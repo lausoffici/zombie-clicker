@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zombie Clicker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="game-header">
+    <h1>🧟 Zombie Clicker</h1>
+  </header>
+
+  <main class="game-main">
+    <section class="counter-section">
+      <div id="brains" class="brains-counter">0</div>
+      <div id="bps" class="bps-indicator">0 cerebros/s</div>
+    </section>
+
+    <section class="zombie-section">
+      <div id="click-float-layer" class="click-float-layer"></div>
+      <button id="zombie-btn" class="zombie-btn">🧟 ¡Golpear zombie!</button>
+    </section>
+
+    <section class="shop-section">
+      <div class="shop-column">
+        <h2 class="shop-title">Generadores</h2>
+        <div id="shop-generators" class="shop-list"></div>
+      </div>
+      <div class="shop-column">
+        <h2 class="shop-title">Mejoras</h2>
+        <div id="shop-upgrades" class="shop-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="game.js"></script>
+  <script src="ui.js"></script>
+</body>
+</html>
