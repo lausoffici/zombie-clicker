@@ -161,3 +161,6 @@
 2026-08-20 17:21:22,849 [INFO]   escrito: game.js (2229 bytes)
 2026-08-20 17:21:22,850 [INFO]   escrito: ui.js (932 bytes)
 2026-08-20 17:21:23,005 [INFO]   verificacion OK
+2026-08-20 17:21:23,090 [INFO]   commit: 04-tick: Tick loop y producción por segundo
+2026-08-20 17:21:23,090 [INFO] === RESUMEN: 4/14 tareas completadas ===
+2026-08-20 17:21:23,090 [INFO] Bloqueadas (reintentar con --only): 05-first-generator, 06-six-generators, 07-upgrades, 08-number-format, 09-save-load, 10-offline-progress, 11-tests, 12-shop-ui-polish, 13-visual-polish, 14-docs

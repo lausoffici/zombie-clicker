@@ -1,7 +1,17 @@
 const Game = (function () {
   'use strict';
 
-  const GENERATORS = [];
+  const GENERATORS = [
+    {
+      id: 'superviviente',
+      name: 'Superviviente',
+      desc: 'Busca cerebros por la ciudad.',
+      baseCost: 15,
+      costGrowth: 1.15,
+      bps: 0.1
+    }
+  ];
+
   const UPGRADES = [];
 
   function createState() {
@@ -18,13 +28,26 @@ const Game = (function () {
     return 1;
   }
 
+  function getGeneratorCost(state, id) {
+    let gen = null;
+    for (let i = 0; i < GENERATORS.length; i++) {
+      if (GENERATORS[i].id === id) {
+        gen = GENERATORS[i];
+        break;
+      }
+    }
+    if (!gen) return Infinity;
+    const count = state.generators[id] || 0;
+    return gen.baseCost * Math.pow(gen.costGrowth, count);
+  }
+
   function getBrainsPerSecond(state) {
     let total = 0;
     for (let i = 0; i < GENERATORS.length; i++) {
       const gen = GENERATORS[i];
       const count = state.generators[gen.id] || 0;
       if (count > 0) {
-        total += gen.baseProduction * count;
+        total += gen.bps * count;
       }
     }
     return total;
@@ -36,11 +59,18 @@ const Game = (function () {
   }
 
   function buyGenerator(state, id) {
-    // Sin generadores por ahora
+    const cost = getGeneratorCost(state, id);
+    if (state.brains >= cost) {
+      state.brains -= cost;
+      state.generators[id] = (state.generators[id] || 0) + 1;
+      return true;
+    }
+    return false;
   }
 
   function buyUpgrade(state, id) {
     // Sin mejoras por ahora
+    return false;
   }
 
   function tick(state, dtSeconds) {
@@ -74,7 +104,10 @@ const Game = (function () {
   }
 
   function applyOfflineProgress(state, elapsedSeconds) {
-    // Sin generadores por ahora
+    const bps = getBrainsPerSecond(state);
+    if (bps > 0 && elapsedSeconds > 0) {
+      state.brains += bps * elapsedSeconds;
+    }
   }
 
   return {
@@ -87,6 +120,7 @@ const Game = (function () {
     tick: tick,
     getBrainsPerSecond: getBrainsPerSecond,
     getClickValue: getClickValue,
+    getGeneratorCost: getGeneratorCost,
     formatNumber: formatNumber,
     serialize: serialize,
     deserialize: deserialize,
