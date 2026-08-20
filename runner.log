@@ -226,3 +226,9 @@
 2026-08-20 17:54:09,766 [INFO]   escrito: ui.js (8021 bytes)
 2026-08-20 17:54:09,767 [INFO]   escrito: style.css (7369 bytes)
 2026-08-20 17:54:09,911 [INFO]   verificacion OK
+2026-08-20 17:54:09,989 [INFO]   commit: 13-visual-polish: Animaciones y pulido zombie
+2026-08-20 17:54:09,990 [INFO] === Tarea 14-docs: Documentación del juego ===
+2026-08-20 17:54:09,996 [INFO]   intento 1/3 (llamando a qwen3.8:27b)...
+2026-08-20 17:56:21,099 [INFO]   respuesta recibida en 131s (3292 chars)
+2026-08-20 17:56:21,100 [INFO]   escrito: COMO-JUGAR.md (3257 bytes)
+2026-08-20 17:56:21,199 [INFO]   verificacion OK
