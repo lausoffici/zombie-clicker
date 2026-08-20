@@ -214,10 +214,16 @@ const Game = (function () {
   }
 
   function applyOfflineProgress(state, elapsedSeconds) {
-    const bps = getBrainsPerSecond(state);
-    if (bps > 0 && elapsedSeconds > 0) {
-      state.brains += bps * elapsedSeconds;
+    if (typeof elapsedSeconds !== 'number' || !isFinite(elapsedSeconds) || elapsedSeconds <= 0) {
+      return 0;
     }
+    const bps = getBrainsPerSecond(state);
+    if (bps <= 0) {
+      return 0;
+    }
+    const gained = bps * elapsedSeconds;
+    state.brains += gained;
+    return gained;
   }
 
   return {

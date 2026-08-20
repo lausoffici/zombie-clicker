@@ -178,8 +178,31 @@
     return Game.createState();
   }
 
+  function showOfflineMessage(gained) {
+    if (!gained || gained <= 0) return;
+    var msg = 'Mientras dormías, tus zombies juntaron ' + Game.formatNumber(gained) + ' cerebros';
+    try {
+      alert(msg);
+    } catch (e) {
+      // alert puede no estar disponible; ignoramos el error
+    }
+  }
+
   function init() {
     state = loadGame();
+
+    // Progreso offline: si hay un save existente, calcular segundos desde lastSaved
+    var now = Date.now();
+    var elapsedSeconds = 0;
+    if (state && typeof state.lastSaved === 'number' && isFinite(state.lastSaved)) {
+      elapsedSeconds = (now - state.lastSaved) / 1000;
+      if (elapsedSeconds > 0) {
+        var gained = Game.applyOfflineProgress(state, elapsedSeconds);
+        if (gained > 0) {
+          showOfflineMessage(gained);
+        }
+      }
+    }
 
     var zombieBtn = document.getElementById('zombie-btn');
     if (zombieBtn) {
