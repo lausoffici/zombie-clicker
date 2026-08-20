@@ -9,6 +9,46 @@ const Game = (function () {
       baseCost: 15,
       costGrowth: 1.15,
       bps: 0.1
+    },
+    {
+      id: 'barricada',
+      name: 'Barricada',
+      desc: 'Atrapa supervivientes desprevenidos.',
+      baseCost: 100,
+      costGrowth: 1.15,
+      bps: 1
+    },
+    {
+      id: 'granja-de-cerebros',
+      name: 'Granja de Cerebros',
+      desc: 'Cultiva cerebros frescos en masa.',
+      baseCost: 1100,
+      costGrowth: 1.15,
+      bps: 8
+    },
+    {
+      id: 'laboratorio',
+      name: 'Laboratorio',
+      desc: 'Experimenta con virus y cerebros.',
+      baseCost: 12000,
+      costGrowth: 1.15,
+      bps: 47
+    },
+    {
+      id: 'horda-zombie',
+      name: 'Horda Zombie',
+      desc: 'Un ejército incesante de hambrientos.',
+      baseCost: 130000,
+      costGrowth: 1.15,
+      bps: 260
+    },
+    {
+      id: 'colina-de-cranios',
+      name: 'Colina de Cráneos',
+      desc: 'Una montaña de cerebros acumulados.',
+      baseCost: 1400000,
+      costGrowth: 1.15,
+      bps: 1400
     }
   ];
 
