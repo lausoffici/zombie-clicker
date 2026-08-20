@@ -1,0 +1,99 @@
+{
+  "project": "Zombie Clicker — juego clicker incremental de temática zombie en HTML/CSS/JS vanilla, sin dependencias ni build step. Se juega abriendo index.html en el navegador.",
+  "contract": [
+    "CONTRATO DE API (obligatorio, no lo cambies entre tareas):",
+    "- game.js contiene SOLO lógica pura, sin DOM ni localStorage. Define `const Game = (function() { ... })();` y al final: `if (typeof module !== 'undefined') module.exports = Game;` (para poder testearlo en Node).",
+    "- API de Game: GENERATORS (array), UPGRADES (array), createState(), click(state), buyGenerator(state, id), buyUpgrade(state, id), tick(state, dtSeconds), getBrainsPerSecond(state), getClickValue(state), formatNumber(n), serialize(state), deserialize(text), applyOfflineProgress(state, elapsedSeconds).",
+    "- Estado: { brains: number, totalClicks: number, generators: {id: cantidad}, upgrades: [ids comprados], lastSaved: timestamp_ms }.",
+    "- La moneda se llama 'cerebros' (state.brains).",
+    "- ui.js es el único archivo que toca el DOM y localStorage. Usa window.Game.",
+    "- index.html carga game.js antes que ui.js, ambos con <script src> al final del body.",
+    "- Id de elementos del DOM: #brains (contador), #bps (cerebros por segundo), #zombie-btn (botón de click), #shop-generators, #shop-upgrades, #click-float-layer (animaciones)."
+  ],
+  "tasks": [
+    {
+      "id": "01-scaffold",
+      "title": "Scaffold HTML y CSS base",
+      "prompt": "Creá index.html y style.css para un juego clicker de temática zombie. index.html: estructura con un header (título 'Zombie Clicker'), sección principal con el contador #brains, el indicador #bps, un botón grande #zombie-btn con el texto '🧟 ¡Golpear zombie!', una capa #click-float-layer para animaciones, y dos columnas de tienda: #shop-generators y #shop-upgrades. Al final del body cargá <script src=\"game.js\"></script> y <script src=\"ui.js\"></script> (todavía no existen, no importa). style.css: tema oscuro zombie (fondo casi negro, acentos verde podrido #7fbf3f y rojo sangre), botón del zombie grande y centrado. No escribas JavaScript en esta tarea.",
+      "verify": "node -e \"const fs=require('fs');const h=fs.readFileSync('index.html','utf8');for(const s of ['game.js','ui.js','brains','zombie-btn','shop-generators','shop-upgrades']){if(!h.includes(s)){console.error('falta '+s);process.exit(1)}};fs.accessSync('style.css')\""
+    },
+    {
+      "id": "02-click-logic",
+      "title": "Lógica de estado y click",
+      "prompt": "Creá game.js siguiendo el CONTRATO DE API. Implementá por ahora SOLO: createState() que devuelve el estado inicial (brains:0, totalClicks:0, generators:{}, upgrades:[], lastSaved:Date.now()), y click(state) que suma getClickValue(state) a state.brains e incrementa totalClicks. getClickValue(state) devuelve 1 por ahora (sin upgrades todavía). GENERATORS y UPGRADES pueden ser arrays vacíos. Incluí el export para Node. No toques otros archivos.",
+      "verify": "node --check game.js && node -e \"const G=require('./game.js');const s=G.createState();G.click(s);G.click(s);if(s.brains!==2||s.totalClicks!==2){console.error('click fallo',s);process.exit(1)}\""
+    },
+    {
+      "id": "03-click-ui",
+      "title": "UI: contador y botón de click",
+      "prompt": "Creá ui.js. Debe: esperar DOMContentLoaded, crear el estado con Game.createState() y guardarlo en una variable global, escuchar clicks en #zombie-btn llamando a Game.click(state), y actualizar el texto de #brains con el número de cerebros (entero) y #bps con la producción por segundo (0 por ahora). Actualizá el DOM en cada click y también con un setInterval de 100ms. No agregues tienda ni save todavía. No modifiques game.js.",
+      "verify": "node --check ui.js && node --check game.js"
+    },
+    {
+      "id": "04-tick",
+      "title": "Tick loop y producción por segundo",
+      "prompt": "Modificá game.js (manteniendo toda la API existente): implementá tick(state, dtSeconds) que suma getBrainsPerSecond(state)*dtSeconds a state.brains, y getBrainsPerSecond(state) que por ahora devuelve 0 si no hay generadores (los generadores llegan en la próxima tarea, pero dejá la estructura lista: recorrer state.generators y sumar producción de cada uno según Game.GENERATORS). En ui.js agregá un setInterval que llame Game.tick(state, 0.1) cada 100ms y actualice #brains y #bps. Mantené el export de Node.",
+      "verify": "node --check game.js && node --check ui.js && node -e \"const G=require('./game.js');const s=G.createState();G.tick(s,10);if(s.brains!==0)process.exit(1);if(typeof G.getBrainsPerSecond(s)!=='number')process.exit(1)\""
+    },
+    {
+      "id": "05-first-generator",
+      "title": "Primer generador: superviviente",
+      "prompt": "Modificá game.js (manteniendo la API): definí GENERATORS con UN generador: { id:'superviviente', name:'Superviviente', desc:'Busca cerebros por la ciudad.', baseCost:15, costGrowth:1.15, bps:0.1 }. Implementá buyGenerator(state,id): si state.brains alcanza para el costo actual (baseCost * costGrowth^cantidadYaComprada), descuenta y suma 1 a state.generators[id]; devuelve true si compró, false si no. getBrainsPerSecond debe sumar bps*cantidad de cada generador. Agregá también Game.getGeneratorCost(state, id). En ui.js renderizá en #shop-generators un botón por generador con nombre, costo actual y cantidad; deshabilitado si no alcanzan los cerebros.",
+      "verify": "node --check game.js && node --check ui.js && node -e \"const G=require('./game.js');const s=G.createState();s.brains=15;if(!G.buyGenerator(s,'superviviente'))process.exit(1);if(G.getGeneratorCost(s,'superviviente')!==17.25)process.exit(1);G.tick(s,10);if(Math.abs(s.brains-1)>1e-9)process.exit(1)\""
+    },
+    {
+      "id": "06-six-generators",
+      "title": "Seis generadores zombie",
+      "prompt": "Extendé GENERATORS en game.js a 6 generadores con temática zombie, costos y producción crecientes. Mantené 'superviviente' como el primero con los mismos valores. Sugeridos: barricada (100, 1/s), granja-de-cerebros (1100, 8/s), laboratorio (12000, 47/s), horda-zombie (130000, 260/s), colina-de-cráneos (1400000, 1400/s). Todos con costGrowth 1.15 y campos id/name/desc/baseCost/costGrowth/bps. No cambies ninguna función de la API ni ui.js.",
+      "verify": "node --check game.js && node -e \"const G=require('./game.js');if(G.GENERATORS.length!==6)process.exit(1);const s=G.createState();s.brains=1e9;for(const g of G.GENERATORS){if(!G.buyGenerator(s,g.id))process.exit(1)};if(G.getBrainsPerSecond(s)<=0)process.exit(1)\""
+    },
+    {
+      "id": "07-upgrades",
+      "title": "Sistema de upgrades",
+      "prompt": "Modificá game.js (manteniendo la API): definí UPGRADES con 4 mejoras temáticas zombie. Cada upgrade: { id, name, desc, cost, type, target, multiplier }. Tipos: 'click' (multiplica getClickValue) y 'generator' (multiplica el bps de un generador target). Ejemplos: 'dedos-podridos' (costo 100, click x2), 'refuerzo-barricada' (costo 1000, generator 'barricada' x2), 'cerebro-premium' (costo 5000, click x2), 'cultivo-acelerado' (costo 20000, generator 'granja-de-cerebros' x2). Implementá buyUpgrade(state,id): si alcanza y no está comprado, descuenta y agrega el id a state.upgrades; true/false. Actualizá getClickValue y getBrainsPerSecond para aplicar los multiplicadores. En ui.js renderizá #shop-upgrades igual que los generadores (ocultar los ya comprados).",
+      "verify": "node --check game.js && node --check ui.js && node -e \"const G=require('./game.js');if(G.UPGRADES.length<4)process.exit(1);const s=G.createState();s.brains=1e6;G.buyUpgrade(s,'dedos-podridos');if(G.getClickValue(s)!==2)process.exit(1);if(G.buyUpgrade(s,'dedos-podridos'))process.exit(1)\""
+    },
+    {
+      "id": "08-number-format",
+      "title": "Formato de números grandes",
+      "prompt": "Agregá Game.formatNumber(n) en game.js: números < 1000 se muestran como enteros; desde miles usar sufijos K, M, B, T con un decimal (1500 -> '1.5K', 2300000 -> '2.3M'). Usá formatNumber en ui.js para #brains, #bps (con un decimal) y los costos de la tienda. Mantené el resto de la API intacta.",
+      "verify": "node --check game.js && node --check ui.js && node -e \"const G=require('./game.js');if(G.formatNumber(999)!=='999')process.exit(1);if(G.formatNumber(1500)!=='1.5K')process.exit(1);if(G.formatNumber(2300000)!=='2.3M')process.exit(1)\""
+    },
+    {
+      "id": "09-save-load",
+      "title": "Guardado en localStorage",
+      "prompt": "Agregá en game.js: serialize(state) que devuelve JSON string del estado (con lastSaved actualizado a Date.now()), y deserialize(text) que parsea y devuelve un estado válido (si el JSON es inválido, devolver createState()). En ui.js: guardar en localStorage (clave 'zombie-clicker-save') con Game.serialize cada 10 segundos y al cerrar (beforeunload); al cargar, si existe save, usar Game.deserialize en vez de createState. Recordá: localStorage SOLO en ui.js.",
+      "verify": "node --check game.js && node --check ui.js && node -e \"const G=require('./game.js');const s=G.createState();s.brains=1234.5;s.generators={superviviente:3};const r=G.deserialize(G.serialize(s));if(r.brains!==1234.5||r.generators.superviviente!==3)process.exit(1);const bad=G.deserialize('{{{');if(!bad||bad.brains!==0)process.exit(1)\""
+    },
+    {
+      "id": "10-offline-progress",
+      "title": "Progreso offline",
+      "prompt": "Agregá Game.applyOfflineProgress(state, elapsedSeconds) en game.js: suma getBrainsPerSecond(state)*elapsedSeconds a state.brains y devuelve cuántos cerebros ganó. En ui.js, al cargar un save existente, calculá los segundos desde state.lastSaved, llamá applyOfflineProgress y mostrá un alert o mensaje en pantalla tipo 'Mientras dormías, tus zombies juntaron X cerebros' (con formatNumber). Mantené la API intacta.",
+      "verify": "node --check game.js && node --check ui.js && node -e \"const G=require('./game.js');const s=G.createState();s.brains=0;s.generators={superviviente:10};const g=G.applyOfflineProgress(s,100);if(Math.abs(g-100)>1e-9||Math.abs(s.brains-100)>1e-9)process.exit(1)\""
+    },
+    {
+      "id": "11-tests",
+      "title": "Tests de lógica en Node",
+      "prompt": "Creá tests/logic.test.js: tests con require('../game.js') usando el módulo 'assert' de Node, sin frameworks. Cubrí: click suma cerebros, buyGenerator descuenta y sube el costo, tick produce según bps, buyUpgrade aplica multiplicador y no se puede comprar dos veces, formatNumber con K y M, roundtrip serialize/deserialize, applyOfflineProgress. Al final imprimí 'Todos los tests pasaron' y process.exit(0). No modifiques game.js salvo que un test revele un bug real.",
+      "verify": "node tests/logic.test.js"
+    },
+    {
+      "id": "12-shop-ui-polish",
+      "title": "Tienda: estados visuales",
+      "prompt": "Mejorá ui.js y style.css: los botones de la tienda deben mostrar nombre, descripción, costo formateado y cantidad comprada; clase CSS 'disabled' (gris, sin pointer) cuando no alcanzan los cerebros, y actualizarse en cada render. Los upgrades comprados desaparecen de la lista. No cambies game.js.",
+      "verify": "node --check ui.js && node tests/logic.test.js"
+    },
+    {
+      "id": "13-visual-polish",
+      "title": "Animaciones y pulido zombie",
+      "prompt": "Pulí la experiencia: en ui.js agregá un texto flotante '+N' (con formatNumber del click value) que aparece donde se clickea el zombie y sube desvaneciéndose (usá #click-float-layer y una animación @keyframes en style.css). En style.css: hover/active en #zombie-btn (que 'tiemble' al clickear), scrollbar estilizada, fuente creepy si hay alguna segura de sistema (ej. 'Impact', fantasy). Opcional: emoji 🧟 que cambie a 💀 brevemente al click. No rompas la API ni los tests.",
+      "verify": "node --check ui.js && node tests/logic.test.js && node -e \"const c=require('fs').readFileSync('style.css','utf8');if(!c.includes('@keyframes'))process.exit(1)\""
+    },
+    {
+      "id": "14-docs",
+      "title": "Documentación del juego",
+      "prompt": "Creá COMO-JUGAR.md: qué es el juego, cómo abrirlo (doble click en index.html), mecánicas (click, generadores, upgrades, progreso offline), y lista de los 6 generadores y 4 upgrades con sus efectos. No modifiques código.",
+      "verify": "node -e \"const fs=require('fs');const t=fs.readFileSync('COMO-JUGAR.md','utf8');if(t.length<500)process.exit(1)\" && node tests/logic.test.js"
+    }
+  ]
+}
