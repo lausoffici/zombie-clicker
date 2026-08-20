@@ -30,7 +30,11 @@
       var countEl = btn.querySelector('.gen-count');
       if (costEl) costEl.textContent = Game.formatNumber(Math.ceil(cost)) + ' 🧠';
       if (countEl) countEl.textContent = 'x' + count;
-      btn.disabled = state.brains < cost;
+      if (state.brains < cost) {
+        btn.classList.add('disabled');
+      } else {
+        btn.classList.remove('disabled');
+      }
     }
   }
 
@@ -51,7 +55,11 @@
       if (!up) continue;
       var costEl = btn.querySelector('.up-cost');
       if (costEl) costEl.textContent = Game.formatNumber(Math.ceil(up.cost)) + ' 🧠';
-      btn.disabled = state.brains < up.cost;
+      if (state.brains < up.cost) {
+        btn.classList.add('disabled');
+      } else {
+        btn.classList.remove('disabled');
+      }
     }
   }
 
