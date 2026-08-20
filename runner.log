@@ -199,3 +199,10 @@
 2026-08-20 17:36:06,777 [INFO]   escrito: game.js (6083 bytes)
 2026-08-20 17:36:06,777 [INFO]   escrito: ui.js (5877 bytes)
 2026-08-20 17:36:06,945 [INFO]   verificacion OK
+2026-08-20 17:36:07,022 [INFO]   commit: 09-save-load: Guardado en localStorage
+2026-08-20 17:36:07,022 [INFO] === Tarea 10-offline-progress: Progreso offline ===
+2026-08-20 17:36:07,022 [INFO]   intento 1/3 (llamando a qwen3.8:27b)...
+2026-08-20 17:40:44,887 [INFO]   respuesta recibida en 278s (12944 chars)
+2026-08-20 17:40:44,888 [INFO]   escrito: game.js (6242 bytes)
+2026-08-20 17:40:44,889 [INFO]   escrito: ui.js (6645 bytes)
+2026-08-20 17:40:45,053 [INFO]   verificacion OK
