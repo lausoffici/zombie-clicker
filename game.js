@@ -52,7 +52,44 @@ const Game = (function () {
     }
   ];
 
-  const UPGRADES = [];
+  const UPGRADES = [
+    {
+      id: 'dedos-podridos',
+      name: 'Dedos Podridos',
+      desc: 'Tus dedos se vuelven más eficientes. Click x2.',
+      cost: 100,
+      type: 'click',
+      target: null,
+      multiplier: 2
+    },
+    {
+      id: 'refuerzo-barricada',
+      name: 'Refuerzo de Barricada',
+      desc: 'Barricadas más letales. Barricada x2.',
+      cost: 1000,
+      type: 'generator',
+      target: 'barricada',
+      multiplier: 2
+    },
+    {
+      id: 'cerebro-premium',
+      name: 'Cerebro Premium',
+      desc: 'Cerebros de mayor calidad. Click x2.',
+      cost: 5000,
+      type: 'click',
+      target: null,
+      multiplier: 2
+    },
+    {
+      id: 'cultivo-acelerado',
+      name: 'Cultivo Acelerado',
+      desc: 'Crecimiento más rápido. Granja de Cerebros x2.',
+      cost: 20000,
+      type: 'generator',
+      target: 'granja-de-cerebros',
+      multiplier: 2
+    }
+  ];
 
   function createState() {
     return {
@@ -65,7 +102,14 @@ const Game = (function () {
   }
 
   function getClickValue(state) {
-    return 1;
+    let value = 1;
+    for (let i = 0; i < UPGRADES.length; i++) {
+      const up = UPGRADES[i];
+      if (up.type === 'click' && state.upgrades.indexOf(up.id) !== -1) {
+        value *= up.multiplier;
+      }
+    }
+    return value;
   }
 
   function getGeneratorCost(state, id) {
@@ -87,7 +131,14 @@ const Game = (function () {
       const gen = GENERATORS[i];
       const count = state.generators[gen.id] || 0;
       if (count > 0) {
-        total += gen.bps * count;
+        let bps = gen.bps;
+        for (let j = 0; j < UPGRADES.length; j++) {
+          const up = UPGRADES[j];
+          if (up.type === 'generator' && up.target === gen.id && state.upgrades.indexOf(up.id) !== -1) {
+            bps *= up.multiplier;
+          }
+        }
+        total += bps * count;
       }
     }
     return total;
@@ -109,7 +160,20 @@ const Game = (function () {
   }
 
   function buyUpgrade(state, id) {
-    // Sin mejoras por ahora
+    if (state.upgrades.indexOf(id) !== -1) return false;
+    let up = null;
+    for (let i = 0; i < UPGRADES.length; i++) {
+      if (UPGRADES[i].id === id) {
+        up = UPGRADES[i];
+        break;
+      }
+    }
+    if (!up) return false;
+    if (state.brains >= up.cost) {
+      state.brains -= up.cost;
+      state.upgrades.push(id);
+      return true;
+    }
     return false;
   }
 
