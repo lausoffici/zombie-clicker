@@ -4,7 +4,7 @@ Un juego clicker incremental de temática zombie (HTML/CSS/JS vanilla, sin depen
 
 ## Requisitos
 
-- [Ollama](https://ollama.com) corriendo con un modelo de código (default: `qwen3.6:35b`)
+- [Ollama](https://ollama.com) corriendo con un modelo de código (default: `qwen3.8:27b`)
 - Python 3.10+ (solo librería estándar)
 - Node.js (para las verificaciones automáticas de cada tarea)
 
