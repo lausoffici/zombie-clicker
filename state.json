@@ -1,5 +1,16 @@
 {
   "01-scaffold": "done",
   "02-click-logic": "done",
-  "03-click-ui": "done"
+  "03-click-ui": "done",
+  "04-tick": "done",
+  "05-first-generator": "blocked",
+  "06-six-generators": "blocked",
+  "07-upgrades": "blocked",
+  "08-number-format": "blocked",
+  "09-save-load": "blocked",
+  "10-offline-progress": "blocked",
+  "11-tests": "blocked",
+  "12-shop-ui-polish": "blocked",
+  "13-visual-polish": "blocked",
+  "14-docs": "blocked"
 }

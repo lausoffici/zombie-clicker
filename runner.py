@@ -27,6 +27,7 @@ STATE_FILE = BASE_DIR / "state.json"
 LOG_FILE = BASE_DIR / "runner.log"
 OLLAMA_URL = "http://localhost:11434"
 DEFAULT_MODEL = "qwen3.8:27b"
+DEFAULT_NUM_CTX = 16384
 MAX_ATTEMPTS = 3
 REQUEST_TIMEOUT = 3600  # los modelos locales grandes pueden tardar
 VERIFY_TIMEOUT = 180
@@ -90,12 +91,17 @@ def check_ollama(model):
     return True, f"Ollama OK, modelo '{model}' disponible."
 
 
-def call_ollama(model, messages):
+def call_ollama(model, messages, num_ctx):
     payload = {
         "model": model,
         "messages": messages,
         "stream": False,
-        "options": {"temperature": 0.2},
+        # num_ctx: el default de Ollama es 4096 y el prompt solo ya lo llena,
+        # lo que truncaba las respuestas (done_reason: length, content vacio).
+        # think: false porque el modo thinking gastaba todo el presupuesto de
+        # tokens en razonamiento y devolvia content vacio.
+        "think": False,
+        "options": {"temperature": 0.2, "num_ctx": num_ctx},
     }
     req = urllib.request.Request(
         f"{OLLAMA_URL}/api/chat",
@@ -164,7 +170,7 @@ def git_commit(message):
         logging.warning("  git commit fallo (se continua igual): %s", e)
 
 
-def run_task(model, data, task, state):
+def run_task(model, num_ctx, data, task, state):
     task_id = task["id"]
     logging.info("=== Tarea %s: %s ===", task_id, task["title"])
 
@@ -186,7 +192,7 @@ def run_task(model, data, task, state):
         logging.info("  intento %d/%d (llamando a %s)...", attempt, MAX_ATTEMPTS, model)
         started = time.time()
         try:
-            response = call_ollama(model, messages)
+            response = call_ollama(model, messages, num_ctx)
         except (urllib.error.URLError, OSError, TimeoutError, KeyError) as e:
             last_error = f"error llamando a Ollama: {e}"
             logging.error("  %s", last_error)
@@ -230,6 +236,8 @@ def run_task(model, data, task, state):
 def main():
     parser = argparse.ArgumentParser(description="Runner autonomo de tareas con Ollama")
     parser.add_argument("--model", default=DEFAULT_MODEL, help="modelo de Ollama a usar")
+    parser.add_argument("--num-ctx", type=int, default=DEFAULT_NUM_CTX,
+                        help="ventana de contexto en tokens (default: %(default)s)")
     parser.add_argument("--dry-run", action="store_true",
                         help="valida tasks.json y la conexion con Ollama sin ejecutar nada")
     parser.add_argument("--only", metavar="TASK_ID", help="ejecuta una sola tarea")
@@ -282,7 +290,7 @@ def main():
             logging.info("Saltando %s (blocked). Usa --only %s para reintentar.",
                          task["id"], task["id"])
             continue
-        run_task(args.model, data, task, state)
+        run_task(args.model, args.num_ctx, data, task, state)
 
     done = sum(1 for t in tasks if state.get(t["id"]) == "done")
     blocked = [t["id"] for t in tasks if state.get(t["id"]) == "blocked"]

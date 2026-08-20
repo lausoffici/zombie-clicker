@@ -19,7 +19,15 @@ const Game = (function () {
   }
 
   function getBrainsPerSecond(state) {
-    return 0;
+    let total = 0;
+    for (let i = 0; i < GENERATORS.length; i++) {
+      const gen = GENERATORS[i];
+      const count = state.generators[gen.id] || 0;
+      if (count > 0) {
+        total += gen.baseProduction * count;
+      }
+    }
+    return total;
   }
 
   function click(state) {
@@ -36,7 +44,10 @@ const Game = (function () {
   }
 
   function tick(state, dtSeconds) {
-    // Sin generadores por ahora
+    const bps = getBrainsPerSecond(state);
+    if (bps > 0 && dtSeconds > 0) {
+      state.brains += bps * dtSeconds;
+    }
   }
 
   function formatNumber(n) {
