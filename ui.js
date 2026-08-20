@@ -2,6 +2,7 @@
   'use strict';
 
   var state = null;
+  var SAVE_KEY = 'zombie-clicker-save';
 
   function updateDisplay() {
     var brainsEl = document.getElementById('brains');
@@ -157,8 +158,28 @@
     updateDisplay();
   }
 
+  function saveGame() {
+    try {
+      localStorage.setItem(SAVE_KEY, Game.serialize(state));
+    } catch (e) {
+      // localStorage puede no estar disponible; ignoramos el error
+    }
+  }
+
+  function loadGame() {
+    try {
+      var saved = localStorage.getItem(SAVE_KEY);
+      if (saved) {
+        return Game.deserialize(saved);
+      }
+    } catch (e) {
+      // ignoramos errores de localStorage
+    }
+    return Game.createState();
+  }
+
   function init() {
-    state = Game.createState();
+    state = loadGame();
 
     var zombieBtn = document.getElementById('zombie-btn');
     if (zombieBtn) {
@@ -173,6 +194,10 @@
       Game.tick(state, 0.1);
       updateDisplay();
     }, 100);
+
+    setInterval(saveGame, 10000);
+
+    window.addEventListener('beforeunload', saveGame);
   }
 
   if (document.readyState === 'loading') {

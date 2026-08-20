@@ -193,18 +193,24 @@ const Game = (function () {
   }
 
   function serialize(state) {
+    state.lastSaved = Date.now();
     return JSON.stringify(state);
   }
 
   function deserialize(text) {
-    const parsed = JSON.parse(text);
-    return {
-      brains: parsed.brains || 0,
-      totalClicks: parsed.totalClicks || 0,
-      generators: parsed.generators || {},
-      upgrades: parsed.upgrades || [],
-      lastSaved: parsed.lastSaved || Date.now()
-    };
+    try {
+      const parsed = JSON.parse(text);
+      if (!parsed || typeof parsed !== 'object') return createState();
+      return {
+        brains: typeof parsed.brains === 'number' ? parsed.brains : 0,
+        totalClicks: typeof parsed.totalClicks === 'number' ? parsed.totalClicks : 0,
+        generators: (parsed.generators && typeof parsed.generators === 'object') ? parsed.generators : {},
+        upgrades: (Array.isArray(parsed.upgrades)) ? parsed.upgrades : [],
+        lastSaved: typeof parsed.lastSaved === 'number' ? parsed.lastSaved : Date.now()
+      };
+    } catch (e) {
+      return createState();
+    }
   }
 
   function applyOfflineProgress(state, elapsedSeconds) {
