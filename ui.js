@@ -161,8 +161,49 @@
     updateUpgradeButtons();
   }
 
-  function handleClick() {
+  function spawnFloatText(x, y, text) {
+    var layer = document.getElementById('click-float-layer');
+    if (!layer) return;
+    var el = document.createElement('div');
+    el.className = 'click-float';
+    el.textContent = text;
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    layer.appendChild(el);
+    setTimeout(function () {
+      if (el.parentNode) el.parentNode.removeChild(el);
+    }, 900);
+  }
+
+  function flashZombieEmoji() {
+    var btn = document.getElementById('zombie-btn');
+    if (!btn) return;
+    var original = btn.textContent;
+    btn.textContent = '💀 ¡Crack!';
+    setTimeout(function () {
+      btn.textContent = original;
+    }, 150);
+  }
+
+  function handleClick(e) {
+    var value = Game.getClickValue(state);
     Game.click(state);
+
+    var layer = document.getElementById('click-float-layer');
+    var x, y;
+    if (layer) {
+      var rect = layer.getBoundingClientRect();
+      if (e && typeof e.clientX === 'number' && typeof e.clientY === 'number') {
+        x = e.clientX - rect.left;
+        y = e.clientY - rect.top;
+      } else {
+        x = rect.width / 2;
+        y = rect.height / 2;
+      }
+      spawnFloatText(x, y, '+' + Game.formatNumber(value));
+    }
+
+    flashZombieEmoji();
     updateDisplay();
   }
 

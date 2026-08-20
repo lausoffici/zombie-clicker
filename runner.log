@@ -212,3 +212,17 @@
 2026-08-20 17:42:55,685 [INFO]   respuesta recibida en 131s (5009 chars)
 2026-08-20 17:42:55,686 [INFO]   escrito: tests/logic.test.js (4968 bytes)
 2026-08-20 17:42:55,762 [INFO]   verificacion OK
+2026-08-20 17:42:55,838 [INFO]   commit: 11-tests: Tests de lógica en Node
+2026-08-20 17:42:55,838 [INFO] === Tarea 12-shop-ui-polish: Tienda: estados visuales ===
+2026-08-20 17:42:55,839 [INFO]   intento 1/3 (llamando a qwen3.8:27b)...
+2026-08-20 17:47:33,897 [INFO]   respuesta recibida en 278s (11772 chars)
+2026-08-20 17:47:33,898 [INFO]   escrito: ui.js (6835 bytes)
+2026-08-20 17:47:33,899 [INFO]   escrito: style.css (4861 bytes)
+2026-08-20 17:47:34,009 [INFO]   verificacion OK
+2026-08-20 17:47:34,089 [INFO]   commit: 12-shop-ui-polish: Tienda: estados visuales
+2026-08-20 17:47:34,089 [INFO] === Tarea 13-visual-polish: Animaciones y pulido zombie ===
+2026-08-20 17:47:34,096 [INFO]   intento 1/3 (llamando a qwen3.8:27b)...
+2026-08-20 17:54:09,763 [INFO]   respuesta recibida en 396s (15449 chars)
+2026-08-20 17:54:09,766 [INFO]   escrito: ui.js (8021 bytes)
+2026-08-20 17:54:09,767 [INFO]   escrito: style.css (7369 bytes)
+2026-08-20 17:54:09,911 [INFO]   verificacion OK

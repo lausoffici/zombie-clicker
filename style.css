@@ -17,6 +17,11 @@
   --border-color: #2a2a2a;
 }
 
+html,
+body {
+  scrollbar-color: var(--green-podrido) #111;
+}
+
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: var(--bg-dark);
@@ -25,6 +30,32 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+/* Scrollbar estilizada (WebKit) */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0d0d0d;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--green-podrido) 0%, var(--rojo-oscuro) 100%);
+  border-radius: 6px;
+  border: 2px solid #0d0d0d;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--green-glow) 0%, var(--rojo-sangre) 100%);
+}
+
+/* Scrollbar estilizada (Firefox) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--green-podrido) #111;
 }
 
 .game-header {
@@ -37,10 +68,12 @@ body {
 }
 
 .game-header h1 {
-  font-size: 2.5rem;
+  font-family: 'Impact', 'Haettenschweiler', 'Franklin Gothic Bold', fantasy, sans-serif;
+  font-size: 2.8rem;
   color: var(--green-podrido);
-  text-shadow: 0 0 10px rgba(127, 191, 63, 0.4), 0 0 30px rgba(127, 191, 63, 0.2);
-  letter-spacing: 2px;
+  text-shadow: 0 0 10px rgba(127, 191, 63, 0.4), 0 0 30px rgba(127, 191, 63, 0.2), 2px 2px 0 #000;
+  letter-spacing: 3px;
+  text-transform: uppercase;
 }
 
 .game-main {
@@ -58,11 +91,13 @@ body {
 }
 
 .brains-counter {
-  font-size: 3.5rem;
+  font-family: 'Impact', 'Haettenschweiler', 'Franklin Gothic Bold', fantasy, sans-serif;
+  font-size: 3.8rem;
   font-weight: bold;
   color: var(--green-podrido);
-  text-shadow: 0 0 8px rgba(127, 191, 63, 0.5);
+  text-shadow: 0 0 8px rgba(127, 191, 63, 0.5), 2px 2px 0 #000;
   margin-bottom: 0.3rem;
+  letter-spacing: 1px;
 }
 
 .bps-indicator {
@@ -89,7 +124,37 @@ body {
   z-index: 10;
 }
 
+.click-float {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-family: 'Impact', 'Haettenschweiler', 'Franklin Gothic Bold', fantasy, sans-serif;
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: var(--green-glow);
+  text-shadow: 0 0 8px rgba(127, 191, 63, 0.8), 1px 1px 0 #000;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  animation: float-up 0.9s ease-out forwards;
+  white-space: nowrap;
+}
+
+@keyframes float-up {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  20% {
+    transform: translate(-50%, -60%) scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -180%) scale(1);
+  }
+}
+
 .zombie-btn {
+  font-family: 'Impact', 'Haettenschweiler', 'Franklin Gothic Bold', fantasy, sans-serif;
   font-size: 1.8rem;
   padding: 1.2rem 3rem;
   border: 3px solid var(--green-podrido);
@@ -101,6 +166,8 @@ body {
   box-shadow: 0 0 15px rgba(127, 191, 63, 0.3), inset 0 0 20px rgba(127, 191, 63, 0.1);
   user-select: none;
   -webkit-user-select: none;
+  letter-spacing: 1px;
+  text-shadow: 0 0 6px rgba(127, 191, 63, 0.4);
 }
 
 .zombie-btn:hover {
@@ -111,6 +178,17 @@ body {
 .zombie-btn:active {
   transform: scale(0.95);
   box-shadow: 0 0 10px rgba(127, 191, 63, 0.4), inset 0 0 15px rgba(127, 191, 63, 0.2);
+  animation: zombie-shake 0.3s ease-in-out;
+}
+
+@keyframes zombie-shake {
+  0% { transform: scale(0.95) translateX(0) rotate(0deg); }
+  15% { transform: scale(0.95) translateX(-6px) rotate(-2deg); }
+  30% { transform: scale(0.95) translateX(6px) rotate(2deg); }
+  45% { transform: scale(0.95) translateX(-5px) rotate(-1.5deg); }
+  60% { transform: scale(0.95) translateX(5px) rotate(1.5deg); }
+  75% { transform: scale(0.95) translateX(-3px) rotate(-1deg); }
+  100% { transform: scale(0.95) translateX(0) rotate(0deg); }
 }
 
 .shop-section {
@@ -132,12 +210,15 @@ body {
 }
 
 .shop-title {
-  font-size: 1.3rem;
+  font-family: 'Impact', 'Haettenschweiler', 'Franklin Gothic Bold', fantasy, sans-serif;
+  font-size: 1.4rem;
   color: var(--rojo-sangre);
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--border-color);
-  text-shadow: 0 0 6px rgba(192, 57, 43, 0.3);
+  text-shadow: 0 0 6px rgba(192, 57, 43, 0.3), 1px 1px 0 #000;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 .shop-list {
@@ -145,6 +226,9 @@ body {
   flex-direction: column;
   gap: 0.7rem;
   min-height: 100px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 0.3rem;
 }
 
 .shop-item {
@@ -237,11 +321,11 @@ body {
 
 @media (max-width: 700px) {
   .game-header h1 {
-    font-size: 1.8rem;
+    font-size: 2rem;
   }
 
   .brains-counter {
-    font-size: 2.5rem;
+    font-size: 2.8rem;
   }
 
   .zombie-btn {
@@ -256,5 +340,9 @@ body {
 
   .shop-column {
     max-width: 100%;
+  }
+
+  .shop-list {
+    max-height: 50vh;
   }
 }
