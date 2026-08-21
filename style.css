@@ -676,26 +676,36 @@ body {
 /* Side tabs */
 #side-tabs {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   margin-bottom: 14px;
+  background: var(--bg-900);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 4px;
 }
 .side-tab {
   flex: 1;
-  padding: 10px 12px;
-  background: var(--bg-700);
-  border: 1px solid var(--border);
+  padding: 10px 10px;
+  background: transparent;
+  border: 1px solid transparent;
   border-radius: var(--radius-xl);
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
-.side-tab:hover { background: var(--bg-600); color: var(--text-primary); }
+.side-tab svg { width: 16px; height: 16px; }
+.side-tab:hover { color: var(--text-primary); }
 .side-tab.active {
-  background: rgba(127, 191, 63, 0.12);
+  background: rgba(110, 207, 47, 0.12);
   color: var(--green-300);
   border-color: var(--green-500);
+  box-shadow: 0 0 12px var(--green-glow-soft);
 }
 
 .side-panel { display: none; }
@@ -704,9 +714,9 @@ body {
 /* Prestige */
 .prestige-help {
   margin: 0 0 16px;
-  padding: 12px 14px;
-  background: rgba(241, 196, 15, 0.05);
-  border: 1px solid rgba(241, 196, 15, 0.25);
+  padding: 14px;
+  background: linear-gradient(145deg, rgba(255, 191, 0, 0.06), rgba(158, 27, 27, 0.05));
+  border: 1px solid rgba(255, 191, 0, 0.2);
   border-radius: var(--radius-md);
   font-size: 13px;
   line-height: 1.55;
@@ -777,6 +787,9 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  transition: all 0.15s ease;
 }
 .btn-prestige:hover {
   box-shadow: var(--glow-red);

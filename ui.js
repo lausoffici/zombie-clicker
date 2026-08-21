@@ -35,7 +35,9 @@
     fire: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 28 Q8 24 8 16 Q8 10 12 6 Q12 12 16 14 Q16 8 20 4 Q24 10 24 16 Q24 24 16 28" fill="#e62e2e"/><path d="M16 24 Q12 22 12 17 Q12 15 14 13 Q14 16 16 17 Q16 14 18 12 Q20 15 20 17 Q20 22 16 24" fill="#ffbf00"/></svg>',
     crown: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 22 L8 10 L12 16 L16 8 L20 16 L24 10 L28 22 Z" fill="#ffbf00"/><rect x="4" y="22" width="24" height="4" fill="#ffbf00"/></svg>',
     muscle: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M8 26 Q6 18 12 14 Q16 10 24 12 Q28 14 26 20 Q24 26 16 26 Z" fill="#6e7f62"/><path d="M14 16 Q18 14 22 16" fill="none" stroke="#3a4a32" stroke-width="2" stroke-linecap="round"/></svg>',
-    palette: '<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="10" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="13" r="2" fill="#9aff4d"/><circle cx="20" cy="13" r="2" fill="#e62e2e"/><circle cx="16" cy="21" r="2" fill="#ffbf00"/></svg>'
+    palette: '<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="10" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="13" r="2" fill="#9aff4d"/><circle cx="20" cy="13" r="2" fill="#e62e2e"/><circle cx="16" cy="21" r="2" fill="#ffbf00"/></svg>',
+    lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>'
   };
 
   const GEN_ICON_MAP = {
@@ -505,7 +507,7 @@
       div.className = "item-card ach-card" + (unlocked ? " unlocked" : " locked");
       div.setAttribute("data-ach-id", ach.id);
       div.innerHTML =
-        '<span class="item-icon">' + (unlocked ? "✅" : "🔒") + '</span>' +
+        '<span class="item-icon">' + (unlocked ? SVG_ICONS.check : SVG_ICONS.lock) + '</span>' +
         '<div class="item-info">' +
           '<div class="item-name">' + ach.name + '</div>' +
           '<div class="item-desc">' + ach.desc + '</div>' +
