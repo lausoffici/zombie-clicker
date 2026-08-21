@@ -900,3 +900,5 @@ TypeError: Game.getClickValue is not a function
 2026-08-21 09:33:02,873 [INFO]   escrito: index.html (3655 bytes)
 2026-08-21 09:33:02,959 [WARNING]   verificacion FALLO: verify fallo sin salida
 2026-08-21 09:33:02,959 [INFO]   intento 2/3 (llamando a qwen3.8:27b)...
+2026-08-21 09:53:50,326 [INFO] tasks.json valido: 22 tareas
+2026-08-21 09:53:50,349 [INFO] Ollama OK, modelo 'qwen3.8:27b' disponible.
