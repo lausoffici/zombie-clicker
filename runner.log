@@ -597,3 +597,30 @@ TypeError: Game.click is not a function
 2026-08-21 06:41:17,840 [INFO]   respuesta recibida en 383s (12976 chars)
 2026-08-21 06:41:17,841 [INFO]   escrito: style.css (8551 bytes)
 2026-08-21 06:41:17,959 [INFO]   verificacion OK
+2026-08-21 06:41:18,053 [INFO]   commit: v2-20-visual-polish-v2: Pulido visual v2: tabs, eventos, partículas
+2026-08-21 06:41:18,053 [INFO] === Tarea v2-21-tests-v2: Tests de todas las nuevas mecánicas ===
+2026-08-21 06:41:18,060 [INFO]   intento 1/3 (llamando a qwen3.8:27b)...
+2026-08-21 06:44:48,645 [INFO]   respuesta recibida en 211s (7457 chars)
+2026-08-21 06:44:48,645 [WARNING]   la respuesta no contenia bloques <<<FILE: ...>>> validos
+2026-08-21 06:44:48,646 [INFO]   intento 2/3 (llamando a qwen3.8:27b)...
+2026-08-21 06:52:09,442 [INFO]   respuesta recibida en 441s (19031 chars)
+2026-08-21 06:52:09,443 [INFO]   escrito: game.js (9519 bytes)
+2026-08-21 06:52:09,444 [INFO]   escrito: tests/logic.test.js (9441 bytes)
+2026-08-21 06:52:09,530 [WARNING]   verificacion FALLO: node:assert:95
+  throw new AssertionError(obj);
+  ^
+
+AssertionError [ERR_ASSERTION]: buyGenerators debe comprar 3
+
+2 !== 3
+
+    at testBuyGenerators (C:\Users\lauta\zombie-clicker\tests\logic.test.js:118:10)
+    at Object.<anonymous> (C:\Users\lauta\zombie-clicker\tests\logic.test.js:129:3)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._lo
+2026-08-21 06:52:09,531 [INFO]   intento 3/3 (llamando a qwen3.8:27b)...
+2026-08-21 06:55:35,155 [INFO]   respuesta recibida en 206s (9737 chars)
+2026-08-21 06:55:35,156 [INFO]   escrito: tests/logic.test.js (9696 bytes)
+2026-08-21 06:55:35,223 [INFO]   verificacion OK

@@ -1,44 +1,31 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zombie Clicker</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Snake</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="app">
-    <header id="topbar">
-      <div id="score-box">
-        <span id="score-label">Cerebros</span>
-        <span id="score-value">0</span>
-        <span id="bps-value">0 /s</span>
+  <div id="game-container">
+    <div id="hud">
+      <div id="score">Puntos: 0</div>
+      <div id="high-score">Récord: 0</div>
+    </div>
+    <canvas id="game-canvas" width="400" height="400"></canvas>
+    <div id="controls">
+      <button id="btn-up">↑</button>
+      <div>
+        <button id="btn-left">←</button>
+        <button id="btn-down">↓</button>
+        <button id="btn-right">→</button>
       </div>
-      <div id="top-actions">
-        <button id="btn-save" title="Guardar">💾</button>
-        <button id="btn-reset" title="Reiniciar">🔄</button>
-      </div>
-    </header>
-
-    <main id="main">
-      <section id="left-panel">
-        <div id="zombie-area">
-          <div id="zombie" class="zombie">🧟</div>
-          <div id="click-power">+1 por click</div>
-        </div>
-        <div id="stats">
-          <div class="stat"><span>Total clicks:</span> <span id="stat-clicks">0</span></div>
-          <div class="stat"><span>Total cerebros:</span> <span id="stat-total">0</span></div>
-        </div>
-      </section>
-
-      <section id="right-panel">
-        <h2>Generadores</h2>
-        <div id="generators"></div>
-        <h2>Mejoras</h2>
-        <div id="upgrades"></div>
-      </section>
-    </main>
+    </div>
+    <div id="overlay" class="hidden">
+      <h1 id="overlay-title">Snake</h1>
+      <p id="overlay-text">Presiona una flecha para comenzar</p>
+      <button id="btn-start">Jugar</button>
+    </div>
   </div>
   <script src="game.js"></script>
 </body>
