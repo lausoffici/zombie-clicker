@@ -35,10 +35,13 @@ OpenCode (`opencode run`) queda **experimental** con este Qwen en Windows (misma
 
 ## Constraints del juego
 
-- Vanilla HTML/CSS/JS — sin framework, sin build, sin sonidos, sin backend
-- Lógica en `game.js`, UI en `ui.js`, estilos en `style.css`
+- Vanilla HTML/CSS/JS — sin framework, sin build, sin sonidos, **sin backend propio**
+- Persistencia: `localStorage` siempre; cuentas/nube **opcionales** vía Supabase (SDK por CDN, `cloud.js`)
+- Lógica en `game.js`, UI en `ui.js`, nube en `cloud.js`, estilos en `style.css`
 - Tras cambios de lógica: `node tests/logic.test.js`
 - UI en español
+- Para probar la nube hay que servir por HTTP (`python -m http.server 8000`), no `file://`
+- Claves: copiar `config.example.js` → `config.js` (gitignored). Schema en `supabase/schema.sql`
 
 ## Planes y specs
 

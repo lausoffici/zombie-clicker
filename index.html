@@ -36,6 +36,10 @@
         </div>
       </div>
       <div id="topbar-actions">
+        <span id="account-name" class="account-name hidden"></span>
+        <button id="btn-account" class="icon-btn" title="Cuenta" aria-label="Cuenta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </button>
         <button id="btn-save" class="icon-btn" title="Guardar" aria-label="Guardar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
         </button>
@@ -243,6 +247,43 @@
       </button>
     </nav>
 
+    <div id="account-modal" class="account-modal hidden" role="dialog" aria-modal="true" aria-labelledby="account-modal-title">
+      <div class="account-modal-backdrop" id="account-modal-backdrop"></div>
+      <div class="account-modal-card">
+        <button type="button" id="account-modal-close" class="icon-btn account-modal-close" aria-label="Cerrar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <h2 id="account-modal-title" class="card-title">Cuenta</h2>
+        <p id="account-unconfigured" class="account-copy hidden">La nube no está configurada. El juego sigue en este dispositivo.</p>
+        <div id="account-guest">
+          <div class="account-tabs" role="tablist">
+            <button type="button" id="account-tab-signup" class="account-tab active" role="tab" aria-selected="true">Crear cuenta</button>
+            <button type="button" id="account-tab-login" class="account-tab" role="tab" aria-selected="false">Entrar</button>
+          </div>
+          <form id="account-form">
+            <label id="account-field-name" class="account-field">
+              <span>Apodo</span>
+              <input id="account-display-name" name="displayName" type="text" maxlength="16" autocomplete="username" placeholder="Necro_King">
+            </label>
+            <label class="account-field">
+              <span>Email</span>
+              <input id="account-email" name="email" type="email" autocomplete="email" required>
+            </label>
+            <label class="account-field">
+              <span>Contraseña</span>
+              <input id="account-password" name="password" type="password" minlength="8" autocomplete="new-password" required>
+            </label>
+            <p id="account-error" class="account-error hidden" role="alert"></p>
+            <button type="submit" id="account-submit" class="btn btn-account-submit">Crear cuenta</button>
+          </form>
+        </div>
+        <div id="account-authed" class="hidden">
+          <p class="account-copy">Conectado como <strong id="account-authed-name">—</strong></p>
+          <p id="account-last-sync" class="account-muted">Último sync: —</p>
+          <button type="button" id="account-signout" class="btn">Cerrar sesión</button>
+        </div>
+      </div>
+    </div>
     <div id="toast-container"></div>
     <div id="golden-brain" class="event-item hidden">
       <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><radialGradient id="gbglow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffbf00" stop-opacity="0.6"/><stop offset="100%" stop-color="#ffbf00" stop-opacity="0"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gbglow)"/><path d="M20 20 Q32 10 44 20 Q54 32 44 44 Q32 54 20 44 Q10 32 20 20" fill="#ffbf00" stroke="#d4a017" stroke-width="2"/><path d="M26 26 Q32 22 38 26" fill="none" stroke="#d4a017" stroke-width="2"/></svg>
@@ -251,7 +292,10 @@
       <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><radialGradient id="bossglow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#e62e2e" stop-opacity="0.5"/><stop offset="100%" stop-color="#e62e2e" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="50" r="45" fill="url(#bossglow)"/><path d="M25 25 L35 45 L20 40 L40 55 L15 60 L45 70 L25 85 L55 75 L60 95 L70 70 L90 80 L80 55 L100 50 L80 45 L90 20 L70 30 L60 5 L55 25 L25 25" fill="#4a0f0f"/><circle cx="40" cy="45" r="5" fill="#ffbf00"/><circle cx="60" cy="45" r="5" fill="#ffbf00"/><path d="M35 70 Q50 60 65 70" fill="#2a2018"/></svg>
     </div>
   </div>
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="game.js"></script>
+  <script src="cloud.js"></script>
   <script src="ui.js"></script>
 </body>
 </html>
