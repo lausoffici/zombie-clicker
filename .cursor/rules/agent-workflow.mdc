@@ -1,0 +1,41 @@
+---
+description: Workflow multi-agente — Cursor/Kimi orchestrator, OpenCode+Qwen executor, Orca runtime
+alwaysApply: true
+---
+
+# Agent workflow (zombie-clicker)
+
+Canonical doc: `docs/WORKFLOW.md` (also `AGENTS.md`).
+
+## Roles
+
+- **You (Cursor or Kimi)** = orchestrator: plans, Locked Decisions, review, **monitor**.
+- **OpenCode + `ollama/qwen3.8-agent:27b`** = AFK executor (not the legacy `execute-plan-ollama.mjs`).
+- **Orca** = optional runtime for visible terminals.
+
+## When user asks to monitor (not build)
+
+1. Inspect Orca terminal / diffs / tests.
+2. Unblock infra/prompt/config; relaunch OpenCode.
+3. Do **not** implement the feature yourself unless explicitly asked to code.
+
+## When user asks for a feature / non-trivial fix
+
+1. Prefer an AFK-safe plan under `docs/superpowers/plans/`.
+2. Tell them how to launch OpenCode (see `docs/WORKFLOW.md`).
+3. Do not re-implement the whole plan in parallel while OpenCode owns those files.
+
+## Launch (executor)
+
+```powershell
+opencode run -m ollama/qwen3.8-agent:27b --auto --title "task-N" "Ejecutá SOLO Task N del plan <path>. Locked Decisions. Sin preguntas. Al final: node tests/logic.test.js"
+```
+
+Project config: `opencode.json` (Ollama provider + default model).
+
+## Game constraints
+
+- Vanilla HTML/CSS/JS only
+- `game.js` = logic; `ui.js` = DOM; `style.css` = look; `index.html` = structure
+- Run `node tests/logic.test.js` after logic/save changes
+- Spanish UI copy

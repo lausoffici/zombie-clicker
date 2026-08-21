@@ -8,6 +8,54 @@ function approxEqual(a, b, eps) {
   return Math.abs(a - b) <= eps;
 }
 
+// 0a. buyCosmetic gasta cerebros y marca owned
+(function testBuyCosmetic() {
+  const s = Game.createState();
+  s.brains = 10000;
+  assert.strictEqual(Game.buyCosmetic(s, "skin-rot"), true, 'buyCosmetic debe comprar skin-rot');
+  assert.strictEqual(s.brains, 10000 - 5000, 'buyCosmetic debe descontar el costo');
+  assert.ok(s.cosmetics.owned.indexOf("skin-rot") !== -1, 'skin-rot debe estar en owned');
+  assert.strictEqual(Game.buyCosmetic(s, "skin-rot"), false, 'no se puede comprar dos veces');
+  s.brains = 10;
+  assert.strictEqual(Game.buyCosmetic(s, "skin-neon"), false, 'sin fondos no se puede comprar');
+})();
+
+// 0b. equipCosmetic requiere owned
+(function testEquipCosmetic() {
+  const s = Game.createState();
+  assert.strictEqual(Game.equipCosmetic(s, "skin-neon"), false, 'no se puede equipar sin comprar');
+  s.brains = 100000;
+  Game.buyCosmetic(s, "skin-neon");
+  assert.strictEqual(Game.equipCosmetic(s, "skin-neon"), true, 'equipCosmetic debe funcionar tras comprar');
+  assert.strictEqual(s.cosmetics.equipped.skin, "skin-neon", 'equipped.skin debe actualizarse');
+})();
+
+// 0c. prestige conserva cosmetics
+(function testPrestigeKeepsCosmetics() {
+  const s = Game.createState();
+  s.brains = 100000;
+  Game.buyCosmetic(s, "skin-neon");
+  Game.equipCosmetic(s, "skin-neon");
+  s.prestige.souls = 10;
+  const ns = Game.prestige(s);
+  assert.ok(ns.cosmetics && ns.cosmetics.owned.indexOf("skin-neon") !== -1, 'prestige debe conservar owned');
+  assert.strictEqual(ns.cosmetics.equipped.skin, "skin-neon", 'prestige debe conservar equipped');
+})();
+
+// 0d. deserialize sin cosmetics → defaults
+(function testDeserializeDefaults() {
+  const s = Game.createState();
+  s.brains = 42;
+  const saved = JSON.parse(JSON.stringify(s));
+  delete saved.cosmetics;
+  const loaded = Game.deserialize(saved);
+  assert.ok(loaded.cosmetics, 'deserialize debe crear cosmetics');
+  assert.ok(loaded.cosmetics.owned.indexOf("skin-classic") !== -1, 'owned debe incluir skin-classic');
+  assert.strictEqual(loaded.cosmetics.equipped.skin, "skin-classic", 'equipped.skin default');
+  assert.strictEqual(loaded.cosmetics.equipped.aura, "aura-none", 'equipped.aura default');
+  assert.strictEqual(loaded.cosmetics.equipped.bg, "bg-void", 'equipped.bg default');
+})();
+
 // 1. click suma cerebros
 (function testClick() {
   const s = Game.createState();
@@ -219,6 +267,58 @@ function approxEqual(a, b, eps) {
   for (const g of Game.GENERATORS) {
     assert.strictEqual(s.generators[g.id], 0, 'generador inicial 0');
   }
+})();
+
+// 16. buyCosmetic gasta cerebros y marca owned
+(function testBuyCosmetic() {
+  const s = Game.createState();
+  const cos = Game.COSMETICS.find((c) => c.id === 'skin-rot');
+  assert.ok(cos, 'debe existir skin-rot en el catálogo');
+  s.brains = cos.cost;
+  const ok = Game.buyCosmetic(s, 'skin-rot');
+  assert.strictEqual(ok, true, 'buyCosmetic debe devolver true si alcanza el costo');
+  assert.strictEqual(s.brains, 0, 'debe descontar el costo');
+  assert.ok(s.cosmetics.owned.indexOf('skin-rot') !== -1, 'debe marcar como owned');
+  const again = Game.buyCosmetic(s, 'skin-rot');
+  assert.strictEqual(again, false, 'no se puede comprar dos veces');
+  const noFunds = Game.createState();
+  assert.strictEqual(Game.buyCosmetic(noFunds, 'skin-rot'), false, 'sin fondos no se puede comprar');
+})();
+
+// 17. equipCosmetic requiere owned
+(function testEquipCosmetic() {
+  const s = Game.createState();
+  assert.strictEqual(Game.equipCosmetic(s, 'skin-neon'), false, 'no se puede equipar sin owned');
+  s.brains = 50000;
+  Game.buyCosmetic(s, 'skin-neon');
+  const ok = Game.equipCosmetic(s, 'skin-neon');
+  assert.strictEqual(ok, true, 'equipCosmetic debe devolver true si está owned');
+  assert.strictEqual(s.cosmetics.equipped.skin, 'skin-neon', 'debe actualizar equipped.skin');
+})();
+
+// 18. prestige conserva cosmetics
+(function testPrestigeKeepsCosmetics() {
+  const s = Game.createState();
+  s.brains = 5000;
+  Game.buyCosmetic(s, 'skin-rot');
+  Game.equipCosmetic(s, 'skin-rot');
+  s.totalBrainsEarned = 2000000;
+  const ns = Game.prestige(s);
+  assert.ok(ns.cosmetics.owned.indexOf('skin-rot') !== -1, 'prestige debe conservar owned');
+  assert.strictEqual(ns.cosmetics.equipped.skin, 'skin-rot', 'prestige debe conservar equipped');
+})();
+
+// 19. deserialize sin cosmetics → defaults
+(function testDeserializeCosmeticsDefault() {
+  const s = Game.createState();
+  s.brains = 10;
+  const text = JSON.stringify({ brains: 10 });
+  const s2 = Game.deserialize(text);
+  assert.ok(s2.cosmetics, 'deserialize debe crear cosmetics');
+  assert.ok(s2.cosmetics.owned.indexOf('skin-classic') !== -1, 'default owned incluye skin-classic');
+  assert.strictEqual(s2.cosmetics.equipped.skin, 'skin-classic', 'default equipped skin');
+  assert.strictEqual(s2.cosmetics.equipped.aura, 'aura-none', 'default equipped aura');
+  assert.strictEqual(s2.cosmetics.equipped.bg, 'bg-void', 'default equipped bg');
 })();
 
 console.log('Todos los tests pasaron correctamente.');

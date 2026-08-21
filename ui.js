@@ -469,7 +469,7 @@
   function updateCosmeticCard(div, cos) {
     const owned = state.cosmetics.owned.indexOf(cos.id) !== -1;
     const equipped = state.cosmetics.equipped[cos.slot] === cos.id;
-    div.className = "item-card" + (equipped ? " owned" : (owned ? " affordable" : (state.brains >= cos.cost ? "affordable" : "disabled")));
+    div.className = "item-card" + (equipped ? " owned" : (owned ? " affordable" : (state.brains >= cos.cost ? " affordable" : " disabled")));
     const costEl = div.querySelector(".item-cost");
     if (costEl) {
       if (equipped) {

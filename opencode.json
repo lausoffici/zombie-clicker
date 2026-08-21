@@ -1,0 +1,24 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "ollama/qwen3.8-agent:27b",
+  "provider": {
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama (local)",
+      "options": {
+        "baseURL": "http://127.0.0.1:11434/v1"
+      },
+      "models": {
+        "qwen3.8-agent:27b": {
+          "name": "Qwen3.8 Agent 27B (tool-loop safe)"
+        },
+        "qwen3.8:27b": {
+          "name": "Qwen3.8 27B"
+        },
+        "qwen3.6:27b-mtp-q8_0": {
+          "name": "Qwen3.6 27B MTP Q8"
+        }
+      }
+    }
+  }
+}

@@ -1,6 +1,8 @@
 # Zombie Clicker — runner autónomo con Ollama
 
-Un juego clicker incremental de temática zombie (HTML/CSS/JS vanilla, sin dependencias) que se construye solo: un LLM local ejecuta las tareas de `tasks.json` mientras vos no estás.
+Un juego clicker incremental de temática zombie (HTML/CSS/JS vanilla, sin dependencias) que se construye solo: un LLM local ejecuta las tareas de un plan mientras vos no estás.
+
+**Workflow actual (Cursor/Kimi → plan AFK → OpenCode + Qwen/Ollama, opcional Orca):** ver [`docs/WORKFLOW.md`](docs/WORKFLOW.md) y [`AGENTS.md`](AGENTS.md).
 
 ## Requisitos
 

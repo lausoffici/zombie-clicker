@@ -47,6 +47,20 @@
     { id: "autoClick", name: "Auto Click", desc: "Click automático cada 2s", cost: 5, effect: "autoClick", value: 1 }
   ];
 
+  const COSMETICS = [
+    { id: "skin-classic", name: "Zombie clásico", slot: "skin", cost: 0, icon: "🧟" },
+    { id: "skin-rot", name: "Putrefacto", slot: "skin", cost: 5000, icon: "🤢" },
+    { id: "skin-neon", name: "Neon infectado", slot: "skin", cost: 50000, icon: "💚" },
+    { id: "skin-king", name: "Rey de la horda", slot: "skin", cost: 500000, icon: "👑" },
+    { id: "aura-none", name: "Sin aura", slot: "aura", cost: 0, icon: "⚫" },
+    { id: "aura-green", name: "Aura podrida", slot: "aura", cost: 2500, icon: "🟢" },
+    { id: "aura-blood", name: "Aura sangre", slot: "aura", cost: 25000, icon: "🔴" },
+    { id: "aura-gold", name: "Aura dorada", slot: "aura", cost: 250000, icon: "🟡" },
+    { id: "bg-void", name: "Vacío", slot: "bg", cost: 0, icon: "🌑" },
+    { id: "bg-fog", name: "Niebla", slot: "bg", cost: 10000, icon: "🌫️" },
+    { id: "bg-necro", name: "Necrópolis", slot: "bg", cost: 100000, icon: "🏚️" }
+  ];
+
   const OFFLINE_CAP_SECONDS = 8 * 3600;
 
   function createState() {
@@ -62,6 +76,10 @@
         souls: 0,
         totalSoulsEarned: 0,
         upgrades: []
+      },
+      cosmetics: {
+        owned: ["skin-classic", "aura-none", "bg-void"],
+        equipped: { skin: "skin-classic", aura: "aura-none", bg: "bg-void" }
       },
       startedAt: Date.now(),
       lastSaved: Date.now()
@@ -238,7 +256,45 @@
       newState.brains = 100;
       newState.totalBrainsEarned = 100;
     }
+    if (state.cosmetics && Array.isArray(state.cosmetics.owned) && state.cosmetics.equipped) {
+      newState.cosmetics = {
+        owned: state.cosmetics.owned.slice(),
+        equipped: {
+          skin: state.cosmetics.equipped.skin || "skin-classic",
+          aura: state.cosmetics.equipped.aura || "aura-none",
+          bg: state.cosmetics.equipped.bg || "bg-void"
+        }
+      };
+    }
     return newState;
+  }
+
+  function buyCosmetic(state, id) {
+    const cos = COSMETICS.find(c => c.id === id);
+    if (!cos) return false;
+    if (!state.cosmetics || !Array.isArray(state.cosmetics.owned)) {
+      state.cosmetics = {
+        owned: ["skin-classic", "aura-none", "bg-void"],
+        equipped: { skin: "skin-classic", aura: "aura-none", bg: "bg-void" }
+      };
+    }
+    if (state.cosmetics.owned.indexOf(id) !== -1) return false;
+    if (state.brains < cos.cost) return false;
+    state.brains -= cos.cost;
+    state.cosmetics.owned.push(id);
+    return true;
+  }
+
+  function equipCosmetic(state, id) {
+    const cos = COSMETICS.find(c => c.id === id);
+    if (!cos) return false;
+    if (!state.cosmetics || !Array.isArray(state.cosmetics.owned)) return false;
+    if (state.cosmetics.owned.indexOf(id) === -1) return false;
+    if (!state.cosmetics.equipped) {
+      state.cosmetics.equipped = { skin: "skin-classic", aura: "aura-none", bg: "bg-void" };
+    }
+    state.cosmetics.equipped[cos.slot] = id;
+    return true;
   }
 
   function buyPrestigeUpgrade(state, id) {
@@ -318,6 +374,22 @@
           if (typeof data.prestige.totalSoulsEarned === "number") state.prestige.totalSoulsEarned = data.prestige.totalSoulsEarned;
           if (Array.isArray(data.prestige.upgrades)) state.prestige.upgrades = data.prestige.upgrades.slice();
         }
+        if (data.cosmetics && typeof data.cosmetics === "object") {
+          if (Array.isArray(data.cosmetics.owned)) {
+            state.cosmetics.owned = data.cosmetics.owned.filter(id => COSMETICS.some(c => c.id === id));
+            if (state.cosmetics.owned.length === 0) {
+              state.cosmetics.owned = ["skin-classic", "aura-none", "bg-void"];
+            }
+          }
+          if (data.cosmetics.equipped && typeof data.cosmetics.equipped === "object") {
+            ["skin", "aura", "bg"].forEach(slot => {
+              const val = data.cosmetics.equipped[slot];
+              if (typeof val === "string" && state.cosmetics.owned.indexOf(val) !== -1) {
+                state.cosmetics.equipped[slot] = val;
+              }
+            });
+          }
+        }
       }
       return state;
     } catch (e) {
@@ -369,6 +441,7 @@
     UPGRADES: UPGRADES,
     ACHIEVEMENTS: ACHIEVEMENTS,
     PRESTIGE_UPGRADES: PRESTIGE_UPGRADES,
+    COSMETICS: COSMETICS,
     createState: createState,
     click: click,
     buyGenerator: buyGenerator,
@@ -394,6 +467,8 @@
     getPrestigeGain: getPrestigeGain,
     prestige: prestige,
     buyPrestigeUpgrade: buyPrestigeUpgrade,
+    buyCosmetic: buyCosmetic,
+    equipCosmetic: equipCosmetic,
     checkAchievements: checkAchievements,
     getStats: getStats,
     exportSave: exportSave,

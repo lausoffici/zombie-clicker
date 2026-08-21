@@ -30,11 +30,15 @@ Hecho en HTML/CSS/JS vanilla, sin dependencias ni build step. Abrí `index.html`
 - Cada logro desbloqueado suma un **+2%** al multiplicador global.
 
 ### ✨ Prestigio
-- Cuando acumulás **cerebros totales** (totalBrainsEarned), podés **Ascender**.
-- Al ascender perdés cerebros, generadores y mejoras actuales, pero ganás **almas** permanentes.
-- Fórmula de almas: `floor(sqrt(totalBrainsEarned / 1_000_000))`.
-- Las almas otorgan un **+5% de multiplicador global** cada una.
-- En la pestaña **Prestigio** podés gastar almas en mejoras permanentes:
+**¿Qué son las Almas?**
+
+Las Almas son la moneda de Prestigio. Al **Ascender** reiniciás cerebros, generadores y mejoras, y ganás Almas permanentes.
+
+- Cada Alma → **+5%** multiplicador global
+- Fórmula: `floor(sqrt(cerebrosTotales / 1e6))`
+- Gastá Almas en la tienda de abajo (mejoras permanentes)
+
+En la pestaña **Prestigio** podés gastar almas en mejoras permanentes:
   - **BPS Boost**: +10% BPS
   - **Click Boost**: +20% click
   - **Soul Start**: +100 cerebros iniciales tras reset
