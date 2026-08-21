@@ -95,8 +95,11 @@ const Game = (function () {
     return {
       brains: 0,
       totalClicks: 0,
+      totalBrainsEarned: 0,
+      bestBps: 0,
       generators: {},
       upgrades: [],
+      startedAt: Date.now(),
       lastSaved: Date.now()
     };
   }
@@ -145,8 +148,10 @@ const Game = (function () {
   }
 
   function click(state) {
-    state.brains += getClickValue(state);
+    const value = getClickValue(state);
+    state.brains += value;
     state.totalClicks += 1;
+    state.totalBrainsEarned += value;
   }
 
   function buyGenerator(state, id) {
@@ -180,7 +185,12 @@ const Game = (function () {
   function tick(state, dtSeconds) {
     const bps = getBrainsPerSecond(state);
     if (bps > 0 && dtSeconds > 0) {
-      state.brains += bps * dtSeconds;
+      const gained = bps * dtSeconds;
+      state.brains += gained;
+      state.totalBrainsEarned += gained;
+      if (bps > (state.bestBps || 0)) {
+        state.bestBps = bps;
+      }
     }
   }
 
@@ -204,8 +214,11 @@ const Game = (function () {
       return {
         brains: typeof parsed.brains === 'number' ? parsed.brains : 0,
         totalClicks: typeof parsed.totalClicks === 'number' ? parsed.totalClicks : 0,
+        totalBrainsEarned: typeof parsed.totalBrainsEarned === 'number' ? parsed.totalBrainsEarned : 0,
+        bestBps: typeof parsed.bestBps === 'number' ? parsed.bestBps : 0,
         generators: (parsed.generators && typeof parsed.generators === 'object') ? parsed.generators : {},
         upgrades: (Array.isArray(parsed.upgrades)) ? parsed.upgrades : [],
+        startedAt: typeof parsed.startedAt === 'number' ? parsed.startedAt : Date.now(),
         lastSaved: typeof parsed.lastSaved === 'number' ? parsed.lastSaved : Date.now()
       };
     } catch (e) {
@@ -223,6 +236,10 @@ const Game = (function () {
     }
     const gained = bps * elapsedSeconds;
     state.brains += gained;
+    state.totalBrainsEarned += gained;
+    if (bps > (state.bestBps || 0)) {
+      state.bestBps = bps;
+    }
     return gained;
   }
 
@@ -262,8 +279,23 @@ const Game = (function () {
     for (let i = 0; i < toBuy; i++) {
       if (!buyGenerator(state, id)) break;
     }
-    const bought = (state.generators[id] || 0) - (state.generators[id] || 0);
     return toBuy;
+  }
+
+  function getStats(state) {
+    let generatorsOwned = 0;
+    for (let i = 0; i < GENERATORS.length; i++) {
+      const genId = GENERATORS[i].id;
+      generatorsOwned += (state.generators[genId] || 0);
+    }
+    const startedAt = (typeof state.startedAt === 'number' && isFinite(state.startedAt)) ? state.startedAt : Date.now();
+    return {
+      totalBrainsEarned: state.totalBrainsEarned || 0,
+      totalClicks: state.totalClicks || 0,
+      bestBps: state.bestBps || 0,
+      elapsedSeconds: (Date.now() - startedAt) / 1000,
+      generatorsOwned: generatorsOwned
+    };
   }
 
   return {
@@ -282,7 +314,8 @@ const Game = (function () {
     deserialize: deserialize,
     applyOfflineProgress: applyOfflineProgress,
     getMaxAffordable: getMaxAffordable,
-    buyGenerators: buyGenerators
+    buyGenerators: buyGenerators,
+    getStats: getStats
   };
 })();
 
