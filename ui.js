@@ -2,7 +2,30 @@
   'use strict';
 
   var state = null;
-  var SAVE_KEY = 'zombie-clicker-save';
+  var lastTick = 0;
+  var tickInterval = null;
+  var saveInterval = null;
+
+  function showToast(message, type) {
+    if (type === undefined) type = 'info';
+    var container = document.getElementById('toast-container');
+    if (!container) return;
+
+    var toast = document.createElement('div');
+    toast.className = 'toast toast-' + type;
+    toast.textContent = message;
+
+    container.appendChild(toast);
+
+    setTimeout(function () {
+      toast.classList.add('toast-out');
+      setTimeout(function () {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast);
+        }
+      }, 300);
+    }, 3000);
+  }
 
   function updateDisplay() {
     var brainsEl = document.getElementById('brains');
@@ -72,96 +95,24 @@
       var btn = document.createElement('button');
       btn.className = 'shop-item';
       btn.setAttribute('data-gen-id', gen.id);
-      btn.type = 'button';
-
-      var nameEl = document.createElement('div');
-      nameEl.className = 'gen-name';
-      nameEl.textContent = gen.name;
-
-      var descEl = document.createElement('div');
-      descEl.className = 'gen-desc';
-      descEl.textContent = gen.desc;
-
-      var metaRow = document.createElement('div');
-      metaRow.className = 'gen-meta';
-
-      var costEl = document.createElement('span');
-      costEl.className = 'gen-cost';
-      costEl.textContent = Game.formatNumber(Math.ceil(Game.getGeneratorCost(state, gen.id))) + ' 🧠';
-
-      var countEl = document.createElement('span');
-      countEl.className = 'gen-count';
-      countEl.textContent = 'x' + (state.generators[gen.id] || 0);
-
-      metaRow.appendChild(costEl);
-      metaRow.appendChild(countEl);
-
-      var buyRow = document.createElement('div');
-      buyRow.className = 'buy-row';
-
-      var btn1 = document.createElement('button');
-      btn1.className = 'buy-btn buy-x1';
-      btn1.type = 'button';
-      btn1.textContent = 'x1';
-      (function (genId) {
-        btn1.addEventListener('click', function (e) {
-          e.stopPropagation();
-          if (Game.buyGenerator(state, genId)) {
-            updateDisplay();
-          }
-        });
-      })(gen.id);
-
-      var btn10 = document.createElement('button');
-      btn10.className = 'buy-btn buy-x10';
-      btn10.type = 'button';
-      btn10.textContent = 'x10';
-      (function (genId) {
-        btn10.addEventListener('click', function (e) {
-          e.stopPropagation();
-          if (Game.buyGenerators(state, genId, 10) > 0) {
-            updateDisplay();
-          }
-        });
-      })(gen.id);
-
-      var btnMax = document.createElement('button');
-      btnMax.className = 'buy-btn buy-max';
-      btnMax.type = 'button';
-      btnMax.textContent = 'Max';
-      (function (genId) {
-        btnMax.addEventListener('click', function (e) {
-          e.stopPropagation();
-          var max = Game.getMaxAffordable(state, genId);
-          if (max > 0) {
-            Game.buyGenerators(state, genId, max);
-            updateDisplay();
-          }
-        });
-      })(gen.id);
-
-      buyRow.appendChild(btn1);
-      buyRow.appendChild(btn10);
-      buyRow.appendChild(btnMax);
-
-      btn.appendChild(nameEl);
-      btn.appendChild(descEl);
-      btn.appendChild(metaRow);
-      btn.appendChild(buyRow);
-
-      (function (genId) {
-        btn.addEventListener('click', function (e) {
-          if (e.target === btn) {
-            if (Game.buyGenerator(state, genId)) {
-              updateDisplay();
-            }
-          }
-        });
-      })(gen.id);
-
+      btn.innerHTML =
+        '<div class="gen-name">' + gen.name + '</div>' +
+        '<div class="gen-desc">' + gen.desc + '</div>' +
+        '<div class="gen-meta">' +
+        '<span class="gen-cost"></span>' +
+        '<span class="gen-count"></span>' +
+        '</div>';
+      btn.addEventListener('click', function (e) {
+        var id = e.currentTarget.getAttribute('data-gen-id');
+        if (Game.buyGenerator(state, id)) {
+          showToast('Compraste ' + gen.name + '!', 'success');
+          updateDisplay();
+        } else {
+          showToast('No tienes suficientes cerebros.', 'error');
+        }
+      });
       container.appendChild(btn);
     }
-    updateShopButtons();
   }
 
   function renderUpgrades() {
@@ -170,157 +121,104 @@
     container.innerHTML = '';
     for (var i = 0; i < Game.UPGRADES.length; i++) {
       var up = Game.UPGRADES[i];
-      if (state.upgrades.indexOf(up.id) !== -1) continue;
-
       var btn = document.createElement('button');
       btn.className = 'shop-item';
       btn.setAttribute('data-up-id', up.id);
-      btn.type = 'button';
-
-      var nameEl = document.createElement('div');
-      nameEl.className = 'up-name';
-      nameEl.textContent = up.name;
-
-      var descEl = document.createElement('div');
-      descEl.className = 'up-desc';
-      descEl.textContent = up.desc;
-
-      var metaRow = document.createElement('div');
-      metaRow.className = 'up-meta';
-
-      var costEl = document.createElement('span');
-      costEl.className = 'up-cost';
-      costEl.textContent = Game.formatNumber(Math.ceil(up.cost)) + ' 🧠';
-
-      metaRow.appendChild(costEl);
-
-      btn.appendChild(nameEl);
-      btn.appendChild(descEl);
-      btn.appendChild(metaRow);
-
-      (function (upId) {
-        btn.addEventListener('click', function () {
-          if (Game.buyUpgrade(state, upId)) {
-            renderUpgrades();
-            updateDisplay();
-          }
-        });
-      })(up.id);
-
+      btn.innerHTML =
+        '<div class="up-name">' + up.name + '</div>' +
+        '<div class="up-desc">' + up.desc + '</div>' +
+        '<div class="up-meta">' +
+        '<span class="up-cost"></span>' +
+        '</div>';
+      btn.addEventListener('click', function (e) {
+        var id = e.currentTarget.getAttribute('data-up-id');
+        if (Game.buyUpgrade(state, id)) {
+          showToast('Mejora comprada: ' + up.name + '!', 'success');
+          updateDisplay();
+        } else {
+          showToast('No tienes suficientes cerebros.', 'error');
+        }
+      });
       container.appendChild(btn);
     }
-    updateUpgradeButtons();
   }
 
-  function spawnFloatText(x, y, text) {
+  function spawnClickFloat(x, y, amount) {
     var layer = document.getElementById('click-float-layer');
     if (!layer) return;
     var el = document.createElement('div');
     el.className = 'click-float';
-    el.textContent = text;
+    el.textContent = '+' + Game.formatNumber(amount);
     el.style.left = x + 'px';
     el.style.top = y + 'px';
     layer.appendChild(el);
     setTimeout(function () {
-      if (el.parentNode) el.parentNode.removeChild(el);
+      if (el.parentNode) {
+        el.parentNode.removeChild(el);
+      }
     }, 900);
   }
 
-  function flashZombieEmoji() {
-    var btn = document.getElementById('zombie-btn');
-    if (!btn) return;
-    var original = btn.textContent;
-    btn.textContent = '💀 ¡Crack!';
-    setTimeout(function () {
-      btn.textContent = original;
-    }, 150);
+  function handleZombieClick(e) {
+    var power = Game.click(state);
+    var layer = document.getElementById('click-float-layer');
+    var rect = layer ? layer.getBoundingClientRect() : null;
+    var x = e.clientX - (rect ? rect.left : 0);
+    var y = e.clientY - (rect ? rect.top : 0);
+    spawnClickFloat(x, y, power);
+    updateDisplay();
   }
 
-  function handleClick(e) {
-    var value = Game.getClickValue(state);
-    Game.click(state);
-
-    var layer = document.getElementById('click-float-layer');
-    var x, y;
-    if (layer) {
-      var rect = layer.getBoundingClientRect();
-      if (e && typeof e.clientX === 'number' && typeof e.clientY === 'number') {
-        x = e.clientX - rect.left;
-        y = e.clientY - rect.top;
-      } else {
-        x = rect.width / 2;
-        y = rect.height / 2;
-      }
-      spawnFloatText(x, y, '+' + Game.formatNumber(value));
+  function tick() {
+    var now = Date.now();
+    var dt = (now - lastTick) / 1000;
+    lastTick = now;
+    if (dt <= 0) dt = 0;
+    if (dt > 5) dt = 5;
+    var bps = Game.getBrainsPerSecond(state);
+    if (bps > 0) {
+      var gain = bps * dt;
+      state.brains += gain;
+      state.totalBrains += gain;
     }
-
-    flashZombieEmoji();
     updateDisplay();
   }
 
   function saveGame() {
-    try {
-      localStorage.setItem(SAVE_KEY, Game.serialize(state));
-    } catch (e) {
-      // localStorage puede no estar disponible; ignoramos el error
-    }
-  }
-
-  function loadGame() {
-    try {
-      var saved = localStorage.getItem(SAVE_KEY);
-      if (saved) {
-        return Game.deserialize(saved);
-      }
-    } catch (e) {
-      // ignoramos errores de localStorage
-    }
-    return Game.createState();
-  }
-
-  function showOfflineMessage(gained) {
-    if (!gained || gained <= 0) return;
-    var msg = 'Mientras dormías, tus zombies juntaron ' + Game.formatNumber(gained) + ' cerebros';
-    try {
-      alert(msg);
-    } catch (e) {
-      // alert puede no estar disponible; ignoramos el error
-    }
+    Game.save(state);
   }
 
   function init() {
-    state = loadGame();
-
-    // Progreso offline: si hay un save existente, calcular segundos desde lastSaved
-    var now = Date.now();
-    var elapsedSeconds = 0;
-    if (state && typeof state.lastSaved === 'number' && isFinite(state.lastSaved)) {
-      elapsedSeconds = (now - state.lastSaved) / 1000;
-      if (elapsedSeconds > 0) {
-        var gained = Game.applyOfflineProgress(state, elapsedSeconds);
-        if (gained > 0) {
-          showOfflineMessage(gained);
-        }
-      }
-    }
-
-    var zombieBtn = document.getElementById('zombie-btn');
-    if (zombieBtn) {
-      zombieBtn.addEventListener('click', handleClick);
+    var loaded = Game.load();
+    if (loaded) {
+      state = loaded;
+      showToast('Partida cargada.', 'info');
+    } else {
+      state = {
+        brains: 0,
+        totalBrains: 0,
+        clicks: 0,
+        generators: {},
+        upgrades: {}
+      };
     }
 
     renderShop();
     renderUpgrades();
     updateDisplay();
 
-    setInterval(function () {
-      Game.tick(state, 0.1);
-      updateDisplay();
-    }, 100);
+    var zombieBtn = document.getElementById('zombie-btn');
+    if (zombieBtn) {
+      zombieBtn.addEventListener('click', handleZombieClick);
+    }
 
-    setInterval(saveGame, 10000);
+    lastTick = Date.now();
+    tickInterval = setInterval(tick, 100);
+    saveInterval = setInterval(saveGame, 15000);
 
-    window.addEventListener('beforeunload', saveGame);
+    window.addEventListener('beforeunload', function () {
+      saveGame();
+    });
   }
 
   if (document.readyState === 'loading') {

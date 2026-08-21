@@ -32,7 +32,6 @@ body {
   align-items: center;
 }
 
-/* Scrollbar estilizada (WebKit) */
 ::-webkit-scrollbar {
   width: 12px;
   height: 12px;
@@ -52,7 +51,6 @@ body {
   background: linear-gradient(180deg, var(--green-glow) 0%, var(--rojo-sangre) 100%);
 }
 
-/* Scrollbar estilizada (Firefox) */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--green-podrido) #111;
@@ -319,6 +317,73 @@ body {
   color: #444;
 }
 
+.toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.toast {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.8rem 1.2rem;
+  color: var(--text-main);
+  font-size: 0.95rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  animation: toast-in 0.3s ease-out forwards;
+  pointer-events: auto;
+  max-width: 300px;
+  word-wrap: break-word;
+}
+
+.toast.toast-info {
+  border-left: 4px solid var(--green-podrido);
+}
+
+.toast.toast-success {
+  border-left: 4px solid var(--green-glow);
+}
+
+.toast.toast-error {
+  border-left: 4px solid var(--rojo-sangre);
+}
+
+.toast.toast-warning {
+  border-left: 4px solid #f39c12;
+}
+
+.toast.toast-out {
+  animation: toast-out 0.3s ease-in forwards;
+}
+
+@keyframes toast-in {
+  0% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes toast-out {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
 @media (max-width: 700px) {
   .game-header h1 {
     font-size: 2rem;
@@ -344,5 +409,16 @@ body {
 
   .shop-list {
     max-height: 50vh;
+  }
+
+  .toast-container {
+    top: 0.5rem;
+    right: 0.5rem;
+    left: 0.5rem;
+    align-items: flex-end;
+  }
+
+  .toast {
+    max-width: 100%;
   }
 }
