@@ -13,6 +13,7 @@ Hecho en HTML/CSS/JS vanilla. Abrí `index.html` en tu navegador y jugá.
 ### Click
 - Hacé click en el **zombie** para ganar cerebros.
 - El valor de cada click se multiplica con upgrades de click, el **multiplicador global** y el prestige **Click Boost** (solo click, no BPS).
+- Debajo del zombie se ven tus stats de click: **valor por click**, **% de crítico** y los **cerebros que da un crítico**.
 
 ### Generadores
 - 15 tipos. Cada compra sube el costo un **15%**.
@@ -20,8 +21,11 @@ Hecho en HTML/CSS/JS vanilla. Abrí `index.html` en tu navegador y jugá.
 - Compra x1 / x10 / Max.
 
 ### Mejoras
-- Compras únicas de la run: click, un generador, o BPS global.
-- Las de generador se revelan al tener 1 / 50 / 100 de ese tipo.
+- Se compran con cerebros y tienen **hasta 5 niveles** cada una.
+- Cada nivel potencia click, un generador, el multiplicador global, críticos o costos más baratos.
+- El costo sube un **×2.5** por nivel. La carta muestra `Lv N/5` y una barra hacia el próximo costo.
+- Al llegar a nivel máximo se marca **MÁX** y queda visible.
+- Al prestigiar se reinician (las de prestigio / almas no).
 
 ### Logros
 - Se desbloquean solos. Cada uno suma **+2%** al multiplicador global.
@@ -33,6 +37,14 @@ Al **Ascender** reiniciás cerebros, generadores y mejoras de **esta run**.
 - **Astillas:** se ganan igual que las almas al ascender, y **sí** se gastan en la tienda de prestige y en cosméticos.
 - Fórmula de la run: `floor(sqrt(cerebrosDeLaRun / 1e9))` — la primera alma pide 1.000 millones de cerebros de esta vida.
 - Consejo: conviene ascender cuando puedas **duplicar tu nivel** de almas.
+
+En la tienda, pestaña **Almas**, podés gastar **astillas** en mejoras permanentes:
+  - **BPS Boost**: +10% BPS
+  - **Click Boost**: +20% click (no BPS)
+  - **Soul Start**: +100 cerebros iniciales tras reset
+  - **Offline Boost**: +50% cap de offline
+  - **Cheaper Generators**: -10% costo
+  - **Auto Click**: click automático cada 2 segundos
 
 ### Huesos
 - Caen del cerebro dorado (a veces) y al **matar** al jefe de la horda (clicks a su barra de vida).
@@ -67,6 +79,33 @@ Al **Ascender** reiniciás cerebros, generadores y mejoras de **esta run**.
 | 13 | Dimensión rota | 1.6e14 | 2.8e8 |
 | 14 | Trono de huesos | 2.5e15 | 1.6e9 |
 | 15 | Vacío verdoso | 4.0e16 | 9.0e9 |
+
+## Mejoras (niveles, max Lv 5)
+
+Cada mejora escala con `costo = base × 2.5^nivel`. Efecto por nivel según tipo:
+
+| Nombre | Tipo | Efecto por nivel |
+|--------|------|------------------|
+| Dedos podridos | click | ×1.5 click |
+| Mandíbula filosa | click | ×1.5 click |
+| Garras infectadas | click | ×1.6 click |
+| Puño demolición | click | ×1.7 click |
+| Reflejos muertos | click | ×1.5 click |
+| Click del fin | click | ×2 click (tarde) |
+| Superviviente veloz | generador | ×1.5 superviviente |
+| Mordedura profunda | generador | ×1.5 mordedor |
+| Corredor mutado | generador | ×1.5 corredor |
+| Rabia eterna | generador | ×1.5 rabioso |
+| Jefe alpha | generador | ×1.5 jefe |
+| Horda voraz | generador | ×1.5 horda |
+| Necrópolis oscura | generador | ×1.5 necrópolis |
+| Virus letal | generador | ×1.5 Virus Alfa |
+| (+ mejoras de gens altos) | generador | ×1.5 por gen restante |
+| Fuerza sobrenatural | global | +25% global |
+| Hambre colectiva | global | +50% global (tarde) |
+| Silencio de dioses | global | +50% global (tarde) |
+| Golpe crítico | crit | +5% chance de crítico ×10 |
+| Cerebros baratos | cheaper | −5% costo de generadores |
 
 ## Prestige (tienda de astillas)
 

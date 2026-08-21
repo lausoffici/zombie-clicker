@@ -99,6 +99,10 @@
             </button>
             <div id="clicker-info">
               <div id="click-value">+1 por click</div>
+              <div class="clicker-stats" aria-live="polite">
+                <div id="click-crit">Crítico 0% · ×10</div>
+                <div id="click-crit-value">+10 en crítico</div>
+              </div>
               <div id="click-hint">Clic para recolectar</div>
             </div>
           </div>
@@ -113,16 +117,22 @@
             <button id="shop-tab-generators" class="shop-tab active">Generadores</button>
             <button id="shop-tab-upgrades" class="shop-tab">Mejoras</button>
             <button id="shop-tab-cosmetics" class="shop-tab">Cosméticos</button>
+            <button id="shop-tab-souls" class="shop-tab shop-tab--souls">Almas</button>
           </div>
           <div id="buy-qty-bar" class="buy-qty" aria-label="Cantidad de compra">
             <button type="button" class="qty-btn active" data-qty="1">x1</button>
             <button type="button" class="qty-btn" data-qty="10">x10</button>
             <button type="button" class="qty-btn" data-qty="0">Max</button>
           </div>
+          <div id="souls-shop-bar" class="souls-shop-bar hidden" aria-label="Astillas disponibles">
+            <span>Astillas disponibles</span>
+            <span id="souls-shop-count" class="tabular-nums">0</span>
+          </div>
           <div id="shop-content">
             <div id="shop-list-generators" class="shop-list"></div>
             <div id="shop-list-upgrades" class="shop-list hidden"></div>
             <div id="shop-list-cosmetics" class="shop-list hidden"></div>
+            <div id="shop-list-souls" class="shop-list hidden"></div>
           </div>
         </div>
       </section>
@@ -169,9 +179,9 @@
               <div class="prestige-stat"><span>Ganarías</span><span id="prestige-gain">0</span></div>
               <div class="prestige-stat"><span>Multiplicador</span><span id="prestige-multiplier">x1.00</span></div>
             </div>
+            <p id="prestige-hint" class="prestige-hint">La primera Alma aparece al juntar 1.000 millones de cerebros en esta vida.</p>
             <button id="btn-prestige" class="btn btn-prestige" disabled>Ascender</button>
-            <h3 class="card-subtitle">Tienda de astillas</h3>
-            <div id="prestige-shop" class="prestige-list"></div>
+            <button type="button" id="btn-open-souls-shop" class="btn btn-souls-shop">Ir a la tienda de Almas</button>
           </div>
         </div>
 

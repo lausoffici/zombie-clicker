@@ -100,20 +100,28 @@ function approxEqual(a, b, eps) {
   assert.strictEqual(s.brains, before2, 'tick con dt=0 no debe cambiar nada');
 })();
 
-// 4. buyUpgrade aplica multiplicador y no se puede comprar dos veces
+// 4. buyUpgrade multi-nivel aplica perLevel y escala costo
 (function testBuyUpgrade() {
   const s = Game.createState();
   const up = Game.UPGRADES[0];
   assert.strictEqual(up.type, 'click', 'el primer upgrade debe ser de tipo click');
   const before = Game.getClickValue(s);
-  s.brains = up.cost;
+  const cost1 = Game.getUpgradeCost(s, up.id);
+  assert.strictEqual(cost1, up.baseCost, 'costo L0→L1 = baseCost');
+  s.brains = cost1;
   const ok = Game.buyUpgrade(s, up.id);
   assert.strictEqual(ok, true, 'buyUpgrade debe devolver true si alcanza el costo');
-  assert.strictEqual(Game.getClickValue(s), before * up.multiplier, 'el multiplicador debe aplicarse al click');
-  assert.strictEqual(s.upgrades.indexOf(up.id), 0, 'el upgrade debe estar en la lista');
-  const again = Game.buyUpgrade(s, up.id);
-  assert.strictEqual(again, false, 'no se puede comprar el mismo upgrade dos veces');
-  assert.strictEqual(s.upgrades.length, 1, 'la lista de upgrades no debe duplicarse');
+  assert.strictEqual(Game.getUpgradeLevel(s, up.id), 1, 'nivel debe ser 1');
+  assert.ok(approxEqual(Game.getClickValue(s), before * up.perLevel), 'perLevel L1 debe aplicarse al click');
+  const cost2 = Game.getUpgradeCost(s, up.id);
+  assert.strictEqual(cost2, Math.ceil(up.baseCost * Math.pow(up.costGrowth, 1)), 'costo debe escalar');
+  s.brains = cost2;
+  assert.strictEqual(Game.buyUpgrade(s, up.id), true, 'debe poder comprar nivel 2');
+  assert.strictEqual(Game.getUpgradeLevel(s, up.id), 2, 'nivel debe ser 2');
+  s.upgrades[up.id] = up.maxLevel;
+  s.brains = 1e15;
+  assert.strictEqual(Game.buyUpgrade(s, up.id), false, 'no se puede comprar past maxLevel');
+  assert.strictEqual(Game.getUpgradeLevel(s, up.id), up.maxLevel, 'nivel queda en max');
 })();
 
 // 5. formatNumber con K y M
@@ -129,15 +137,33 @@ function approxEqual(a, b, eps) {
   s.brains = 12345.678;
   s.totalClicks = 42;
   s.generators['superviviente'] = 7;
-  s.upgrades.push('dedos-podridos');
+  s.upgrades['dedos-podridos'] = 2;
   const text = Game.serialize(s);
   const s2 = Game.deserialize(text);
   assert.strictEqual(s2.brains, s.brains, 'brains debe sobrevivir al roundtrip');
   assert.strictEqual(s2.totalClicks, s.totalClicks, 'totalClicks debe sobrevivir al roundtrip');
   assert.strictEqual(s2.generators['superviviente'], 7, 'generators deben sobrevivir al roundtrip');
-  assert.strictEqual(s2.upgrades.indexOf('dedos-podridos'), 0, 'upgrades deben sobrevivir al roundtrip');
+  assert.strictEqual(s2.upgrades['dedos-podridos'], 2, 'upgrades map debe sobrevivir al roundtrip');
   const bad = Game.deserialize('no es json');
   assert.strictEqual(bad.brains, 0, 'deserialize invalido debe devolver brains 0');
+})();
+
+// 6b. migrate upgrades array legacy → map nivel 1
+(function testMigrateUpgradesArray() {
+  const legacy = JSON.stringify({
+    brains: 10,
+    totalClicks: 0,
+    totalBrainsEarned: 0,
+    bestBps: 0,
+    generators: {},
+    upgrades: ['dedos-podridos', 'fuerza-sobrenatural'],
+    achievements: [],
+    prestige: { souls: 0, totalSoulsEarned: 0, upgrades: [] }
+  });
+  const s = Game.deserialize(legacy);
+  assert.strictEqual(s.upgrades['dedos-podridos'], 1, 'array legacy → nivel 1');
+  assert.strictEqual(s.upgrades['fuerza-sobrenatural'], 1, 'array legacy global → nivel 1');
+  assert.strictEqual(Game.getUpgradeLevel(s, 'mandibula-filosa'), 0, 'no comprada = 0');
 })();
 
 // 7. applyOfflineProgress
@@ -231,9 +257,10 @@ function approxEqual(a, b, eps) {
   const up = Game.UPGRADES.find((u) => u.type === 'global');
   assert.ok(up, 'debe existir un upgrade global');
   const before = Game.getGlobalMultiplier(s);
-  s.upgrades.push(up.id);
+  s.upgrades[up.id] = 1;
   const after = Game.getGlobalMultiplier(s);
   assert.ok(after > before, 'el upgrade global debe aumentar el multiplicador');
+  assert.ok(approxEqual(after, before + (up.perLevel - 1)), 'bonus global = (perLevel-1)*level');
 })();
 
 // 13. getGeneratorBps con upgrade de generador
@@ -242,9 +269,9 @@ function approxEqual(a, b, eps) {
   const up = Game.UPGRADES.find((u) => u.type === 'generator');
   assert.ok(up, 'debe existir un upgrade de generador');
   const before = Game.getGeneratorBps(s, up.generatorId);
-  s.upgrades.push(up.id);
+  s.upgrades[up.id] = 1;
   const after = Game.getGeneratorBps(s, up.generatorId);
-  assert.ok(after > before, 'el upgrade de generador debe aumentar el bps');
+  assert.ok(approxEqual(after, before * up.perLevel), 'el upgrade de generador debe aumentar el bps');
 })();
 
 // 14. getClickValue con upgrades de click
@@ -252,7 +279,7 @@ function approxEqual(a, b, eps) {
   const s = Game.createState();
   const base = Game.getClickValue(s);
   const clickUps = Game.UPGRADES.filter((u) => u.type === 'click');
-  for (const u of clickUps) s.upgrades.push(u.id);
+  for (const u of clickUps) s.upgrades[u.id] = 1;
   const after = Game.getClickValue(s);
   assert.ok(after > base, 'los upgrades de click deben aumentar el valor');
 })();
@@ -263,7 +290,8 @@ function approxEqual(a, b, eps) {
   assert.strictEqual(s.brains, 0, 'brains inicial 0');
   assert.strictEqual(s.totalBrainsEarned, 0, 'totalBrainsEarned inicial 0');
   assert.strictEqual(s.totalClicks, 0, 'totalClicks inicial 0');
-  assert.strictEqual(s.upgrades.length, 0, 'upgrades inicial vacio');
+  assert.strictEqual(typeof s.upgrades, 'object', 'upgrades es objeto');
+  assert.strictEqual(Object.keys(s.upgrades).length, 0, 'upgrades inicial vacio');
   assert.strictEqual(s.achievements.length, 0, 'achievements inicial vacio');
   for (const g of Game.GENERATORS) {
     assert.strictEqual(s.generators[g.id], 0, 'generador inicial 0');
@@ -426,6 +454,45 @@ function approxEqual(a, b, eps) {
   assert.ok(kill.brains >= 500, 'jefe da cerebros');
   assert.strictEqual(s.bones, 2, 'jefe da hueso');
   assert.ok(Game.getBossMaxHp(s) >= 15, 'HP mínimo 15');
+})();
+
+// 28. crit chance y hit ×10
+(function testCrit() {
+  const s = Game.createState();
+  const crit = Game.UPGRADES.find((u) => u.type === 'crit');
+  assert.ok(crit, 'debe existir upgrade crit');
+  assert.strictEqual(Game.getCritChance(s), 0, 'sin crit chance = 0');
+  s.upgrades[crit.id] = 2;
+  assert.ok(approxEqual(Game.getCritChance(s), crit.perLevel * 2), 'crit chance = perLevel * level');
+  const base = Game.getClickValue(s);
+  Game._random = function () { return 0; }; // always crit
+  const gained = Game.click(s);
+  assert.ok(approxEqual(gained, base * 10), 'crit debe multiplicar click ×10');
+  Game._random = function () { return 0.99; }; // never crit with 10% chance
+  const gained2 = Game.click(s);
+  assert.ok(approxEqual(gained2, Game.getClickValue(s)), 'sin crit debe dar click normal');
+  Game._random = null;
+})();
+
+// 29. cheaper reduce costo de generadores
+(function testCheaperUpgrade() {
+  const s = Game.createState();
+  const genId = 'jefe'; // baseCost alto para que el ceil no anule el descuento
+  const before = Game.getGeneratorCost(s, genId);
+  const cheap = Game.UPGRADES.find((u) => u.type === 'cheaper');
+  assert.ok(cheap, 'debe existir upgrade cheaper');
+  s.upgrades[cheap.id] = 1;
+  const after = Game.getGeneratorCost(s, genId);
+  assert.ok(after < before, 'cheaper debe bajar el costo');
+  assert.strictEqual(after, Math.ceil(before * (1 - cheap.perLevel)), 'factor 0.95 en L1');
+})();
+
+// 30. catálogo con niveles + gen altos + crit/cheaper
+(function testUpgradeCatalogSize() {
+  assert.ok(Game.UPGRADES.length >= 16, 'debe haber al menos 16 upgrades');
+  assert.ok(Game.UPGRADES.every((u) => u.maxLevel === 5 && u.costGrowth === 2.5), 'todas con niveles');
+  assert.ok(Game.UPGRADES.some((u) => u.id === 'golpe-critico'), 'golpe-critico presente');
+  assert.ok(Game.UPGRADES.some((u) => u.id === 'horde-voraz'), 'horde-voraz presente');
 })();
 
 console.log('Todos los tests pasaron correctamente.');
