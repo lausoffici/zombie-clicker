@@ -96,14 +96,65 @@
       metaRow.appendChild(costEl);
       metaRow.appendChild(countEl);
 
+      var buyRow = document.createElement('div');
+      buyRow.className = 'buy-row';
+
+      var btn1 = document.createElement('button');
+      btn1.className = 'buy-btn buy-x1';
+      btn1.type = 'button';
+      btn1.textContent = 'x1';
+      (function (genId) {
+        btn1.addEventListener('click', function (e) {
+          e.stopPropagation();
+          if (Game.buyGenerator(state, genId)) {
+            updateDisplay();
+          }
+        });
+      })(gen.id);
+
+      var btn10 = document.createElement('button');
+      btn10.className = 'buy-btn buy-x10';
+      btn10.type = 'button';
+      btn10.textContent = 'x10';
+      (function (genId) {
+        btn10.addEventListener('click', function (e) {
+          e.stopPropagation();
+          if (Game.buyGenerators(state, genId, 10) > 0) {
+            updateDisplay();
+          }
+        });
+      })(gen.id);
+
+      var btnMax = document.createElement('button');
+      btnMax.className = 'buy-btn buy-max';
+      btnMax.type = 'button';
+      btnMax.textContent = 'Max';
+      (function (genId) {
+        btnMax.addEventListener('click', function (e) {
+          e.stopPropagation();
+          var max = Game.getMaxAffordable(state, genId);
+          if (max > 0) {
+            Game.buyGenerators(state, genId, max);
+            updateDisplay();
+          }
+        });
+      })(gen.id);
+
+      buyRow.appendChild(btn1);
+      buyRow.appendChild(btn10);
+      buyRow.appendChild(btnMax);
+
       btn.appendChild(nameEl);
       btn.appendChild(descEl);
       btn.appendChild(metaRow);
+      btn.appendChild(buyRow);
 
       (function (genId) {
-        btn.addEventListener('click', function () {
-          if (Game.buyGenerator(state, genId)) {
-            updateDisplay();
+        btn.addEventListener('click', function (e) {
+          if (e.target === btn) {
+            if (Game.buyGenerator(state, genId)) {
+              updateDisplay();
+            }
           }
         });
       })(gen.id);

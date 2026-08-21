@@ -226,6 +226,46 @@ const Game = (function () {
     return gained;
   }
 
+  function getMaxAffordable(state, id) {
+    let gen = null;
+    for (let i = 0; i < GENERATORS.length; i++) {
+      if (GENERATORS[i].id === id) {
+        gen = GENERATORS[i];
+        break;
+      }
+    }
+    if (!gen) return 0;
+    if (typeof state.brains !== 'number' || !isFinite(state.brains) || state.brains < 0) return 0;
+
+    const count = state.generators[id] || 0;
+    const baseCost = gen.baseCost;
+    const growth = gen.costGrowth;
+    const budget = state.brains;
+
+    if (growth <= 1) {
+      if (baseCost <= 0) return Infinity;
+      return Math.floor(budget / baseCost);
+    }
+
+    const firstCost = baseCost * Math.pow(growth, count);
+    if (firstCost > budget) return 0;
+
+    const n = Math.floor(Math.log(budget * (growth - 1) / firstCost + 1) / Math.log(growth));
+    return Math.max(0, n);
+  }
+
+  function buyGenerators(state, id, count) {
+    if (typeof count !== 'number' || !isFinite(count) || count <= 0) return 0;
+    const maxAffordable = getMaxAffordable(state, id);
+    const toBuy = Math.min(Math.floor(count), maxAffordable);
+    if (toBuy <= 0) return 0;
+    for (let i = 0; i < toBuy; i++) {
+      if (!buyGenerator(state, id)) break;
+    }
+    const bought = (state.generators[id] || 0) - (state.generators[id] || 0);
+    return toBuy;
+  }
+
   return {
     GENERATORS: GENERATORS,
     UPGRADES: UPGRADES,
@@ -240,7 +280,9 @@ const Game = (function () {
     formatNumber: formatNumber,
     serialize: serialize,
     deserialize: deserialize,
-    applyOfflineProgress: applyOfflineProgress
+    applyOfflineProgress: applyOfflineProgress,
+    getMaxAffordable: getMaxAffordable,
+    buyGenerators: buyGenerators
   };
 })();
 
