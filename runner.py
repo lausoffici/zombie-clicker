@@ -122,10 +122,6 @@ def call_ollama(model, messages, num_ctx):
         "model": model,
         "messages": messages,
         "stream": False,
-        # num_ctx: el default de Ollama es 4096 y el prompt solo ya lo llena,
-        # lo que truncaba las respuestas (done_reason: length, content vacio).
-        # think: false porque el modo thinking gastaba todo el presupuesto de
-        # tokens en razonamiento y devolvia content vacio.
         "think": False,
         "options": {"temperature": 0.2, "num_ctx": num_ctx},
     }
@@ -137,6 +133,35 @@ def call_ollama(model, messages, num_ctx):
     with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT) as r:
         resp = json.load(r)
     return resp["message"]["content"]
+
+
+def is_connection_error(e):
+    text = str(e).lower()
+    return isinstance(e, (urllib.error.URLError, OSError)) or \
+           "remote end closed" in text or \
+           "connection refused" in text or \
+           "denegó" in text or \
+           "no se puede establecer" in text
+
+
+def call_ollama_with_retry(model, messages, num_ctx, max_conn_retries=30):
+    for conn_try in range(1, max_conn_retries + 1):
+        try:
+            return call_ollama(model, messages, num_ctx)
+        except (urllib.error.URLError, OSError, TimeoutError) as e:
+            if isinstance(e, TimeoutError) and not is_connection_error(e):
+                raise
+            if not is_connection_error(e):
+                raise
+            logging.warning("Ollama no responde (intento de conexion %d/%d): %s",
+                            conn_try, max_conn_retries, e)
+            if conn_try >= max_conn_retries:
+                raise
+            time.sleep(min(conn_try * 5, 60))
+        except KeyError:
+            # respuesta inesperada del modelo, no es problema de conexion
+            raise
+    raise urllib.error.URLError("No se pudo conectar a Ollama tras varios reintentos")
 
 
 def build_context():
@@ -221,7 +246,7 @@ def run_task(model, num_ctx, data, task, state):
         logging.info("  intento %d/%d (llamando a %s)...", attempt, MAX_ATTEMPTS, model)
         started = time.time()
         try:
-            response = call_ollama(model, messages, num_ctx)
+            response = call_ollama_with_retry(model, messages, num_ctx)
         except (urllib.error.URLError, OSError, TimeoutError, KeyError) as e:
             last_error = f"error llamando a Ollama: {e}"
             logging.error("  %s", last_error)
