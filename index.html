@@ -64,7 +64,36 @@
               </div>
             </div>
             <button id="zombie-btn" aria-label="Ganar cerebro">
-              <span id="zombie-icon">🧟</span>
+              <span id="zombie-icon">
+                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="zombie-svg" aria-hidden="true">
+                  <defs>
+                    <radialGradient id="zglow" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stop-color="#9aff4d" stop-opacity="0.35"/>
+                      <stop offset="100%" stop-color="#9aff4d" stop-opacity="0"/>
+                    </radialGradient>
+                    <filter id="zshadow" x="-20%" y="-20%" width="140%" height="140%">
+                      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.6"/>
+                    </filter>
+                  </defs>
+                  <circle cx="100" cy="105" r="78" fill="url(#zglow)"/>
+                  <g filter="url(#zshadow)">
+                    <ellipse cx="100" cy="100" rx="70" ry="75" fill="#5a6b4f"/>
+                    <ellipse cx="100" cy="95" rx="60" ry="55" fill="#6e7f62"/>
+                    <path d="M55 75 Q70 60 85 75" fill="none" stroke="#3a4a32" stroke-width="4" stroke-linecap="round"/>
+                    <path d="M115 75 Q130 60 145 75" fill="none" stroke="#3a4a32" stroke-width="4" stroke-linecap="round"/>
+                    <circle cx="72" cy="92" r="14" fill="#1a1f16"/>
+                    <circle cx="128" cy="92" r="14" fill="#1a1f16"/>
+                    <circle cx="75" cy="90" r="5" fill="#9aff4d" class="zombie-eye-glow"/>
+                    <circle cx="131" cy="90" r="5" fill="#9aff4d" class="zombie-eye-glow"/>
+                    <path d="M75 130 Q100 155 125 130" fill="#2a2018"/>
+                    <path d="M80 132 L85 142 L90 132 L95 142 L100 132 L105 142 L110 132 L115 142 L120 132" fill="#eef2ea"/>
+                    <path d="M40 100 L55 95 L40 110" fill="#4a5a40"/>
+                    <path d="M160 100 L145 95 L160 110" fill="#4a5a40"/>
+                    <path d="M50 140 Q45 160 60 165" fill="none" stroke="#3a4a32" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M150 140 Q155 160 140 165" fill="none" stroke="#3a4a32" stroke-width="3" stroke-linecap="round"/>
+                  </g>
+                </svg>
+              </span>
             </button>
             <div id="clicker-info">
               <div id="click-value">+1 por click</div>
