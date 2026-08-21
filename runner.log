@@ -578,3 +578,22 @@ TypeError: Game.click is not a function
 2026-08-21 06:21:11,575 [INFO]   respuesta recibida en 418s (18366 chars)
 2026-08-21 06:21:11,577 [INFO]   escrito: ui.js (18339 bytes)
 2026-08-21 06:21:11,684 [INFO]   verificacion OK
+2026-08-21 06:21:11,787 [INFO]   commit: v2-18-auto-click-upgrade: Upgrade de auto-click
+2026-08-21 06:21:11,788 [INFO] === Tarea v2-19-offline-cap-prestige: Cap de offline mejorado por prestige ===
+2026-08-21 06:21:11,789 [INFO]   intento 1/3 (llamando a qwen3.8:27b)...
+2026-08-21 06:28:19,580 [INFO]   respuesta recibida en 428s (15655 chars)
+2026-08-21 06:28:19,581 [INFO]   escrito: game.js (15618 bytes)
+2026-08-21 06:28:19,715 [WARNING]   verificacion FALLO: Todos los tests pasaron
+2026-08-21 06:28:19,715 [INFO]   intento 2/3 (llamando a qwen3.8:27b)...
+2026-08-21 06:28:52,139 [INFO]   respuesta recibida en 32s (549 chars)
+2026-08-21 06:28:52,140 [WARNING]   la respuesta no contenia bloques <<<FILE: ...>>> validos
+2026-08-21 06:28:52,140 [INFO]   intento 3/3 (llamando a qwen3.8:27b)...
+2026-08-21 06:34:54,472 [INFO]   respuesta recibida en 362s (15266 chars)
+2026-08-21 06:34:54,473 [INFO]   escrito: game.js (15229 bytes)
+2026-08-21 06:34:54,602 [WARNING]   verificacion FALLO: Todos los tests pasaron
+2026-08-21 06:34:54,602 [ERROR]   tarea v2-19-offline-cap-prestige BLOQUEADA tras 3 intentos
+2026-08-21 06:34:54,603 [INFO] === Tarea v2-20-visual-polish-v2: Pulido visual v2: tabs, eventos, partículas ===
+2026-08-21 06:34:54,604 [INFO]   intento 1/3 (llamando a qwen3.8:27b)...
+2026-08-21 06:41:17,840 [INFO]   respuesta recibida en 383s (12976 chars)
+2026-08-21 06:41:17,841 [INFO]   escrito: style.css (8551 bytes)
+2026-08-21 06:41:17,959 [INFO]   verificacion OK

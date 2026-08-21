@@ -1,399 +1,263 @@
-(function () {
-  "use strict";
+'use strict';
 
+const Game = (function () {
   const GENERATORS = [
-    { id: "g1", name: "Zombi Podrido", icon: "🧟", baseCost: 15, baseBps: 0.5, desc: "Un zombi básico que muerde y suelta un poco de cerebro." },
-    { id: "g2", name: "Zombi Cojeante", icon: "🧟‍♂️", baseCost: 100, baseBps: 2, desc: "Camina lento pero produce más." },
-    { id: "g3", name: "Zombi Corredor", icon: "🏃", baseCost: 1100, baseBps: 8, desc: "Rápido y hambriento de materia gris." },
-    { id: "g4", name: "Zombi Bruto", icon: "💪", baseCost: 12000, baseBps: 47, desc: "Fuerte como una roca, produce montones." },
-    { id: "g5", name: "Zombi Escupidero", icon: "🤮", baseCost: 130000, baseBps: 260, desc: "Escupe ácido que disuelve cerebros." },
-    { id: "g6", name: "Zombi Portador", icon: "👹", baseCost: 1.4e6, baseBps: 1400, desc: "Arrastra hordas enteras de zombis." },
-    { id: "g7", name: "Zombi Leviatán", icon: "🐲", baseCost: 2e7, baseBps: 7800, desc: "Un coloso devorador de ciudades." },
-    { id: "g8", name: "Apocalipsis", icon: "☢️", baseCost: 3.3e8, baseBps: 44000, desc: "El fin del mundo, literalmente." },
-    { id: "g9", name: "Zombi Espectral", icon: "👻", baseCost: 5e9, baseBps: 260000, desc: "Un fantasma hambriento que atraviesa la materia." },
-    { id: "g10", name: "Dios Zombi", icon: "🌌", baseCost: 7.5e10, baseBps: 1.6e6, desc: "La entidad final que devora universos." }
+    { id: 'superviviente', name: 'Superviviente', baseCost: 15, bps: 0.1, growth: 1.15 },
+    { id: 'zombi', name: 'Zombi', baseCost: 100, bps: 1, growth: 1.15 },
+    { id: 'necromante', name: 'Necromante', baseCost: 1100, bps: 8, growth: 1.15 },
+    { id: 'templo', name: 'Templo Oscuro', baseCost: 12000, bps: 47, growth: 1.15 },
+    { id: 'portal', name: 'Portal Infernal', baseCost: 130000, bps: 260, growth: 1.15 },
+    { id: 'cerebro', name: 'Cerebro Central', baseCost: 1400000, bps: 1400, growth: 1.15 }
   ];
 
   const UPGRADES = [
-    { id: "u1", name: "Manos Ágiles", icon: "✋", cost: 100, type: "click", multiplier: 2, desc: "Duplica el cerebro por click." },
-    { id: "u2", name: "Puños de Acero", icon: "🥊", cost: 1000, type: "click", multiplier: 2, desc: "Duplica el cerebro por click otra vez." },
-    { id: "u3", name: "Guantes de Espino", icon: "🧤", cost: 10000, type: "click", multiplier: 3, desc: "x3 cerebro por click." },
-    { id: "u4", name: "Dientes Filosos", icon: "🦷", cost: 500, type: "gen", gen: "g1", multiplier: 2, desc: "Duplica producción de Zombis Podridos." },
-    { id: "u5", name: "Cojeras Rápidas", icon: "🦵", cost: 2500, type: "gen", gen: "g2", multiplier: 2, desc: "Duplica producción de Zombis Cojeantes." },
-    { id: "u6", name: "Adrenalina", icon: "⚡", cost: 25000, type: "gen", gen: "g3", multiplier: 2, desc: "Duplica producción de Zombis Corredores." },
-    { id: "u7", name: "Músculos Infinitos", icon: "🏋️", cost: 250000, type: "gen", gen: "g4", multiplier: 2, desc: "Duplica producción de Zombis Brutos." },
-    { id: "u8", name: "Ácido Concentrado", icon: "🧪", cost: 2.5e6, type: "gen", gen: "g5", multiplier: 2, desc: "Duplica producción de Zombis Escupideros." },
-    { id: "u9", name: "Horda Organizada", icon: "📋", cost: 5e4, type: "global", multiplier: 1.5, desc: "x1.5 a TODA la producción." },
-    { id: "u10", name: "Culto Zombi", icon: "🕯️", cost: 5e6, type: "global", multiplier: 2, desc: "x2 a TODA la producción." }
+    { id: 'dedos-podridos', name: 'Dedos Podridos', cost: 100, type: 'click', multiplier: 2, desc: 'Duplica el valor de cada click' },
+    { id: 'uñas-afiladas', name: 'Uñas Afiladas', cost: 500, type: 'click', multiplier: 2, desc: 'Duplica el valor de cada click' },
+    { id: 'manada', name: 'Manada', cost: 1000, type: 'generator', generatorId: 'superviviente', multiplier: 2, desc: 'Duplica la produccion de Supervivientes' },
+    { id: 'sangre', name: 'Sangre Fria', cost: 5000, type: 'generator', generatorId: 'zombi', multiplier: 2, desc: 'Duplica la produccion de Zombis' },
+    { id: 'ritual', name: 'Ritual Ancestral', cost: 25000, type: 'generator', generatorId: 'necromante', multiplier: 2, desc: 'Duplica la produccion de Necromantes' },
+    { id: 'maldicion', name: 'Maldicion Eterna', cost: 100000, type: 'click', multiplier: 3, desc: 'Triplica el valor de cada click' },
+    { id: 'reino', name: 'Reino de los Muertos', cost: 500000, type: 'global', multiplier: 1.5, desc: 'Aumenta toda la produccion en 50%' }
   ];
 
   const ACHIEVEMENTS = [
-    { id: "a1", name: "Primer Bocado", desc: "Haz 10 clicks", type: "clicks", threshold: 10, bonus: 0.02 },
-    { id: "a2", name: "Manos Hambrientas", desc: "Haz 100 clicks", type: "clicks", threshold: 100, bonus: 0.02 },
-    { id: "a3", name: "Cerebros en Masa", desc: "Gana 1,000 cerebros totales", type: "totalBrains", threshold: 1000, bonus: 0.02 },
-    { id: "a4", name: "Acumulador", desc: "Gana 100,000 cerebros totales", type: "totalBrains", threshold: 100000, bonus: 0.02 },
-    { id: "a5", name: "Horda Pequeña", desc: "Ten 10 generadores", type: "generatorCount", threshold: 10, bonus: 0.02 },
-    { id: "a6", name: "Ejército Zombi", desc: "Ten 50 generadores", type: "generatorCount", threshold: 50, bonus: 0.02 },
-    { id: "a7", name: "Coleccionista", desc: "Ten 5 tipos de generadores", type: "generators", threshold: 5, bonus: 0.02 },
-    { id: "a8", name: "Señor de la Horda", desc: "Ten 100 generadores", type: "generatorCount", threshold: 100, bonus: 0.02 }
+    { id: 'primer-cerebro', name: 'Primer Cerebro', desc: 'Gana 1 cerebro', check: (s) => s.totalBrainsEarned >= 1, bonus: 1.05 },
+    { id: 'cerebros-100', name: 'Cerebros x100', desc: 'Gana 100 cerebros', check: (s) => s.totalBrainsEarned >= 100, bonus: 1.1 },
+    { id: 'cerebros-10k', name: 'Cerebros x10K', desc: 'Gana 10,000 cerebros', check: (s) => s.totalBrainsEarned >= 10000, bonus: 1.15 },
+    { id: 'cerebros-1m', name: 'Cerebros x1M', desc: 'Gana 1,000,000 cerebros', check: (s) => s.totalBrainsEarned >= 1000000, bonus: 1.25 },
+    { id: 'clicks-100', name: 'Clicks x100', desc: 'Haz 100 clicks', check: (s) => s.totalClicks >= 100, bonus: 1.05 },
+    { id: 'clicks-1000', name: 'Clicks x1000', desc: 'Haz 1,000 clicks', check: (s) => s.totalClicks >= 1000, bonus: 1.1 },
+    { id: 'generators-10', name: 'Ejercito x10', desc: 'Tienes 10 generadores', check: (s) => Object.values(s.generators).reduce((a, b) => a + b, 0) >= 10, bonus: 1.1 },
+    { id: 'generators-100', name: 'Ejercito x100', desc: 'Tienes 100 generadores', check: (s) => Object.values(s.generators).reduce((a, b) => a + b, 0) >= 100, bonus: 1.15 },
+    { id: 'upgrades-3', name: 'Mejoras x3', desc: 'Compra 3 mejoras', check: (s) => s.upgrades.length >= 3, bonus: 1.1 },
+    { id: 'upgrades-7', name: 'Mejoras x7', desc: 'Compra 7 mejoras', check: (s) => s.upgrades.length >= 7, bonus: 1.2 }
   ];
-
-  const PRESTIGE_UPGRADES = [
-    { id: "p1", name: "Alma de Fuego", desc: "+10% BPS", cost: 1, effect: "bpsBoost" },
-    { id: "p2", name: "Alma de Gelo", desc: "+20% click", cost: 2, effect: "clickBoost" },
-    { id: "p3", name: "Alma de Vida", desc: "+100 cerebros iniciales", cost: 3, effect: "soulStart" },
-    { id: "p4", name: "Alma de Tiempo", desc: "+50% offline cap", cost: 5, effect: "offlineBoost" },
-    { id: "p5", name: "Alma de Avaricia", desc: "-10% costo generadores", cost: 8, effect: "cheaperGenerators" },
-    { id: "p6", name: "Alma de Automatización", desc: "Click automático cada 2s", cost: 15, effect: "autoClick" }
-  ];
-
-  const BASE_OFFLINE_CAP_SECONDS = 8 * 3600; // 28800s
 
   function createState() {
+    const generators = {};
+    for (const g of GENERATORS) generators[g.id] = 0;
     return {
       brains: 0,
-      totalClicks: 0,
       totalBrainsEarned: 0,
-      bestBps: 0,
-      generators: {},
+      totalClicks: 0,
+      generators: generators,
       upgrades: [],
       achievements: [],
-      prestige: {
-        souls: 0,
-        totalSoulsEarned: 0,
-        upgrades: []
-      },
-      startedAt: Date.now(),
       lastSaved: Date.now()
     };
   }
 
-  function formatNumber(n) {
-    if (n < 1000) return Math.floor(n).toString();
-    if (n < 1e6) return (n / 1e3).toFixed(1) + "K";
-    if (n < 1e9) return (n / 1e6).toFixed(1) + "M";
-    if (n < 1e12) return (n / 1e9).toFixed(1) + "B";
-    return (n / 1e12).toFixed(1) + "T";
+  function getClickValue(s) {
+    let value = 1;
+    for (const up of UPGRADES) {
+      if (up.type === 'click' && s.upgrades.indexOf(up.id) !== -1) {
+        value *= up.multiplier;
+      }
+    }
+    return value;
   }
 
-  function getGlobalMultiplier(state) {
+  function getGeneratorCost(s, genId) {
+    const gen = GENERATORS.find((g) => g.id === genId);
+    if (!gen) return Infinity;
+    const count = s.generators[genId] || 0;
+    return Math.ceil(gen.baseCost * Math.pow(gen.growth, count));
+  }
+
+  function getGeneratorBps(s, genId) {
+    const gen = GENERATORS.find((g) => g.id === genId);
+    if (!gen) return 0;
+    let bps = gen.bps;
+    for (const up of UPGRADES) {
+      if (up.type === 'generator' && up.generatorId === genId && s.upgrades.indexOf(up.id) !== -1) {
+        bps *= up.multiplier;
+      }
+    }
+    return bps;
+  }
+
+  function getGlobalMultiplier(s) {
     let mult = 1;
-    mult += (state.prestige ? state.prestige.souls : 0) * 0.05;
-    const achCount = state.achievements ? state.achievements.length : 0;
-    mult += achCount * 0.02;
-    if (state.prestige && state.prestige.upgrades) {
-      state.prestige.upgrades.forEach(function (puId) {
-        const pu = PRESTIGE_UPGRADES.find(function (p) { return p.id === puId; });
-        if (pu) {
-          if (pu.effect === "bpsBoost") mult += 0.10;
-          if (pu.effect === "clickBoost") mult += 0.20;
-        }
-      });
+    for (const up of UPGRADES) {
+      if (up.type === 'global' && s.upgrades.indexOf(up.id) !== -1) {
+        mult *= up.multiplier;
+      }
+    }
+    for (const achId of s.achievements) {
+      const ach = ACHIEVEMENTS.find((a) => a.id === achId);
+      if (ach) mult *= ach.bonus;
     }
     return mult;
   }
 
-  function getClickValue(state) {
-    let power = 1;
-    UPGRADES.forEach(function (u) {
-      if (state.upgrades.indexOf(u.id) !== -1 && u.type === "click") {
-        power *= u.multiplier;
-      }
-    });
-    return power * getGlobalMultiplier(state);
-  }
-
-  function getGeneratorCost(state, id) {
-    const gen = GENERATORS.find(function (g) { return g.id === id; });
-    if (!gen) return Infinity;
-    const count = state.generators[id] || 0;
-    let cost = gen.baseCost * Math.pow(1.15, count);
-    if (state.prestige && state.prestige.upgrades) {
-      const cheaperCount = state.prestige.upgrades.filter(function (puId) {
-        const pu = PRESTIGE_UPGRADES.find(function (p) { return p.id === puId; });
-        return pu && pu.effect === "cheaperGenerators";
-      }).length;
-      if (cheaperCount > 0) {
-        cost *= Math.pow(0.9, cheaperCount);
-      }
-    }
-    return Math.floor(cost);
-  }
-
-  function getBrainsPerSecond(state) {
+  function getBrainsPerSecond(s) {
     let total = 0;
-    GENERATORS.forEach(function (gen) {
-      const count = state.generators[gen.id] || 0;
-      if (count === 0) return;
-      let mult = 1;
-      UPGRADES.forEach(function (u) {
-        if (state.upgrades.indexOf(u.id) !== -1 && u.type === "gen" && u.gen === gen.id) {
-          mult *= u.multiplier;
-        }
-      });
-      total += count * gen.baseBps * mult;
-    });
-    UPGRADES.forEach(function (u) {
-      if (state.upgrades.indexOf(u.id) !== -1 && u.type === "global") {
-        total *= u.multiplier;
-      }
-    });
-    total *= getGlobalMultiplier(state);
-    return total;
-  }
-
-  function click(state) {
-    const value = getClickValue(state);
-    state.brains += value;
-    state.totalBrainsEarned += value;
-    state.totalClicks += 1;
-    return value;
-  }
-
-  function buyGenerator(state, id) {
-    const gen = GENERATORS.find(function (g) { return g.id === id; });
-    if (!gen) return false;
-    const cost = getGeneratorCost(state, id);
-    if (state.brains >= cost) {
-      state.brains -= cost;
-      state.generators[id] = (state.generators[id] || 0) + 1;
-      return true;
+    for (const g of GENERATORS) {
+      total += (s.generators[g.id] || 0) * getGeneratorBps(s, g.id);
     }
-    return false;
+    return total * getGlobalMultiplier(s);
   }
 
-  function buyGenerators(state, id, count) {
-    if (!count || count <= 0) return 0;
+  function click(s) {
+    const value = getClickValue(s);
+    s.brains += value;
+    s.totalBrainsEarned += value;
+    s.totalClicks += 1;
+    checkAchievements(s);
+  }
+
+  function buyGenerator(s, genId) {
+    const cost = getGeneratorCost(s, genId);
+    if (s.brains < cost) return false;
+    s.brains -= cost;
+    s.generators[genId] = (s.generators[genId] || 0) + 1;
+    checkAchievements(s);
+    return true;
+  }
+
+  function buyGenerators(s, genId, count) {
+    if (count <= 0) return 0;
     let bought = 0;
     for (let i = 0; i < count; i++) {
-      if (!buyGenerator(state, id)) break;
+      const cost = getGeneratorCost(s, genId);
+      if (s.brains < cost) break;
+      s.brains -= cost;
+      s.generators[genId] = (s.generators[genId] || 0) + 1;
       bought++;
     }
+    if (bought > 0) checkAchievements(s);
     return bought;
   }
 
-  function getMaxAffordable(state, id) {
-    const gen = GENERATORS.find(function (g) { return g.id === id; });
+  function getMaxAffordable(s, genId) {
+    let count = 0;
+    let brains = s.brains;
+    let genCount = s.generators[genId] || 0;
+    const gen = GENERATORS.find((g) => g.id === genId);
     if (!gen) return 0;
-    let count = state.generators[id] || 0;
-    let affordable = 0;
-    let cost = getGeneratorCost(state, id);
-    let brains = state.brains;
-    while (brains >= cost) {
+    while (true) {
+      const cost = Math.ceil(gen.baseCost * Math.pow(gen.growth, genCount));
+      if (brains < cost) break;
       brains -= cost;
+      genCount++;
       count++;
-      affordable++;
-      cost = gen.baseCost * Math.pow(1.15, count);
-      if (state.prestige && state.prestige.upgrades) {
-        const cheaperCount = state.prestige.upgrades.filter(function (puId) {
-          const pu = PRESTIGE_UPGRADES.find(function (p) { return p.id === puId; });
-          return pu && pu.effect === "cheaperGenerators";
-        }).length;
-        if (cheaperCount > 0) cost *= Math.pow(0.9, cheaperCount);
-      }
-      cost = Math.floor(cost);
     }
-    return affordable;
+    return count;
   }
 
-  function buyUpgrade(state, id) {
-    const upg = UPGRADES.find(function (u) { return u.id === id; });
-    if (!upg || state.upgrades.indexOf(id) !== -1) return false;
-    if (state.brains >= upg.cost) {
-      state.brains -= upg.cost;
-      state.upgrades.push(id);
-      return true;
-    }
-    return false;
+  function buyUpgrade(s, upId) {
+    const up = UPGRADES.find((u) => u.id === upId);
+    if (!up) return false;
+    if (s.upgrades.indexOf(upId) !== -1) return false;
+    if (s.brains < up.cost) return false;
+    s.brains -= up.cost;
+    s.upgrades.push(upId);
+    checkAchievements(s);
+    return true;
   }
 
-  function tick(state, dtSeconds) {
-    if (dtSeconds <= 0) return;
-    const bps = getBrainsPerSecond(state);
-    if (bps > 0) {
-      const gained = bps * dtSeconds;
-      state.brains += gained;
-      state.totalBrainsEarned += gained;
-      if (bps > state.bestBps) state.bestBps = bps;
-    }
+  function tick(s, dt) {
+    if (dt <= 0) return;
+    const gained = getBrainsPerSecond(s) * dt;
+    s.brains += gained;
+    s.totalBrainsEarned += gained;
+    checkAchievements(s);
   }
 
-  function getPrestigeGain(state) {
-    const total = state.totalBrainsEarned || 0;
-    if (total < 1000000) return 0;
-    return Math.floor(Math.sqrt(total / 1000000));
-  }
-
-  function prestige(state) {
-    const gain = getPrestigeGain(state);
-    const newState = createState();
-    newState.achievements = state.achievements ? state.achievements.slice() : [];
-    newState.prestige.souls = (state.prestige ? state.prestige.souls : 0) + gain;
-    newState.prestige.totalSoulsEarned = (state.prestige ? state.prestige.totalSoulsEarned : 0) + gain;
-    newState.prestige.upgrades = state.prestige ? state.prestige.upgrades.slice() : [];
-    newState.startedAt = state.startedAt || Date.now();
-    if (newState.prestige.upgrades) {
-      const soulStartCount = newState.prestige.upgrades.filter(function (puId) {
-        const pu = PRESTIGE_UPGRADES.find(function (p) { return p.id === puId; });
-        return pu && pu.effect === "soulStart";
-      }).length;
-      if (soulStartCount > 0) {
-        newState.brains = soulStartCount * 100;
-        newState.totalBrainsEarned = soulStartCount * 100;
+  function checkAchievements(s) {
+    let changed = false;
+    for (const ach of ACHIEVEMENTS) {
+      if (s.achievements.indexOf(ach.id) === -1 && ach.check(s)) {
+        s.achievements.push(ach.id);
+        changed = true;
       }
     }
-    return newState;
+    return changed;
   }
 
-  function buyPrestigeUpgrade(state, id) {
-    const pu = PRESTIGE_UPGRADES.find(function (p) { return p.id === id; });
-    if (!pu) return false;
-    if (state.prestige.upgrades.indexOf(id) !== -1) return false;
-    if (state.prestige.souls >= pu.cost) {
-      state.prestige.souls -= pu.cost;
-      state.prestige.upgrades.push(id);
-      return true;
+  function formatNumber(n) {
+    if (n === undefined || n === null || isNaN(n)) return '0';
+    if (n < 0) return '-' + formatNumber(-n);
+    if (n < 1000) {
+      if (n === Math.floor(n)) return String(n);
+      return n.toFixed(1);
     }
-    return false;
+    if (n < 1000000) {
+      return (n / 1000).toFixed(1) + 'K';
+    }
+    if (n < 1000000000) {
+      return (n / 1000000).toFixed(1) + 'M';
+    }
+    if (n < 1000000000000) {
+      return (n / 1000000000).toFixed(1) + 'B';
+    }
+    return (n / 1000000000000).toFixed(1) + 'T';
   }
 
-  function checkAchievements(state) {
-    const newlyUnlocked = [];
-    ACHIEVEMENTS.forEach(function (ach) {
-      if (state.achievements.indexOf(ach.id) !== -1) return;
-      let met = false;
-      if (ach.type === "clicks") {
-        met = state.totalClicks >= ach.threshold;
-      } else if (ach.type === "totalBrains") {
-        met = state.totalBrainsEarned >= ach.threshold;
-      } else if (ach.type === "generatorCount") {
-        let total = 0;
-        Object.keys(state.generators).forEach(function (k) { total += state.generators[k]; });
-        met = total >= ach.threshold;
-      } else if (ach.type === "generators") {
-        let types = 0;
-        Object.keys(state.generators).forEach(function (k) { if (state.generators[k] > 0) types++; });
-        met = types >= ach.threshold;
-      }
-      if (met) {
-        state.achievements.push(ach.id);
-        newlyUnlocked.push(ach.id);
-      }
-    });
-    return newlyUnlocked;
-  }
-
-  function getStats(state) {
-    let generatorsOwned = 0;
-    Object.keys(state.generators).forEach(function (k) { generatorsOwned += state.generators[k]; });
-    const elapsedSeconds = (Date.now() - (state.startedAt || Date.now())) / 1000;
-    return {
-      totalBrainsEarned: state.totalBrainsEarned || 0,
-      totalClicks: state.totalClicks || 0,
-      bestBps: state.bestBps || 0,
-      elapsedSeconds: elapsedSeconds,
-      generatorsOwned: generatorsOwned
-    };
-  }
-
-  function serialize(state) {
-    return JSON.stringify(state);
+  function serialize(s) {
+    return JSON.stringify(s);
   }
 
   function deserialize(text) {
     try {
-      const parsed = JSON.parse(text);
+      const obj = JSON.parse(text);
+      if (typeof obj !== 'object' || obj === null) return createState();
       const base = createState();
-      const result = Object.assign(base, parsed);
-      if (!result.prestige) result.prestige = { souls: 0, totalSoulsEarned: 0, upgrades: [] };
-      if (!Array.isArray(result.prestige.upgrades)) result.prestige.upgrades = [];
-      if (!Array.isArray(result.upgrades)) result.upgrades = [];
-      if (!Array.isArray(result.achievements)) result.achievements = [];
-      if (!result.generators) result.generators = {};
-      if (!result.startedAt) result.startedAt = Date.now();
-      return result;
+      base.brains = typeof obj.brains === 'number' ? obj.brains : 0;
+      base.totalBrainsEarned = typeof obj.totalBrainsEarned === 'number' ? obj.totalBrainsEarned : 0;
+      base.totalClicks = typeof obj.totalClicks === 'number' ? obj.totalClicks : 0;
+      if (obj.generators && typeof obj.generators === 'object') {
+        for (const g of GENERATORS) {
+          base.generators[g.id] = typeof obj.generators[g.id] === 'number' ? obj.generators[g.id] : 0;
+        }
+      }
+      if (Array.isArray(obj.upgrades)) {
+        base.upgrades = obj.upgrades.filter((id) => typeof id === 'string');
+      }
+      if (Array.isArray(obj.achievements)) {
+        base.achievements = obj.achievements.filter((id) => typeof id === 'string');
+      }
+      base.lastSaved = typeof obj.lastSaved === 'number' ? obj.lastSaved : Date.now();
+      return base;
     } catch (e) {
       return createState();
     }
   }
 
-  function getOfflineCapSeconds(state) {
-    let cap = BASE_OFFLINE_CAP_SECONDS;
-    if (state.prestige && state.prestige.upgrades) {
-      const offlineBoostCount = state.prestige.upgrades.filter(function (puId) {
-        const pu = PRESTIGE_UPGRADES.find(function (p) { return p.id === puId; });
-        return pu && pu.effect === "offlineBoost";
-      }).length;
-      if (offlineBoostCount > 0) {
-        cap += cap * 0.5 * offlineBoostCount;
-      }
-    }
-    return cap;
-  }
-
-  function applyOfflineProgress(state, elapsedSeconds) {
-    if (elapsedSeconds <= 0) return 0;
-    const cap = getOfflineCapSeconds(state);
-    const effective = Math.min(elapsedSeconds, cap);
-    const bps = getBrainsPerSecond(state);
-    const gained = bps * effective;
-    state.brains += gained;
-    state.totalBrainsEarned += gained;
+  function applyOfflineProgress(s, elapsedSeconds) {
+    if (elapsedSeconds === undefined || elapsedSeconds === null || isNaN(elapsedSeconds) || elapsedSeconds <= 0) return 0;
+    const bps = getBrainsPerSecond(s);
+    const gained = bps * elapsedSeconds;
+    s.brains += gained;
+    s.totalBrainsEarned += gained;
+    checkAchievements(s);
     return gained;
   }
 
-  function exportSave(state) {
-    const json = JSON.stringify(state);
-    if (typeof btoa !== "undefined") {
-      return btoa(unescape(encodeURIComponent(json)));
-    }
-    return json;
-  }
-
-  function importSave(text) {
-    try {
-      let json;
-      if (typeof atob !== "undefined") {
-        json = decodeURIComponent(escape(atob(text)));
-      } else {
-        json = text;
-      }
-      return deserialize(json);
-    } catch (e) {
-      return createState();
-    }
-  }
-
-  const Game = {
-    GENERATORS,
-    UPGRADES,
-    ACHIEVEMENTS,
-    PRESTIGE_UPGRADES,
-    createState,
-    click,
-    buyGenerator,
-    buyGenerators,
-    getMaxAffordable,
-    buyUpgrade,
-    tick,
-    getBrainsPerSecond,
-    getClickValue,
-    getGeneratorCost,
-    getGlobalMultiplier,
-    getPrestigeGain,
-    prestige,
-    buyPrestigeUpgrade,
-    checkAchievements,
-    getStats,
-    formatNumber,
-    serialize,
-    deserialize,
-    getOfflineCapSeconds,
-    applyOfflineProgress,
-    exportSave,
-    importSave
+  return {
+    GENERATORS: GENERATORS,
+    UPGRADES: UPGRADES,
+    ACHIEVEMENTS: ACHIEVEMENTS,
+    createState: createState,
+    getClickValue: getClickValue,
+    getGeneratorCost: getGeneratorCost,
+    getGeneratorBps: getGeneratorBps,
+    getGlobalMultiplier: getGlobalMultiplier,
+    getBrainsPerSecond: getBrainsPerSecond,
+    click: click,
+    buyGenerator: buyGenerator,
+    buyGenerators: buyGenerators,
+    getMaxAffordable: getMaxAffordable,
+    buyUpgrade: buyUpgrade,
+    tick: tick,
+    checkAchievements: checkAchievements,
+    formatNumber: formatNumber,
+    serialize: serialize,
+    deserialize: deserialize,
+    applyOfflineProgress: applyOfflineProgress
   };
-
-  if (typeof module !== "undefined") module.exports = Game;
-  if (typeof window !== "undefined") window.Game = Game;
 })();
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = Game;
+}
