@@ -872,7 +872,7 @@ body {
   max-width: 320px;
 }
 .toast {
-  background: var(--bg-800);
+  background: linear-gradient(145deg, var(--bg-800), var(--bg-700));
   border: 1px solid var(--border);
   border-left: 4px solid var(--green-500);
   color: var(--text-primary);
@@ -884,8 +884,8 @@ body {
   position: relative;
   overflow: hidden;
 }
-.toast.success { border-left-color: var(--green-500); }
-.toast.warn { border-left-color: var(--gold-500); }
+.toast.success { border-left-color: var(--green-500); box-shadow: 0 0 16px var(--green-glow-soft); }
+.toast.warn { border-left-color: var(--gold-500); box-shadow: 0 0 16px var(--gold-glow); }
 .toast.info { border-left-color: var(--text-secondary); }
 .toast::after {
   content: "";
@@ -944,7 +944,6 @@ body {
 /* Event items */
 .event-item {
   position: fixed;
-  font-size: 64px;
   cursor: pointer;
   user-select: none;
   z-index: 90;
@@ -954,9 +953,11 @@ body {
 .event-item.visible { display: block; }
 
 #golden-brain {
-  filter: drop-shadow(0 0 16px rgba(241, 196, 15, 0.8));
+  width: 72px;
+  height: 72px;
   animation: goldenFloat 8s ease-in-out forwards, goldenPulse 1.2s ease-in-out infinite;
 }
+#golden-brain svg { width: 100%; height: 100%; }
 @keyframes goldenFloat {
   0% { transform: translateY(0) scale(0) rotate(-20deg); opacity: 0; }
   10% { transform: translateY(-10px) scale(1) rotate(0deg); opacity: 1; }
@@ -964,8 +965,8 @@ body {
   100% { transform: translateY(0) scale(0) rotate(20deg); opacity: 0; }
 }
 @keyframes goldenPulse {
-  0%, 100% { filter: drop-shadow(0 0 12px rgba(241, 196, 15, 0.6)); }
-  50% { filter: drop-shadow(0 0 28px rgba(241, 196, 15, 1)); }
+  0%, 100% { filter: drop-shadow(0 0 12px rgba(255, 191, 0, 0.6)); }
+  50% { filter: drop-shadow(0 0 28px rgba(255, 191, 0, 1)); }
 }
 #golden-brain.popping {
   animation: goldenPop 0.35s ease forwards;
@@ -978,11 +979,12 @@ body {
 #horde-boss {
   top: 80px;
   left: 50%;
+  width: 100px;
+  height: 100px;
   transform: translateX(-50%);
-  font-size: 80px;
-  filter: drop-shadow(0 0 24px var(--red-glow));
   animation: bossEntrance 0.5s ease, bossHover 2s ease-in-out infinite;
 }
+#horde-boss svg { width: 100%; height: 100%; }
 @keyframes bossEntrance {
   from { transform: translateX(-50%) scale(0); opacity: 0; }
   to { transform: translateX(-50%) scale(1); opacity: 1; }
