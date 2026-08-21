@@ -1,0 +1,62 @@
+{
+  "plan": "docs/superpowers/plans/2026-08-21-afk-ux-cosmetics-tutorial.md",
+  "tasks": {
+    "1": {
+      "completedAt": "2026-08-21T20:22:56.905Z",
+      "model": "qwen3.8-agent:27b"
+    },
+    "2": {
+      "completedAt": "2026-08-21T20:25:45.288Z",
+      "model": "qwen3.8-agent:27b"
+    },
+    "3": {
+      "completedAt": "2026-08-21T20:27:31.901Z",
+      "model": "qwen3.8-agent:27b"
+    },
+    "4": {
+      "completedAt": "2026-08-21T20:28:59.837Z",
+      "model": "qwen3.8-agent:27b"
+    },
+    "5": {
+      "completedAt": "2026-08-21T20:30:47.445Z",
+      "model": "qwen3.8-agent:27b"
+    },
+    "6": {
+      "completedAt": "2026-08-21T20:32:30.295Z",
+      "model": "qwen3.8-agent:27b"
+    },
+    "7": {
+      "completedAt": "2026-08-21T20:35:45.433Z",
+      "model": "qwen3.8-agent:27b"
+    },
+    "8": {
+      "completedAt": "2026-08-21T20:37:12.909Z",
+      "model": "qwen3.8-agent:27b"
+    },
+    "9": {
+      "completedAt": "2026-08-21T20:40:32.313Z",
+      "model": "qwen3.8-agent:27b"
+    },
+    "10": {
+      "completedAt": "2026-08-21T20:42:10.143Z",
+      "model": "qwen3.8-agent:27b"
+    },
+    "11": {
+      "completedAt": "2026-08-21T20:43:52.558Z",
+      "model": "qwen3.8-agent:27b"
+    },
+    "12": {
+      "completedAt": "2026-08-21T20:46:24.227Z",
+      "model": "qwen3.8-agent:27b"
+    },
+    "13": {
+      "completedAt": "2026-08-21T20:46:56.604Z",
+      "model": "qwen3.8-agent:27b"
+    },
+    "14": {
+      "completedAt": "2026-08-21T20:47:27.598Z",
+      "model": "qwen3.8-agent:27b"
+    }
+  },
+  "lastUpdated": "2026-08-21T20:47:27.598Z"
+}
