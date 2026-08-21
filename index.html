@@ -1,32 +1,105 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Snake</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zombie Clicker</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="game-container">
-    <div id="hud">
-      <div id="score">Puntos: 0</div>
-      <div id="high-score">Récord: 0</div>
-    </div>
-    <canvas id="game-canvas" width="400" height="400"></canvas>
-    <div id="controls">
-      <button id="btn-up">↑</button>
-      <div>
-        <button id="btn-left">←</button>
-        <button id="btn-down">↓</button>
-        <button id="btn-right">→</button>
+  <div id="app">
+    <header id="topbar">
+      <div id="brand">
+        <span id="brand-icon">🧟</span>
+        <span id="brand-name">Zombie Clicker</span>
       </div>
-    </div>
-    <div id="overlay" class="hidden">
-      <h1 id="overlay-title">Snake</h1>
-      <p id="overlay-text">Presiona una flecha para comenzar</p>
-      <button id="btn-start">Jugar</button>
-    </div>
+      <div id="topbar-stats">
+        <div class="stat">
+          <span class="stat-label">Cerebros</span>
+          <span id="stat-brains" class="stat-value">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Por segundo</span>
+          <span id="stat-bps" class="stat-value">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Almas</span>
+          <span id="stat-souls" class="stat-value">0</span>
+        </div>
+      </div>
+      <div id="topbar-actions">
+        <button id="btn-save" class="btn btn-ghost" title="Guardar">💾</button>
+        <button id="btn-reset" class="btn btn-ghost" title="Reiniciar">🔄</button>
+      </div>
+    </header>
+
+    <nav id="tab-nav">
+      <button id="btn-tab-game" class="tab-btn active" data-tab="game">🧟 Juego</button>
+      <button id="btn-tab-achievements" class="tab-btn" data-tab="achievements">🏆 Logros</button>
+      <button id="btn-tab-prestige" class="tab-btn" data-tab="prestige">✨ Prestigio</button>
+      <button id="btn-tab-stats" class="tab-btn" data-tab="stats">📊 Estadísticas</button>
+    </nav>
+
+    <main id="main">
+      <section id="tab-game" class="tab-panel active">
+        <div id="clicker-panel" class="panel">
+          <div id="clicker-area">
+            <button id="big-button" aria-label="Ganar cerebro">
+              <span id="big-button-icon">🧠</span>
+            </button>
+            <div id="clicker-info">
+              <div id="click-value">+1 por click</div>
+              <div id="click-hint">Haz clic para ganar cerebros</div>
+            </div>
+          </div>
+          <div id="prestige-box">
+            <div id="prestige-info">
+              <span id="prestige-souls">0</span> almas
+              <span id="prestige-next">Próxima alma: 1000 cerebros</span>
+            </div>
+            <button id="btn-prestige" class="btn btn-prestige" disabled>Ascender</button>
+          </div>
+        </div>
+        <div id="shop-panel" class="panel">
+          <div id="shop-tabs">
+            <button id="tab-generators" class="tab active">Generadores</button>
+            <button id="tab-upgrades" class="tab">Mejoras</button>
+          </div>
+          <div id="shop-content">
+            <div id="list-generators" class="list"></div>
+            <div id="list-upgrades" class="list hidden"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-achievements" class="tab-panel">
+        <div class="panel">
+          <h2>🏆 Logros</h2>
+          <div id="achievements-list" class="list"></div>
+        </div>
+      </section>
+
+      <section id="tab-prestige" class="tab-panel">
+        <div class="panel">
+          <h2>✨ Prestigio</h2>
+          <div id="prestige-info"></div>
+          <div id="prestige-shop" class="list"></div>
+        </div>
+      </section>
+
+      <section id="tab-stats" class="tab-panel">
+        <div class="panel">
+          <h2>📊 Estadísticas</h2>
+          <div id="stats-content"></div>
+        </div>
+      </section>
+    </main>
+
+    <div id="toast-container"></div>
+    <div id="golden-brain" class="hidden">🧠</div>
+    <div id="horde-boss" class="hidden">👹</div>
   </div>
   <script src="game.js"></script>
+  <script src="ui.js"></script>
 </body>
 </html>
