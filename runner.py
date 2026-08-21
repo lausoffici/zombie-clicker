@@ -24,6 +24,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 TASKS_FILE = BASE_DIR / "tasks.json"
 STATE_FILE = BASE_DIR / "state.json"
+DASHBOARD_FILE = BASE_DIR / "dashboard.json"
 LOG_FILE = BASE_DIR / "runner.log"
 OLLAMA_URL = "http://localhost:11434"
 DEFAULT_MODEL = "qwen3.8:27b"
@@ -59,6 +60,30 @@ def setup_logging():
             logging.StreamHandler(sys.stdout),
         ],
     )
+
+
+def write_dashboard(tasks, state, current_task=None, current_attempt=None, message="Esperando..."):
+    total = len(tasks)
+    done = sum(1 for t in tasks if state.get(t["id"]) == "done")
+    blocked = sum(1 for t in tasks if state.get(t["id"]) == "blocked")
+    pending = total - done - blocked
+    progress = round(100 * done / total, 1) if total else 0
+    payload = {
+        "total": total,
+        "done": done,
+        "blocked": blocked,
+        "pending": pending,
+        "progress_pct": progress,
+        "current_task": current_task,
+        "current_attempt": current_attempt,
+        "message": message,
+        "updated_at": time.strftime("%H:%M:%S"),
+    }
+    try:
+        with open(DASHBOARD_FILE, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False)
+    except OSError as e:
+        logging.warning("No se pudo escribir dashboard.json: %s", e)
 
 
 def load_tasks(tasks_file):
@@ -190,6 +215,9 @@ def run_task(model, num_ctx, data, task, state):
 
     last_error = ""
     for attempt in range(1, MAX_ATTEMPTS + 1):
+        write_dashboard(data["tasks"], state, current_task=f"{task_id}: {task['title']}",
+                        current_attempt=f"{attempt}/{MAX_ATTEMPTS}",
+                        message=f"Ejecutando {task_id} (intento {attempt}/{MAX_ATTEMPTS})")
         logging.info("  intento %d/%d (llamando a %s)...", attempt, MAX_ATTEMPTS, model)
         started = time.time()
         try:
@@ -218,6 +246,7 @@ def run_task(model, num_ctx, data, task, state):
             logging.info("  verificacion OK")
             state[task_id] = "done"
             save_state(state)
+            write_dashboard(data["tasks"], state, message=f"{task_id} completada")
             git_commit(f"{task_id}: {task['title']}")
             return True
 
@@ -231,6 +260,7 @@ def run_task(model, num_ctx, data, task, state):
     logging.error("  tarea %s BLOQUEADA tras %d intentos", task_id, MAX_ATTEMPTS)
     state[task_id] = "blocked"
     save_state(state)
+    write_dashboard(data["tasks"], state, message=f"{task_id} bloqueada tras {MAX_ATTEMPTS} intentos")
     return False
 
 
@@ -280,6 +310,7 @@ def main():
         return 0
 
     state = load_state()
+    write_dashboard(tasks, state, message="Runner iniciado, esperando primera tarea")
 
     while True:
         todo = [t for t in tasks if state.get(t["id"]) != "done"]
@@ -295,6 +326,7 @@ def main():
 
         if not todo:
             logging.info("No hay tareas pendientes. Todo terminado.")
+            write_dashboard(tasks, state, message="Todas las tareas completadas")
             break
 
         logging.info("Tareas a ejecutar en este ciclo: %d", len(todo))
@@ -309,6 +341,7 @@ def main():
             break
         if not args.retry_blocked:
             break
+        write_dashboard(tasks, state, message=f"Reintentando {len(blocked)} tareas bloqueadas en {args.retry_delay}s")
         logging.info("%d tareas bloqueadas; reintentando en %d segundos...",
                      len(blocked), args.retry_delay)
         time.sleep(args.retry_delay)
@@ -316,6 +349,7 @@ def main():
     done = sum(1 for t in tasks if state.get(t["id"]) == "done")
     blocked = [t["id"] for t in tasks if state.get(t["id"]) == "blocked"]
     logging.info("=== RESUMEN: %d/%d tareas completadas ===", done, len(tasks))
+    write_dashboard(tasks, state, message=f"Resumen: {done}/{len(tasks)} completadas")
     if blocked:
         logging.info("Bloqueadas (reintentar con --only o --retry-blocked): %s",
                      ", ".join(blocked))

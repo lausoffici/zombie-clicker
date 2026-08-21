@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zombie Clicker — Runner Dashboard</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --panel: #141414;
+      --green: #7fbf3f;
+      --green-glow: #a8e06a;
+      --red: #c0392b;
+      --text: #e0e0e0;
+      --muted: #888;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+    h1 {
+      font-family: Impact, Haettenschweiler, 'Franklin Gothic Bold', fantasy, sans-serif;
+      color: var(--green);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 0.2rem;
+    }
+    .subtitle { color: var(--muted); margin-bottom: 2rem; }
+    .card {
+      background: var(--panel);
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 700px;
+      margin-bottom: 1rem;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 28px;
+      background: #222;
+      border-radius: 14px;
+      overflow: hidden;
+      margin: 1rem 0;
+      border: 1px solid #333;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--green) 0%, var(--green-glow) 100%);
+      transition: width 0.4s ease;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 10px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      color: #000;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1rem;
+    }
+    .stat {
+      text-align: center;
+      padding: 1rem;
+      background: #0f0f0f;
+      border-radius: 8px;
+      border: 1px solid #262626;
+    }
+    .stat .value {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: var(--green);
+    }
+    .stat .label { color: var(--muted); font-size: 0.85rem; margin-top: 0.3rem; }
+    .current {
+      font-size: 1.1rem;
+      color: var(--text);
+    }
+    .current span { color: var(--green-glow); font-weight: bold; }
+    .message {
+      color: var(--muted);
+      font-style: italic;
+      margin-top: 0.8rem;
+    }
+    .error { color: var(--red); }
+    .updated { color: #555; font-size: 0.8rem; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>🧟 Zombie Clicker Runner</h1>
+  <div class="subtitle">Dashboard de progreso de Ollama</div>
+
+  <div class="card">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill">0%</div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="value" id="done">0</div><div class="label">Completadas</div></div>
+      <div class="stat"><div class="value" id="pending">0</div><div class="label">Pendientes</div></div>
+      <div class="stat"><div class="value" id="blocked">0</div><div class="label">Bloqueadas</div></div>
+      <div class="stat"><div class="value" id="pct">0%</div><div class="label">Progreso</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="current">Tarea actual: <span id="current-task">—</span></div>
+    <div class="current">Intento: <span id="current-attempt">—</span></div>
+    <div class="message" id="message">Conectando...</div>
+    <div class="updated" id="updated">—</div>
+  </div>
+
+  <script>
+    async function load() {
+      try {
+        const res = await fetch('dashboard.json?t=' + Date.now());
+        if (!res.ok) throw new Error('No se pudo leer dashboard.json');
+        const d = await res.json();
+
+        document.getElementById('done').textContent = d.done;
+        document.getElementById('pending').textContent = d.pending;
+        document.getElementById('blocked').textContent = d.blocked;
+        document.getElementById('pct').textContent = d.progress_pct + '%';
+        document.getElementById('progress-fill').style.width = d.progress_pct + '%';
+        document.getElementById('progress-fill').textContent = d.progress_pct + '%';
+        document.getElementById('current-task').textContent = d.current_task || 'Esperando';
+        document.getElementById('current-attempt').textContent = d.current_attempt || '—';
+        document.getElementById('message').textContent = d.message;
+        document.getElementById('updated').textContent = 'Última actualización: ' + d.updated_at;
+      } catch (e) {
+        document.getElementById('message').textContent = 'Error: ' + e.message;
+        document.getElementById('message').classList.add('error');
+      }
+    }
+    load();
+    setInterval(load, 2000);
+  </script>
+</body>
+</html>
