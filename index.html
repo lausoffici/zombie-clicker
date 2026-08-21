@@ -2,110 +2,163 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Zombie Clicker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Creepster&family=IBM+Plex+Sans:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="app">
     <header id="topbar">
       <div id="brand">
-        <span id="brand-icon">🧟</span>
-        <span id="brand-name">Zombie Clicker</span>
+        <span id="brand-icon" aria-hidden="true">
+          <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><ellipse cx="16" cy="16" rx="12" ry="13" fill="#6e7f62"/><circle cx="12" cy="14" r="2.5" fill="#9aff4d"/><circle cx="20" cy="14" r="2.5" fill="#9aff4d"/><path d="M12 22 Q16 25 20 22" fill="#2a2018"/></svg>
+        </span>
+        <div id="brand-text">
+          <span id="brand-name">Zombie Clicker</span>
+          <span id="brand-sub">Incremental</span>
+        </div>
       </div>
-      <div id="topbar-stats">
-        <div class="stat">
-          <span class="stat-label">Cerebros</span>
-          <span id="stat-brains" class="stat-value">0</span>
+      <div id="topbar-stats" role="group" aria-label="Progreso">
+        <div class="topbar-stat topbar-stat--brains">
+          <span class="topbar-stat-label">Cerebros</span>
+          <span id="stat-brains" class="topbar-stat-value tabular-nums">0</span>
         </div>
-        <div class="stat">
-          <span class="stat-label">Por segundo</span>
-          <span id="stat-bps" class="stat-value">0</span>
+        <div class="topbar-stat topbar-stat--bps">
+          <span class="topbar-stat-label">Por segundo</span>
+          <span id="stat-bps" class="topbar-stat-value tabular-nums">0/s</span>
         </div>
-        <div class="stat">
-          <span class="stat-label">Almas</span>
-          <span id="stat-souls" class="stat-value">0</span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">Clicks</span>
-          <span id="stat-clicks" class="stat-value">0</span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">Total</span>
-          <span id="stat-total" class="stat-value">0</span>
+        <div class="topbar-stat topbar-stat--souls" title="Almas: moneda de Prestigio. Cada Alma da +5% multiplicador permanente.">
+          <span class="topbar-stat-label">Almas</span>
+          <span id="stat-souls" class="topbar-stat-value tabular-nums">0</span>
         </div>
       </div>
       <div id="topbar-actions">
-        <button id="btn-save" class="btn btn-ghost" title="Guardar">💾</button>
-        <button id="btn-reset" class="btn btn-ghost" title="Reiniciar">🔄</button>
+        <button id="btn-save" class="icon-btn" title="Guardar" aria-label="Guardar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        </button>
+        <button id="btn-reset" class="icon-btn" title="Reiniciar" aria-label="Reiniciar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        </button>
+        <button id="btn-help" class="icon-btn" title="Cómo jugar" aria-label="Cómo jugar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </button>
       </div>
     </header>
 
-    <nav id="tab-nav">
-      <button id="btn-tab-game" class="tab-btn active" data-tab="game">🧟 Juego</button>
-      <button id="btn-tab-achievements" class="tab-btn" data-tab="achievements">🏆 Logros</button>
-      <button id="btn-tab-prestige" class="tab-btn" data-tab="prestige">✨ Prestigio</button>
-      <button id="btn-tab-stats" class="tab-btn" data-tab="stats">📊 Estadísticas</button>
-    </nav>
-
-    <main id="main">
-      <section id="tab-game" class="tab-panel active">
-        <div id="clicker-panel" class="panel">
+    <main id="main" class="main-grid">
+      <!-- Columna izquierda: Clicker -->
+      <section id="col-clicker" class="col active">
+        <div id="clicker-card" class="card">
           <div id="clicker-area">
-            <button id="big-button" aria-label="Ganar cerebro">
-              <span id="big-button-icon">🧠</span>
+            <div id="hero-score">
+              <div class="hero-stat hero-stat--brains">
+                <span class="hero-stat-label">Cerebros</span>
+                <span id="hero-brains" class="hero-stat-value" aria-live="polite">0</span>
+              </div>
+              <div class="hero-stat hero-stat--bps">
+                <span class="hero-stat-label">Por segundo</span>
+                <span id="hero-bps" class="hero-stat-value">0/s</span>
+              </div>
+            </div>
+            <button id="zombie-btn" aria-label="Ganar cerebro">
+              <span id="zombie-icon">🧟</span>
             </button>
             <div id="clicker-info">
               <div id="click-value">+1 por click</div>
               <div id="click-hint">Haz clic para ganar cerebros</div>
             </div>
           </div>
-          <div id="prestige-box">
-            <div id="prestige-info">
-              <span id="prestige-souls">0</span> almas
-              <span id="prestige-next">Próxima alma: 1000 cerebros</span>
-            </div>
-            <button id="btn-prestige" class="btn btn-prestige" disabled>Ascender</button>
-          </div>
+          <div id="click-particles" aria-hidden="true"></div>
         </div>
-        <div id="shop-panel" class="panel">
+      </section>
+
+      <!-- Columna central: Tienda -->
+      <section id="col-shop" class="col">
+        <div id="shop-card" class="card">
           <div id="shop-tabs">
-            <button id="tab-generators" class="tab active">Generadores</button>
-            <button id="tab-upgrades" class="tab">Mejoras</button>
+            <button id="shop-tab-generators" class="shop-tab active">Generadores</button>
+            <button id="shop-tab-upgrades" class="shop-tab">Mejoras</button>
+            <button id="shop-tab-cosmetics" class="shop-tab">Cosméticos</button>
+          </div>
+          <div id="buy-qty-bar" class="buy-qty" aria-label="Cantidad de compra">
+            <button type="button" class="qty-btn active" data-qty="1">x1</button>
+            <button type="button" class="qty-btn" data-qty="10">x10</button>
+            <button type="button" class="qty-btn" data-qty="0">Max</button>
           </div>
           <div id="shop-content">
-            <div id="list-generators" class="list"></div>
-            <div id="list-upgrades" class="list hidden"></div>
+            <div id="shop-list-generators" class="shop-list"></div>
+            <div id="shop-list-upgrades" class="shop-list hidden"></div>
+            <div id="shop-list-cosmetics" class="shop-list hidden"></div>
           </div>
         </div>
       </section>
 
-      <section id="tab-achievements" class="tab-panel">
-        <div class="panel">
-          <h2>🏆 Logros</h2>
-          <div id="achievements-list" class="list"></div>
+      <!-- Columna derecha: Logros / Prestigio / Stats -->
+      <section id="col-side" class="col">
+        <div id="side-tabs">
+          <button id="side-tab-achievements" class="side-tab active" data-side="achievements">🏆 Logros</button>
+          <button id="side-tab-prestige" class="side-tab" data-side="prestige">✨ Prestigio</button>
+          <button id="side-tab-stats" class="side-tab" data-side="stats">📊 Stats</button>
         </div>
-      </section>
 
-      <section id="tab-prestige" class="tab-panel">
-        <div class="panel">
-          <h2>✨ Prestigio</h2>
-          <div id="prestige-info"></div>
-          <div id="prestige-shop" class="list"></div>
+        <div id="side-panel-achievements" class="side-panel active">
+          <div class="card">
+            <h2 class="card-title">Logros</h2>
+            <div id="achievements-list" class="ach-list"></div>
+          </div>
         </div>
-      </section>
 
-      <section id="tab-stats" class="tab-panel">
-        <div class="panel">
-          <h2>📊 Estadísticas</h2>
-          <div id="stats-content"></div>
+        <div id="side-panel-prestige" class="side-panel">
+          <div class="card">
+            <h2 class="card-title">Prestigio</h2>
+            <div class="prestige-help">
+              <p><strong>¿Qué son las Almas?</strong></p>
+              <p>Las Almas son la moneda de Prestigio. Al <strong>Ascender</strong> reiniciás cerebros, generadores y mejoras, y ganás Almas permanentes.</p>
+              <ul>
+                <li>Cada Alma → <strong>+5%</strong> multiplicador global</li>
+                <li>Fórmula: <code>floor(sqrt(cerebrosTotales / 1e6))</code></li>
+                <li>Gastá Almas en la tienda de abajo (mejoras permanentes)</li>
+              </ul>
+            </div>
+            <div id="prestige-summary">
+              <div class="prestige-stat"><span>Almas</span><span id="prestige-souls">0</span></div>
+              <div class="prestige-stat"><span>Ganarías</span><span id="prestige-gain">0</span></div>
+              <div class="prestige-stat"><span>Multiplicador</span><span id="prestige-multiplier">x1.00</span></div>
+            </div>
+            <button id="btn-prestige" class="btn btn-prestige" disabled>Ascender</button>
+            <h3 class="card-subtitle">Tienda de almas</h3>
+            <div id="prestige-shop" class="prestige-list"></div>
+          </div>
+        </div>
+
+        <div id="side-panel-stats" class="side-panel">
+          <div class="card">
+            <h2 class="card-title">Estadísticas</h2>
+            <div id="stats-content" class="stats-grid"></div>
+            <div class="stats-actions">
+              <button id="btn-export" class="btn">Exportar</button>
+              <button id="btn-import" class="btn">Importar</button>
+            </div>
+            <textarea id="save-area" class="save-area hidden" placeholder="Pega tu save aquí..."></textarea>
+          </div>
         </div>
       </section>
     </main>
 
+    <!-- Mobile bottom navigation -->
+    <nav id="mobile-nav">
+      <button class="mobile-tab active" data-mobile="game">🧟 Juego</button>
+      <button class="mobile-tab" data-mobile="achievements">🏆 Logros</button>
+      <button class="mobile-tab" data-mobile="prestige">✨ Prestigio</button>
+      <button class="mobile-tab" data-mobile="stats">📊 Stats</button>
+    </nav>
+
     <div id="toast-container"></div>
-    <div id="golden-brain" class="hidden">🧠</div>
-    <div id="horde-boss" class="hidden">👹</div>
+    <div id="golden-brain" class="event-item hidden">🧠</div>
+    <div id="horde-boss" class="event-item hidden">👹</div>
   </div>
   <script src="game.js"></script>
   <script src="ui.js"></script>
