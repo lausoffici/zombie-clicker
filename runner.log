@@ -232,3 +232,5 @@
 2026-08-20 17:56:21,099 [INFO]   respuesta recibida en 131s (3292 chars)
 2026-08-20 17:56:21,100 [INFO]   escrito: COMO-JUGAR.md (3257 bytes)
 2026-08-20 17:56:21,199 [INFO]   verificacion OK
+2026-08-20 17:56:21,274 [INFO]   commit: 14-docs: Documentación del juego
+2026-08-20 17:56:21,274 [INFO] === RESUMEN: 14/14 tareas completadas ===
