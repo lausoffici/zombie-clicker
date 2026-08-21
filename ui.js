@@ -14,6 +14,56 @@
   let generatorQty = 1; // 1, 10, 0=max
   let prevAchievements = [];
 
+  const SVG_ICONS = {
+    survivor: '<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="10" r="5" fill="#8fa085"/><path d="M8 28 L12 14 L20 14 L24 28" fill="#5d705a"/><circle cx="14" cy="10" r="1" fill="#000"/><circle cx="18" cy="10" r="1" fill="#000"/></svg>',
+    biter: '<svg viewBox="0 0 32 32" aria-hidden="true"><ellipse cx="16" cy="16" rx="10" ry="12" fill="#6e7f62"/><circle cx="12" cy="13" r="2" fill="#9aff4d"/><circle cx="20" cy="13" r="2" fill="#9aff4d"/><path d="M11 22 Q16 26 21 22" fill="#2a2018"/></svg>',
+    runner: '<svg viewBox="0 0 32 32" aria-hidden="true"><ellipse cx="16" cy="14" rx="8" ry="9" fill="#6e7f62"/><circle cx="13" cy="12" r="1.5" fill="#9aff4d"/><circle cx="19" cy="12" r="1.5" fill="#9aff4d"/><path d="M8 26 L12 18 L20 18 L24 26" fill="#4a5a40"/></svg>',
+    rabid: '<svg viewBox="0 0 32 32" aria-hidden="true"><ellipse cx="16" cy="15" rx="10" ry="11" fill="#7a4f4f"/><circle cx="12" cy="13" r="2" fill="#e62e2e"/><circle cx="20" cy="13" r="2" fill="#e62e2e"/><path d="M10 24 L16 19 L22 24" fill="#fff"/></svg>',
+    boss: '<svg viewBox="0 0 32 32" aria-hidden="true"><ellipse cx="16" cy="15" rx="11" ry="12" fill="#4a5a40"/><path d="M8 6 L12 12 L16 5 L20 12 L24 6" fill="#9e1b1b"/><circle cx="12" cy="14" r="2" fill="#ffbf00"/><circle cx="20" cy="14" r="2" fill="#ffbf00"/><path d="M11 25 Q16 21 21 25" fill="#2a2018"/></svg>',
+    horde: '<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="10" cy="18" r="5" fill="#6e7f62"/><circle cx="22" cy="18" r="5" fill="#6e7f62"/><circle cx="16" cy="12" r="5" fill="#5a6b4f"/><circle cx="12" cy="12" r="1" fill="#9aff4d"/><circle cx="20" cy="12" r="1" fill="#9aff4d"/></svg>',
+    necro: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 28 L8 10 L16 6 L24 10 L28 28 Z" fill="#3a4a32"/><rect x="10" y="14" width="4" height="5" fill="#1a1f16"/><rect x="18" y="14" width="4" height="5" fill="#1a1f16"/><path d="M12 24 L20 24" stroke="#5d705a" stroke-width="2"/></svg>',
+    virus: '<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="8" fill="#6ecf2f"/><circle cx="16" cy="16" r="4" fill="#161c15"/><circle cx="8" cy="10" r="2" fill="#6ecf2f"/><circle cx="24" cy="10" r="2" fill="#6ecf2f"/><circle cx="8" cy="22" r="2" fill="#6ecf2f"/><circle cx="24" cy="22" r="2" fill="#6ecf2f"/></svg>',
+    apocalypse: '<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="10" fill="#9e1b1b"/><path d="M10 10 L22 22 M22 10 L10 22" stroke="#ffbf00" stroke-width="3"/><circle cx="16" cy="16" r="3" fill="#ffbf00"/></svg>',
+    god: '<svg viewBox="0 0 32 32" aria-hidden="true"><ellipse cx="16" cy="15" rx="10" ry="11" fill="#ffbf00"/><path d="M6 8 L10 4 L14 8 L18 4 L22 8 L26 4" fill="none" stroke="#ffbf00" stroke-width="2"/><circle cx="12" cy="14" r="2" fill="#9e1b1b"/><circle cx="20" cy="14" r="2" fill="#9e1b1b"/><path d="M11 24 Q16 28 21 24" fill="#9e1b1b"/></svg>',
+    hand: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M10 26 L10 16 Q10 10 16 10 Q22 10 22 16 L22 26" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 L6 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M14 6 L14 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M18 6 L18 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>',
+    tooth: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M10 12 Q16 6 22 12 Q24 18 20 26 Q16 22 12 26 Q8 18 10 12" fill="#eef2ea"/><path d="M14 14 L18 14 L16 20 Z" fill="#9e1b1b"/></svg>',
+    claw: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 22 Q10 10 16 8 Q22 10 26 22" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M10 20 L12 26" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M16 18 L16 26" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M22 20 L20 26" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>',
+    fist: '<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="17" r="9" fill="currentColor"/><path d="M10 12 L10 8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M14 10 L14 6" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M18 10 L18 6" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M22 12 L22 8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
+    bolt: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M18 4 L10 16 L16 16 L14 28 L22 16 L16 16 Z" fill="#ffbf00"/></svg>',
+    bone: '<svg viewBox="0 0 32 32" aria-hidden="true"><rect x="6" y="13" width="20" height="6" rx="3" fill="#eef2ea"/><circle cx="8" cy="13" r="3" fill="#eef2ea"/><circle cx="8" cy="19" r="3" fill="#eef2ea"/><circle cx="24" cy="13" r="3" fill="#eef2ea"/><circle cx="24" cy="19" r="3" fill="#eef2ea"/></svg>',
+    flask: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M12 4 L12 12 L8 22 Q8 26 12 26 L20 26 Q24 26 24 22 L20 12 L20 4" fill="none" stroke="#9aff4d" stroke-width="2"/><path d="M11 4 L21 4" stroke="#9aff4d" stroke-width="2"/></svg>',
+    fire: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 28 Q8 24 8 16 Q8 10 12 6 Q12 12 16 14 Q16 8 20 4 Q24 10 24 16 Q24 24 16 28" fill="#e62e2e"/><path d="M16 24 Q12 22 12 17 Q12 15 14 13 Q14 16 16 17 Q16 14 18 12 Q20 15 20 17 Q20 22 16 24" fill="#ffbf00"/></svg>',
+    crown: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 22 L8 10 L12 16 L16 8 L20 16 L24 10 L28 22 Z" fill="#ffbf00"/><rect x="4" y="22" width="24" height="4" fill="#ffbf00"/></svg>',
+    muscle: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M8 26 Q6 18 12 14 Q16 10 24 12 Q28 14 26 20 Q24 26 16 26 Z" fill="#6e7f62"/><path d="M14 16 Q18 14 22 16" fill="none" stroke="#3a4a32" stroke-width="2" stroke-linecap="round"/></svg>',
+    palette: '<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="10" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="13" r="2" fill="#9aff4d"/><circle cx="20" cy="13" r="2" fill="#e62e2e"/><circle cx="16" cy="21" r="2" fill="#ffbf00"/></svg>'
+  };
+
+  const GEN_ICON_MAP = {
+    superviviente: SVG_ICONS.survivor,
+    mordedor: SVG_ICONS.biter,
+    corredor: SVG_ICONS.runner,
+    rabioso: SVG_ICONS.rabid,
+    jefe: SVG_ICONS.boss,
+    horde: SVG_ICONS.horde,
+    necropolis: SVG_ICONS.necro,
+    "virus-alfa": SVG_ICONS.virus,
+    apocalipsis: SVG_ICONS.apocalypse,
+    "zombie-dios": SVG_ICONS.god
+  };
+
+  const UPGRADE_ICON_MAP = {
+    "dedos-podridos": SVG_ICONS.hand,
+    "mandibula-filosa": SVG_ICONS.tooth,
+    "garras-infectadas": SVG_ICONS.claw,
+    "puño-demolicion": SVG_ICONS.fist,
+    "superviviente-veloz": SVG_ICONS.bolt,
+    "mordedura-profunda": SVG_ICONS.bone,
+    "corredor-mutado": SVG_ICONS.flask,
+    "rabia-eterna": SVG_ICONS.fire,
+    "jefe-alpha": SVG_ICONS.crown,
+    "fuerza-sobrenatural": SVG_ICONS.muscle
+  };
+
   function $(id) { return document.getElementById(id); }
 
   function formatNumber(n) {
@@ -293,7 +343,7 @@
     const div = document.createElement("div");
     div.setAttribute("data-gen-id", gen.id);
     div.innerHTML =
-      '<span class="item-icon">' + gen.icon + '</span>' +
+      '<span class="item-icon">' + (GEN_ICON_MAP[gen.id] || gen.icon) + '</span>' +
       '<div class="item-info">' +
         '<div class="item-name">' + gen.name + '</div>' +
         '<div class="item-desc">' + gen.desc + '</div>' +
@@ -346,7 +396,7 @@
     const div = document.createElement("div");
     div.setAttribute("data-upg-id", upg.id);
     div.innerHTML =
-      '<span class="item-icon">' + upg.icon + '</span>' +
+      '<span class="item-icon">' + (UPGRADE_ICON_MAP[upg.id] || upg.icon) + '</span>' +
       '<div class="item-info">' +
         '<div class="item-name">' + upg.name + '</div>' +
         '<div class="item-desc">' + upg.desc + '</div>' +
@@ -404,7 +454,7 @@
     const div = document.createElement("div");
     div.setAttribute("data-cos-id", cos.id);
     div.innerHTML =
-      '<span class="item-icon">' + (cos.icon || "🎨") + '</span>' +
+      '<span class="item-icon">' + SVG_ICONS.palette + '</span>' +
       '<div class="item-info">' +
         '<div class="item-name">' + cos.name + '</div>' +
         '<div class="item-desc">' + (cos.slot === "skin" ? "Piel" : cos.slot === "aura" ? "Aura" : "Fondo") + '</div>' +

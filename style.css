@@ -489,30 +489,31 @@ body {
 /* Shop tabs */
 #shop-tabs {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   margin-bottom: 14px;
+  background: var(--bg-900);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 4px;
 }
 .shop-tab {
   flex: 1;
-  padding: 10px 14px;
-  background: var(--bg-700);
-  border: 1px solid var(--border);
+  padding: 10px 12px;
+  background: transparent;
+  border: 1px solid transparent;
   border-radius: var(--radius-xl);
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: all 0.15s ease;
 }
-.shop-tab:hover {
-  background: var(--bg-600);
-  color: var(--text-primary);
-}
+.shop-tab:hover { color: var(--text-primary); }
 .shop-tab.active {
-  background: rgba(127, 191, 63, 0.12);
+  background: rgba(110, 207, 47, 0.12);
   color: var(--green-300);
   border-color: var(--green-500);
-  box-shadow: 0 0 12px var(--green-glow);
+  box-shadow: 0 0 12px var(--green-glow-soft);
 }
 
 /* Lists */
@@ -541,44 +542,69 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: var(--bg-700);
+  background: linear-gradient(145deg, var(--bg-700), rgba(22, 28, 21, 0.6));
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 12px;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease, transform 0.08s ease, box-shadow 0.15s ease;
+  position: relative;
+  overflow: hidden;
+}
+.item-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(110, 207, 47, 0.15), transparent 40%, transparent 60%, rgba(110, 207, 47, 0.05));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 @media (hover: hover) and (pointer: fine) {
   .item-card:hover {
     background: var(--bg-600);
     border-color: var(--green-500);
+    box-shadow: 0 0 16px var(--green-glow-soft);
   }
 }
 .item-card:active { transform: translateY(1px); }
 .item-card.disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 @media (hover: hover) and (pointer: fine) {
   .item-card.disabled:hover {
     background: var(--bg-700);
     border-color: var(--border);
+    box-shadow: none;
   }
 }
 .item-card.affordable {
   border-color: var(--green-500);
-  box-shadow: 0 0 12px var(--green-glow);
+  box-shadow: 0 0 14px var(--green-glow);
 }
 .item-card.owned {
   border-color: var(--green-500);
-  background: rgba(127, 191, 63, 0.08);
+  background: rgba(110, 207, 47, 0.08);
 }
 
 .item-icon {
-  font-size: 30px;
-  width: 44px;
-  text-align: center;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-800);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   flex-shrink: 0;
+}
+.item-icon svg {
+  width: 26px;
+  height: 26px;
 }
 .item-info { flex: 1; min-width: 0; }
 .item-name {
@@ -612,11 +638,11 @@ body {
 /* Generator buy quantity buttons */
 .buy-qty {
   display: flex;
-  gap: 4px;
-  margin-bottom: 10px;
+  gap: 6px;
+  margin-bottom: 12px;
 }
 .qty-btn {
-  padding: 4px 8px;
+  padding: 5px 10px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: var(--bg-800);
@@ -624,11 +650,14 @@ body {
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
+.qty-btn:hover { border-color: var(--border-strong); color: var(--text-primary); }
 .qty-btn.active {
   background: var(--green-500);
   color: var(--bg-900);
   border-color: var(--green-500);
+  box-shadow: 0 0 10px var(--green-glow-soft);
 }
 
 /* Achievements */
