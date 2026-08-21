@@ -142,9 +142,9 @@
   // ---------- Render ----------
   function renderScore() {
     if (!state) return;
-    const scoreEl = $("score-value");
-    const bpsEl = $("bps-value");
-    const clickPowerEl = $("click-power");
+    const scoreEl = $("stat-brains");
+    const bpsEl = $("stat-bps");
+    const clickPowerEl = $("click-value");
     if (scoreEl) scoreEl.textContent = formatNumber(state.brains);
     if (bpsEl) bpsEl.textContent = formatNumber(Game.getBrainsPerSecond(state)) + " /s";
     if (clickPowerEl) clickPowerEl.textContent = "+" + formatNumber(Game.getClickValue(state)) + " por click";
@@ -182,7 +182,7 @@
 
   function renderGenerators() {
     if (!state) return;
-    const container = $("generators");
+    const container = $("list-generators");
     if (!container) return;
     container.innerHTML = "";
     Game.GENERATORS.forEach(function (gen) {
@@ -207,7 +207,7 @@
 
   function renderUpgrades() {
     if (!state) return;
-    const container = $("upgrades");
+    const container = $("list-upgrades");
     if (!container) return;
     container.innerHTML = "";
     let any = false;
@@ -468,7 +468,7 @@
     setupAutoClick();
 
     // Click en zombi
-    const zombieEl = $("zombie-btn") || $("zombie");
+    const zombieEl = $("big-button") || $("zombie-btn") || $("zombie");
     if (zombieEl) {
       zombieEl.addEventListener("click", handleClick);
     }

@@ -624,3 +624,279 @@ AssertionError [ERR_ASSERTION]: buyGenerators debe comprar 3
 2026-08-21 06:55:35,155 [INFO]   respuesta recibida en 206s (9737 chars)
 2026-08-21 06:55:35,156 [INFO]   escrito: tests/logic.test.js (9696 bytes)
 2026-08-21 06:55:35,223 [INFO]   verificacion OK
+2026-08-21 06:55:35,317 [INFO]   commit: v2-21-tests-v2: Tests de todas las nuevas mecánicas
+2026-08-21 06:55:35,317 [INFO] === Tarea v2-22-docs-v2: Documentación de las nuevas mecánicas ===
+2026-08-21 06:55:35,318 [INFO]   intento 1/3 (llamando a qwen3.8:27b)...
+2026-08-21 06:58:59,632 [INFO]   respuesta recibida en 204s (4550 chars)
+2026-08-21 06:58:59,633 [WARNING]   la respuesta no contenia bloques <<<FILE: ...>>> validos
+2026-08-21 06:58:59,633 [INFO]   intento 2/3 (llamando a qwen3.8:27b)...
+2026-08-21 07:15:28,639 [INFO]   respuesta recibida en 989s (40151 chars)
+2026-08-21 07:15:28,640 [INFO]   escrito: index.html (3399 bytes)
+2026-08-21 07:15:28,641 [INFO]   escrito: style.css (11920 bytes)
+2026-08-21 07:15:28,641 [INFO]   escrito: game.js (24738 bytes)
+2026-08-21 07:15:28,714 [WARNING]   verificacion FALLO: C:\Users\lauta\zombie-clicker\game.js:644
+  if (document.readyState === 'loading') {
+  ^
+
+ReferenceError: document is not defined
+    at C:\Users\lauta\zombie-clicker\game.js:644:3
+    at Object.<anonymous> (C:\Users\lauta\zombie-clicker\game.js:649:3)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:12
+2026-08-21 07:15:28,714 [INFO]   intento 3/3 (llamando a qwen3.8:27b)...
+2026-08-21 07:16:46,511 [INFO]   respuesta recibida en 78s (1310 chars)
+2026-08-21 07:16:46,511 [WARNING]   la respuesta no contenia bloques <<<FILE: ...>>> validos
+2026-08-21 07:16:46,511 [ERROR]   tarea v2-22-docs-v2 BLOQUEADA tras 3 intentos
+2026-08-21 07:16:46,512 [INFO] 14 tareas bloqueadas; reintentando en 60 segundos...
+2026-08-21 07:17:46,513 [INFO] Tareas a ejecutar en este ciclo: 14
+2026-08-21 07:17:46,513 [INFO] === Tarea v2-04-achievements-data: Sistema de logros: datos y chequeo ===
+2026-08-21 07:17:46,530 [INFO]   intento 1/3 (llamando a qwen3.8:27b)...
+2026-08-21 07:18:12,413 [INFO]   respuesta recibida en 26s (90 chars)
+2026-08-21 07:18:12,414 [WARNING]   la respuesta no contenia bloques <<<FILE: ...>>> validos
+2026-08-21 07:18:12,414 [INFO]   intento 2/3 (llamando a qwen3.8:27b)...
+2026-08-21 07:20:56,650 [INFO]   respuesta recibida en 164s (6817 chars)
+2026-08-21 07:20:56,651 [INFO]   escrito: index.html (906 bytes)
+2026-08-21 07:20:56,652 [INFO]   escrito: style.css (1963 bytes)
+2026-08-21 07:20:56,652 [INFO]   escrito: game.js (3854 bytes)
+2026-08-21 07:20:56,754 [WARNING]   verificacion FALLO: C:\Users\lauta\zombie-clicker\game.js:1
+const canvas = document.getElementById('game-canvas');
+               ^
+
+ReferenceError: document is not defined
+    at Object.<anonymous> (C:\Users\lauta\zombie-clicker\game.js:1:16)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.
+2026-08-21 07:20:56,754 [INFO]   intento 3/3 (llamando a qwen3.8:27b)...
+2026-08-21 07:22:36,072 [INFO]   respuesta recibida en 99s (5028 chars)
+2026-08-21 07:22:36,073 [INFO]   escrito: game.js (4999 bytes)
+2026-08-21 07:22:36,173 [WARNING]   verificacion FALLO: C:\Users\lauta\zombie-clicker\tests\logic.test.js:13
+  const s = Game.createState();
+                 ^
+
+TypeError: Game.createState is not a function
+    at testClick (C:\Users\lauta\zombie-clicker\tests\logic.test.js:13:18)
+    at Object.<anonymous> (C:\Users\lauta\zombie-clicker\tests\logic.test.js:19:3)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+  
+2026-08-21 07:22:36,174 [ERROR]   tarea v2-04-achievements-data BLOQUEADA tras 3 intentos
+2026-08-21 07:22:36,174 [INFO] === Tarea v2-06-prestige-formula: Fórmula de prestige (almas) ===
+2026-08-21 07:22:36,188 [INFO]   intento 1/3 (llamando a qwen3.8:27b)...
+2026-08-21 07:30:58,551 [INFO]   respuesta recibida en 502s (17987 chars)
+2026-08-21 07:30:58,552 [INFO]   escrito: game.js (17958 bytes)
+2026-08-21 07:30:58,681 [INFO]   verificacion OK
+2026-08-21 07:30:58,778 [INFO]   commit: v2-06-prestige-formula: Fórmula de prestige (almas)
+2026-08-21 07:30:58,778 [INFO] === Tarea v2-07-prestige-reset: Reset de prestige (Ascender) ===
+2026-08-21 07:30:58,779 [INFO]   intento 1/3 (llamando a qwen3.8:27b)...
+2026-08-21 07:35:32,544 [INFO]   respuesta recibida en 274s (8816 chars)
+2026-08-21 07:35:32,544 [WARNING]   la respuesta no contenia bloques <<<FILE: ...>>> validos
+2026-08-21 07:35:32,545 [INFO]   intento 2/3 (llamando a qwen3.8:27b)...
+2026-08-21 07:44:02,334 [INFO]   respuesta recibida en 510s (21007 chars)
+2026-08-21 07:44:02,335 [INFO]   escrito: index.html (1839 bytes)
+2026-08-21 07:44:02,336 [INFO]   escrito: style.css (5796 bytes)
+2026-08-21 07:44:02,337 [INFO]   escrito: game.js (13276 bytes)
+2026-08-21 07:44:02,468 [WARNING]   verificacion FALLO: C:\Users\lauta\zombie-clicker\tests\logic.test.js:13
+  const s = Game.createState();
+                 ^
+
+TypeError: Game.createState is not a function
+    at testClick (C:\Users\lauta\zombie-clicker\tests\logic.test.js:13:18)
+    at Object.<anonymous> (C:\Users\lauta\zombie-clicker\tests\logic.test.js:19:3)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+  
+2026-08-21 07:44:02,468 [INFO]   intento 3/3 (llamando a qwen3.8:27b)...
+2026-08-21 07:49:55,307 [INFO]   respuesta recibida en 353s (14792 chars)
+2026-08-21 07:49:55,308 [INFO]   escrito: game.js (14763 bytes)
+2026-08-21 07:49:55,437 [WARNING]   verificacion FALLO: C:\Users\lauta\zombie-clicker\tests\logic.test.js:16
+  for (let i = 0; i < clicks; i++) Game.click(s);
+                                        ^
+
+TypeError: Game.click is not a function
+    at testClick (C:\Users\lauta\zombie-clicker\tests\logic.test.js:16:41)
+    at Object.<anonymous> (C:\Users\lauta\zombie-clicker\tests\logic.test.js:19:3)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:inte
+2026-08-21 07:49:55,438 [ERROR]   tarea v2-07-prestige-reset BLOQUEADA tras 3 intentos
+2026-08-21 07:49:55,439 [INFO] === Tarea v2-08-prestige-shop-data: Tienda de prestige: datos ===
+2026-08-21 07:49:55,452 [INFO]   intento 1/3 (llamando a qwen3.8:27b)...
+2026-08-21 07:52:59,154 [INFO]   respuesta recibida en 184s (4743 chars)
+2026-08-21 07:52:59,155 [WARNING]   la respuesta no contenia bloques <<<FILE: ...>>> validos
+2026-08-21 07:52:59,155 [INFO]   intento 2/3 (llamando a qwen3.8:27b)...
+2026-08-21 07:57:28,252 [INFO]   respuesta recibida en 269s (10562 chars)
+2026-08-21 07:57:28,253 [INFO]   escrito: index.html (1086 bytes)
+2026-08-21 07:57:28,254 [INFO]   escrito: style.css (3984 bytes)
+2026-08-21 07:57:28,255 [INFO]   escrito: game.js (5396 bytes)
+2026-08-21 07:57:28,357 [WARNING]   verificacion FALLO: C:\Users\lauta\zombie-clicker\game.js:22
+  const brainsCountEl = document.getElementById('brains-count');
+                        ^
+
+ReferenceError: document is not defined
+    at C:\Users\lauta\zombie-clicker\game.js:22:25
+    at Object.<anonymous> (C:\Users\lauta\zombie-clicker\game.js:162:3)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function
+2026-08-21 07:57:28,357 [INFO]   intento 3/3 (llamando a qwen3.8:27b)...
+2026-08-21 07:59:49,283 [INFO]   respuesta recibida en 141s (7256 chars)
+2026-08-21 07:59:49,284 [INFO]   escrito: game.js (7227 bytes)
+2026-08-21 07:59:49,387 [WARNING]   verificacion FALLO: C:\Users\lauta\zombie-clicker\tests\logic.test.js:13
+  const s = Game.createState();
+                 ^
+
+TypeError: Game.createState is not a function
+    at testClick (C:\Users\lauta\zombie-clicker\tests\logic.test.js:13:18)
+    at Object.<anonymous> (C:\Users\lauta\zombie-clicker\tests\logic.test.js:19:3)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+  
+2026-08-21 07:59:49,387 [ERROR]   tarea v2-08-prestige-shop-data BLOQUEADA tras 3 intentos
+2026-08-21 07:59:49,388 [INFO] === Tarea v2-09-prestige-shop-ui: UI de tienda de prestige ===
+2026-08-21 07:59:49,401 [INFO]   intento 1/3 (llamando a qwen3.8:27b)...
+2026-08-21 08:06:04,981 [INFO]   respuesta recibida en 376s (15846 chars)
+2026-08-21 08:06:04,983 [INFO]   escrito: index.html (2235 bytes)
+2026-08-21 08:06:05,064 [WARNING]   verificacion FALLO: verify fallo sin salida
+2026-08-21 08:06:05,065 [INFO]   intento 2/3 (llamando a qwen3.8:27b)...
+2026-08-21 08:20:14,119 [INFO]   respuesta recibida en 849s (33345 chars)
+2026-08-21 08:20:14,121 [INFO]   escrito: index.html (2235 bytes)
+2026-08-21 08:20:14,121 [INFO]   escrito: style.css (5855 bytes)
+2026-08-21 08:20:14,122 [INFO]   escrito: game.js (11118 bytes)
+2026-08-21 08:20:14,203 [WARNING]   verificacion FALLO: verify fallo sin salida
+2026-08-21 08:20:14,204 [INFO]   intento 3/3 (llamando a qwen3.8:27b)...
+2026-08-21 08:26:26,267 [INFO]   respuesta recibida en 372s (11744 chars)
+2026-08-21 08:26:26,268 [INFO]   escrito: index.html (2235 bytes)
+2026-08-21 08:26:26,269 [INFO]   escrito: style.css (5855 bytes)
+2026-08-21 08:26:26,348 [WARNING]   verificacion FALLO: verify fallo sin salida
+2026-08-21 08:26:26,348 [ERROR]   tarea v2-09-prestige-shop-ui BLOQUEADA tras 3 intentos
+2026-08-21 08:26:26,349 [INFO] === Tarea v2-10-apply-prestige-multiplier: Aplicar multiplicador global a click y bps ===
+2026-08-21 08:26:26,377 [INFO]   intento 1/3 (llamando a qwen3.8:27b)...
+2026-08-21 08:28:53,194 [INFO]   respuesta recibida en 147s (3282 chars)
+2026-08-21 08:28:53,194 [WARNING]   la respuesta no contenia bloques <<<FILE: ...>>> validos
+2026-08-21 08:28:53,195 [INFO]   intento 2/3 (llamando a qwen3.8:27b)...
+2026-08-21 08:36:04,604 [INFO]   respuesta recibida en 431s (18183 chars)
+2026-08-21 08:36:04,605 [INFO]   escrito: index.html (1724 bytes)
+2026-08-21 08:36:04,606 [INFO]   escrito: style.css (5545 bytes)
+2026-08-21 08:36:04,607 [INFO]   escrito: game.js (10818 bytes)
+2026-08-21 08:36:04,712 [WARNING]   verificacion FALLO: C:\Users\lauta\zombie-clicker\game.js:295
+  if (document.readyState === "loading") {
+  ^
+
+ReferenceError: document is not defined
+    at C:\Users\lauta\zombie-clicker\game.js:295:3
+    at Object.<anonymous> (C:\Users\lauta\zombie-clicker\game.js:300:3)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:12
+2026-08-21 08:36:04,712 [INFO]   intento 3/3 (llamando a qwen3.8:27b)...
+2026-08-21 08:40:28,143 [INFO]   respuesta recibida en 263s (11923 chars)
+2026-08-21 08:40:28,144 [INFO]   escrito: game.js (11894 bytes)
+2026-08-21 08:40:28,242 [WARNING]   verificacion FALLO: C:\Users\lauta\zombie-clicker\tests\logic.test.js:13
+  const s = Game.createState();
+                 ^
+
+TypeError: Game.createState is not a function
+    at testClick (C:\Users\lauta\zombie-clicker\tests\logic.test.js:13:18)
+    at Object.<anonymous> (C:\Users\lauta\zombie-clicker\tests\logic.test.js:19:3)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+  
+2026-08-21 08:40:28,242 [ERROR]   tarea v2-10-apply-prestige-multiplier BLOQUEADA tras 3 intentos
+2026-08-21 08:40:28,243 [INFO] === Tarea v2-11-new-generators: Extender generadores a 10 ===
+2026-08-21 08:40:28,257 [INFO]   intento 1/3 (llamando a qwen3.8:27b)...
+2026-08-21 08:43:51,208 [INFO]   respuesta recibida en 203s (6292 chars)
+2026-08-21 08:43:51,208 [WARNING]   la respuesta no contenia bloques <<<FILE: ...>>> validos
+2026-08-21 08:43:51,209 [INFO]   intento 2/3 (llamando a qwen3.8:27b)...
+2026-08-21 08:49:37,394 [INFO]   respuesta recibida en 346s (14461 chars)
+2026-08-21 08:49:37,395 [INFO]   escrito: index.html (1193 bytes)
+2026-08-21 08:49:37,395 [INFO]   escrito: style.css (2893 bytes)
+2026-08-21 08:49:37,396 [INFO]   escrito: game.js (10279 bytes)
+2026-08-21 08:49:37,495 [WARNING]   verificacion FALLO: C:\Users\lauta\zombie-clicker\tests\logic.test.js:13
+  const s = Game.createState();
+                 ^
+
+TypeError: Game.createState is not a function
+    at testClick (C:\Users\lauta\zombie-clicker\tests\logic.test.js:13:18)
+    at Object.<anonymous> (C:\Users\lauta\zombie-clicker\tests\logic.test.js:19:3)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+  
+2026-08-21 08:49:37,496 [INFO]   intento 3/3 (llamando a qwen3.8:27b)...
+2026-08-21 08:53:49,676 [INFO]   respuesta recibida en 252s (11142 chars)
+2026-08-21 08:53:49,677 [INFO]   escrito: game.js (11113 bytes)
+2026-08-21 08:53:49,776 [WARNING]   verificacion FALLO: C:\Users\lauta\zombie-clicker\tests\logic.test.js:16
+  for (let i = 0; i < clicks; i++) Game.click(s);
+                                        ^
+
+TypeError: Game.click is not a function
+    at testClick (C:\Users\lauta\zombie-clicker\tests\logic.test.js:16:41)
+    at Object.<anonymous> (C:\Users\lauta\zombie-clicker\tests\logic.test.js:19:3)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:inte
+2026-08-21 08:53:49,776 [ERROR]   tarea v2-11-new-generators BLOQUEADA tras 3 intentos
+2026-08-21 08:53:49,777 [INFO] === Tarea v2-12-new-base-upgrades: Extender upgrades base a 10 ===
+2026-08-21 08:53:49,793 [INFO]   intento 1/3 (llamando a qwen3.8:27b)...
+2026-08-21 08:58:39,596 [INFO]   respuesta recibida en 290s (10692 chars)
+2026-08-21 08:58:39,597 [WARNING]   la respuesta no contenia bloques <<<FILE: ...>>> validos
+2026-08-21 08:58:39,597 [INFO]   intento 2/3 (llamando a qwen3.8:27b)...
+2026-08-21 09:05:06,739 [INFO]   respuesta recibida en 387s (15944 chars)
+2026-08-21 09:05:06,740 [INFO]   escrito: index.html (1215 bytes)
+2026-08-21 09:05:06,741 [INFO]   escrito: style.css (3515 bytes)
+2026-08-21 09:05:06,741 [INFO]   escrito: game.js (11118 bytes)
+2026-08-21 09:05:06,840 [WARNING]   verificacion FALLO: C:\Users\lauta\zombie-clicker\tests\logic.test.js:16
+  for (let i = 0; i < clicks; i++) Game.click(s);
+                                        ^
+
+TypeError: Game.click is not a function
+    at testClick (C:\Users\lauta\zombie-clicker\tests\logic.test.js:16:41)
+    at Object.<anonymous> (C:\Users\lauta\zombie-clicker\tests\logic.test.js:19:3)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:inte
+2026-08-21 09:05:06,841 [INFO]   intento 3/3 (llamando a qwen3.8:27b)...
+2026-08-21 09:09:31,648 [INFO]   respuesta recibida en 265s (11460 chars)
+2026-08-21 09:09:31,650 [INFO]   escrito: game.js (11431 bytes)
+2026-08-21 09:09:31,750 [WARNING]   verificacion FALLO: C:\Users\lauta\zombie-clicker\tests\logic.test.js:17
+  assert.strictEqual(s.brains, before + clicks * Game.getClickValue(s), 'click debe sumar el valor de click');
+                                                      ^
+
+TypeError: Game.getClickValue is not a function
+    at testClick (C:\Users\lauta\zombie-clicker\tests\logic.test.js:17:55)
+    at Object.<anonymous> (C:\Users\lauta\zombie-clicker\tests\logic.test.js:19:3)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at 
+2026-08-21 09:09:31,750 [ERROR]   tarea v2-12-new-base-upgrades BLOQUEADA tras 3 intentos
+2026-08-21 09:09:31,751 [INFO] === Tarea v2-14-horde-boss-event: Evento: Horda de jefe ===
+2026-08-21 09:09:31,764 [INFO]   intento 1/3 (llamando a qwen3.8:27b)...
+2026-08-21 09:14:02,509 [INFO]   respuesta recibida en 271s (8058 chars)
+2026-08-21 09:14:02,510 [WARNING]   la respuesta no contenia bloques <<<FILE: ...>>> validos
+2026-08-21 09:14:02,511 [INFO]   intento 2/3 (llamando a qwen3.8:27b)...
+2026-08-21 09:26:27,926 [INFO]   respuesta recibida en 745s (29623 chars)
+2026-08-21 09:26:27,928 [INFO]   escrito: index.html (2516 bytes)
+2026-08-21 09:26:27,928 [INFO]   escrito: style.css (5686 bytes)
+2026-08-21 09:26:27,929 [INFO]   escrito: game.js (21327 bytes)
+2026-08-21 09:26:28,017 [WARNING]   verificacion FALLO: verify fallo sin salida
+2026-08-21 09:26:28,017 [INFO]   intento 3/3 (llamando a qwen3.8:27b)...
+2026-08-21 09:30:25,196 [INFO]   respuesta recibida en 237s (8094 chars)
+2026-08-21 09:30:25,198 [INFO]   escrito: index.html (2565 bytes)
+2026-08-21 09:30:25,286 [WARNING]   verificacion FALLO: verify fallo sin salida
+2026-08-21 09:30:25,286 [ERROR]   tarea v2-14-horde-boss-event BLOQUEADA tras 3 intentos
+2026-08-21 09:30:25,287 [INFO] === Tarea v2-15-tabs-navigation: Navegación por pestañas ===
+2026-08-21 09:30:25,299 [INFO]   intento 1/3 (llamando a qwen3.8:27b)...
+2026-08-21 09:33:02,872 [INFO]   respuesta recibida en 158s (4493 chars)
+2026-08-21 09:33:02,873 [INFO]   escrito: index.html (3655 bytes)
+2026-08-21 09:33:02,959 [WARNING]   verificacion FALLO: verify fallo sin salida
+2026-08-21 09:33:02,959 [INFO]   intento 2/3 (llamando a qwen3.8:27b)...
