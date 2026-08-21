@@ -10,7 +10,8 @@
   let goldenBrainTimer = null;
   let bossTimer = null;
   let bossActive = false;
-  let bossMultiplier = 1;
+  let bossHp = 0;
+  let bossMaxHp = 0;
   let generatorQty = 1; // 1, 10, 0=max
   let prevAchievements = [];
 
@@ -50,7 +51,12 @@
     necropolis: SVG_ICONS.necro,
     "virus-alfa": SVG_ICONS.virus,
     apocalipsis: SVG_ICONS.apocalypse,
-    "zombie-dios": SVG_ICONS.god
+    "zombie-dios": SVG_ICONS.god,
+    cementerio: SVG_ICONS.necro,
+    "plaga-mundial": SVG_ICONS.virus,
+    "dimension-rota": SVG_ICONS.apocalypse,
+    "trono-huesos": SVG_ICONS.bone,
+    "vacio-verdoso": SVG_ICONS.god
   };
 
   const UPGRADE_ICON_MAP = {
@@ -110,8 +116,13 @@
       if (raw) state = Game.deserialize(raw);
     } catch (e) {}
     if (!state) state = Game.createState();
-    if (!state.prestige) state.prestige = { souls: 0, totalSoulsEarned: 0, upgrades: [] };
+    if (!state.prestige) state.prestige = { souls: 0, totalSoulsEarned: 0, soulChips: 0, upgrades: [] };
     if (!Array.isArray(state.prestige.upgrades)) state.prestige.upgrades = [];
+    if (typeof Game.normalizePrestige === "function") {
+      state.prestige = Game.normalizePrestige(state.prestige);
+    }
+    if (typeof state.bones !== "number") state.bones = 0;
+    if (typeof state.prestigeCount !== "number") state.prestigeCount = 0;
     if (!Array.isArray(state.upgrades)) state.upgrades = [];
     if (!Array.isArray(state.achievements)) state.achievements = [];
     if (!state.generators) state.generators = {};
@@ -244,7 +255,7 @@
       renderPrestige();
       renderHeader();
       setupAutoClick();
-      showToast("Mejora de almas comprada", "success");
+      showToast("Mejora permanente comprada", "success");
     }
   }
 
@@ -255,7 +266,7 @@
       showToast("Necesitas más cerebros totales para ascender", "warn");
       return;
     }
-    if (typeof confirm === "function" && !confirm("¿Ascender? Perderás cerebros, generadores y mejoras, pero ganarás " + gain + " almas.")) return;
+    if (typeof confirm === "function" && !confirm("¿Ascender? Perderás cerebros, generadores y mejoras de esta run, pero ganarás " + gain + " almas (nivel) y " + gain + " astillas.")) return;
     state = Game.prestige(state);
     prevAchievements = state.achievements.slice();
     saveGame();
@@ -281,7 +292,11 @@
     setStatText($("stat-bps"), bpsText);
     setStatText($("hero-brains"), brainsText);
     setStatText($("hero-bps"), bpsText);
-    setStatText($("stat-souls"), formatNumber(state.prestige.souls));
+    const soulLevel = typeof Game.getSoulLevel === "function"
+      ? Game.getSoulLevel(state)
+      : (state.prestige.totalSoulsEarned || 0);
+    setStatText($("stat-souls"), formatNumber(soulLevel));
+    setStatText($("stat-bones"), formatNumber(state.bones || 0));
   }
 
   function renderClicker() {
@@ -368,7 +383,24 @@
     const costEl = div.querySelector(".item-cost");
     const countEl = div.querySelector(".item-count");
     if (costEl) costEl.textContent = formatNumber(cost);
-    if (countEl) countEl.textContent = "x" + count + " · " + formatNumber(bpsEach) + "/s";
+    if (countEl) {
+      let extra = "x" + count + " · " + formatNumber(bpsEach) + "/s";
+      const next = nextMilestone(count);
+      if (next) extra += " · hito " + next;
+      const mil = typeof Game.getMilestoneMultiplier === "function"
+        ? Game.getMilestoneMultiplier(count)
+        : 1;
+      if (mil > 1) extra += " · x" + mil + " hitos";
+      countEl.textContent = extra;
+    }
+  }
+
+  function nextMilestone(count) {
+    const thresholds = Game.MILESTONE_THRESHOLDS || [25, 50, 100, 200, 400];
+    for (let i = 0; i < thresholds.length; i++) {
+      if (count < thresholds[i]) return thresholds[i];
+    }
+    return 0;
   }
 
   function patchGenerators() {
@@ -414,7 +446,12 @@
 
     Game.UPGRADES.forEach(function (upg) {
       const existing = container.querySelector('[data-upg-id="' + upg.id + '"]');
+      const visible = typeof Game.isUpgradeVisible !== "function" || Game.isUpgradeVisible(state, upg);
       const owned = state.upgrades.indexOf(upg.id) !== -1;
+      if (!visible && !owned) {
+        if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
+        return;
+      }
       if (owned) {
         if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
         return;
@@ -469,15 +506,19 @@
   function updateCosmeticCard(div, cos) {
     const owned = state.cosmetics.owned.indexOf(cos.id) !== -1;
     const equipped = state.cosmetics.equipped[cos.slot] === cos.id;
-    div.className = "item-card" + (equipped ? " owned" : (owned ? " affordable" : (state.brains >= cos.cost ? " affordable" : " disabled")));
+    const chips = typeof Game.getSoulChips === "function" ? Game.getSoulChips(state) : (state.prestige.soulChips || 0);
+    const canAfford = owned || cos.cost <= 0 || chips >= cos.cost;
+    div.className = "item-card" + (equipped ? " owned" : (owned ? " affordable" : (canAfford ? " affordable" : " disabled")));
     const costEl = div.querySelector(".item-cost");
     if (costEl) {
       if (equipped) {
         costEl.textContent = "Equipado";
       } else if (owned) {
         costEl.textContent = "Comprado";
+      } else if (cos.cost <= 0) {
+        costEl.textContent = "Gratis";
       } else {
-        costEl.textContent = formatNumber(cos.cost);
+        costEl.textContent = formatNumber(cos.cost) + " astillas";
       }
     }
   }
@@ -522,12 +563,20 @@
 
   function renderPrestige() {
     const soulsEl = $("prestige-souls");
+    const chipsEl = $("prestige-chips");
     const gainEl = $("prestige-gain");
     const multEl = $("prestige-multiplier");
     const btn = $("btn-prestige");
     if (!state) return;
     const gain = Game.getPrestigeGain(state);
-    if (soulsEl) soulsEl.textContent = formatNumber(state.prestige.souls);
+    const soulLevel = typeof Game.getSoulLevel === "function"
+      ? Game.getSoulLevel(state)
+      : (state.prestige.totalSoulsEarned || 0);
+    const chips = typeof Game.getSoulChips === "function"
+      ? Game.getSoulChips(state)
+      : (state.prestige.soulChips || 0);
+    if (soulsEl) soulsEl.textContent = formatNumber(soulLevel);
+    if (chipsEl) chipsEl.textContent = formatNumber(chips);
     if (gainEl) gainEl.textContent = formatNumber(gain);
     if (multEl) multEl.textContent = "x" + Game.getGlobalMultiplier(state).toFixed(2);
     if (btn) btn.disabled = gain <= 0;
@@ -537,7 +586,7 @@
     shop.innerHTML = "";
     Game.PRESTIGE_UPGRADES.forEach(function (pu) {
       const owned = state.prestige.upgrades.indexOf(pu.id) !== -1;
-      const canBuy = !owned && state.prestige.souls >= pu.cost;
+      const canBuy = !owned && chips >= pu.cost;
       const div = document.createElement("div");
       div.className = "item-card" + (owned ? " owned" : (canBuy ? " affordable" : " disabled"));
       div.innerHTML =
@@ -545,7 +594,7 @@
           '<div class="item-name">' + pu.name + '</div>' +
           '<div class="item-desc">' + pu.desc + '</div>' +
         '</div>' +
-        '<span class="item-cost prestige-cost">' + (owned ? "Comprado" : formatNumber(pu.cost) + " almas") + '</span>';
+        '<span class="item-cost prestige-cost">' + (owned ? "Comprado" : formatNumber(pu.cost) + " astillas") + '</span>';
       if (!owned) {
         div.addEventListener("click", function () { buyPrestigeUpgrade(pu.id); });
       }
@@ -566,7 +615,10 @@
       statRow("Generadores", formatNumber(stats.generatorsOwned)) +
       statRow("Logros", state.achievements.length + "/" + Game.ACHIEVEMENTS.length) +
       statRow("Multiplicador", "x" + Game.getGlobalMultiplier(state).toFixed(2)) +
-      statRow("Almas totales", formatNumber(state.prestige.totalSoulsEarned));
+      statRow("Almas (nivel)", formatNumber(stats.soulLevel != null ? stats.soulLevel : state.prestige.totalSoulsEarned)) +
+      statRow("Astillas", formatNumber(stats.soulChips != null ? stats.soulChips : (state.prestige.soulChips || 0))) +
+      statRow("Huesos", formatNumber(stats.bones != null ? stats.bones : (state.bones || 0))) +
+      statRow("Ascensiones", formatNumber(stats.prestigeCount != null ? stats.prestigeCount : (state.prestigeCount || 0)));
   }
 
   function statRow(label, value) {
@@ -672,10 +724,13 @@
       el.classList.add("popping");
       goldenBrainTimer = null;
       if (state) {
-        const reward = Math.max(100, Math.floor(Game.getBrainsPerSecond(state) * 30));
-        state.brains += reward;
-        state.totalBrainsEarned += reward;
-        showToast("🧠 Cerebro dorado: +" + formatNumber(reward) + " cerebros", "success");
+        const result = Game.applyGoldenBrain(state, Math.random());
+        if (result && result.type === "bones") {
+          showToast("🧠 Cerebro dorado: +" + result.amount + " hueso", "success");
+        } else {
+          const amount = result ? result.amount : 0;
+          showToast("🧠 Cerebro dorado: +" + formatNumber(amount) + " cerebros", "success");
+        }
         renderHeader();
         renderStats();
       }
@@ -692,34 +747,48 @@
     }, delay);
   }
 
+  function updateBossHpUi() {
+    const bar = $("boss-hp-bar");
+    const label = $("boss-hp-label");
+    const pct = bossMaxHp > 0 ? Math.max(0, (bossHp / bossMaxHp) * 100) : 0;
+    if (bar) bar.style.width = pct + "%";
+    if (label) label.textContent = Math.max(0, bossHp) + "/" + bossMaxHp;
+  }
+
+  function clearBoss() {
+    const el = $("horde-boss");
+    if (el) el.classList.remove("visible");
+    bossActive = false;
+    bossHp = 0;
+    bossMaxHp = 0;
+    bossTimer = null;
+  }
+
   function spawnBoss() {
     const el = $("horde-boss");
     if (!el) return;
     bossActive = true;
-    bossMultiplier = 5;
+    bossMaxHp = typeof Game.getBossMaxHp === "function" ? Game.getBossMaxHp(state) : 15;
+    bossHp = bossMaxHp;
     el.classList.add("visible");
-    showToast("👹 ¡Jefe de la horda apareció! x5 producción por 30s", "warn");
+    updateBossHpUi();
+    showToast("👹 ¡Jefe de la horda! Clickalo para bajarle la vida", "warn");
     const timeout = setTimeout(function () {
-      el.classList.remove("visible");
-      bossActive = false;
-      bossMultiplier = 1;
-      bossTimer = null;
+      if (!bossActive) return;
+      clearBoss();
       showToast("El jefe se fue", "info");
-    }, 30000);
+    }, 45000);
     el.onclick = function () {
+      if (!bossActive || !state) return;
+      bossHp -= 1;
+      updateBossHpUi();
+      if (bossHp > 0) return;
       clearTimeout(timeout);
-      el.classList.remove("visible");
-      bossActive = false;
-      bossMultiplier = 1;
-      bossTimer = null;
-      if (state) {
-        const reward = Math.max(500, Math.floor(Game.getBrainsPerSecond(state) * 60));
-        state.brains += reward;
-        state.totalBrainsEarned += reward;
-        showToast("💀 ¡Derrotaste al jefe! +" + formatNumber(reward) + " cerebros", "success");
-        renderHeader();
-        renderStats();
-      }
+      clearBoss();
+      const reward = Game.applyBossKill(state);
+      showToast("💀 ¡Derrotaste al jefe! +" + formatNumber(reward.brains) + " cerebros y +" + reward.bones + " hueso", "success");
+      renderHeader();
+      renderStats();
     };
   }
 
@@ -757,8 +826,7 @@
     const dt = (now - lastTickTime) / 1000;
     lastTickTime = now;
     if (dt > 0) {
-      const tickMult = bossActive ? bossMultiplier : 1;
-      Game.tick(state, dt * tickMult);
+      Game.tick(state, dt);
       const bps = Game.getBrainsPerSecond(state);
       if (bps > (state.bestBps || 0)) state.bestBps = bps;
       const newAch = Game.checkAchievements(state);

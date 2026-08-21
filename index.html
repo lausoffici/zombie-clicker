@@ -30,9 +30,13 @@
           <span class="topbar-stat-label">Por segundo</span>
           <span id="stat-bps" class="topbar-stat-value tabular-nums">0/s</span>
         </div>
-        <div class="topbar-stat topbar-stat--souls" title="Almas: moneda de Prestigio. Cada Alma da +5% multiplicador permanente.">
+        <div class="topbar-stat topbar-stat--souls" title="Almas: nivel de Prestigio. Cada Alma da +5% multiplicador permanente. No se gasta.">
           <span class="topbar-stat-label">Almas</span>
           <span id="stat-souls" class="topbar-stat-value tabular-nums">0</span>
+        </div>
+        <div class="topbar-stat topbar-stat--bones" title="Huesos: se acumulan con eventos. Aún no se gastan (capa futura).">
+          <span class="topbar-stat-label">Huesos</span>
+          <span id="stat-bones" class="topbar-stat-value tabular-nums">0</span>
         </div>
       </div>
       <div id="topbar-actions">
@@ -151,21 +155,22 @@
           <div class="card">
             <h2 class="card-title">Prestigio</h2>
             <div class="prestige-help">
-              <p><strong>¿Qué son las Almas?</strong></p>
-              <p>Las Almas son la moneda de Prestigio. Al <strong>Ascender</strong> reiniciás cerebros, generadores y mejoras, y ganás Almas permanentes.</p>
+              <p><strong>Almas y astillas</strong></p>
+              <p>Al <strong>Ascender</strong> reiniciás cerebros, generadores y mejoras de esta run. El <strong>nivel de Almas</strong> es permanente y no se gasta. Las <strong>astillas</strong> sí se gastan en la tienda y en cosméticos.</p>
               <ul>
-                <li>Cada Alma → <strong>+5%</strong> multiplicador global</li>
-                <li>Fórmula: <code>floor(sqrt(cerebrosTotales / 1e6))</code></li>
-                <li>Gastá Almas en la tienda de abajo (mejoras permanentes)</li>
+                <li>Cada Alma (nivel) → <strong>+5%</strong> multiplicador global</li>
+                <li>Fórmula: <code>floor(sqrt(cerebrosDeLaRun / 1e9))</code></li>
+                <li>Conviene ascender cuando puedas <strong>duplicar tu nivel</strong> de almas</li>
               </ul>
             </div>
             <div id="prestige-summary">
-              <div class="prestige-stat"><span>Almas</span><span id="prestige-souls">0</span></div>
+              <div class="prestige-stat"><span>Almas (nivel)</span><span id="prestige-souls">0</span></div>
+              <div class="prestige-stat"><span>Astillas</span><span id="prestige-chips">0</span></div>
               <div class="prestige-stat"><span>Ganarías</span><span id="prestige-gain">0</span></div>
               <div class="prestige-stat"><span>Multiplicador</span><span id="prestige-multiplier">x1.00</span></div>
             </div>
             <button id="btn-prestige" class="btn btn-prestige" disabled>Ascender</button>
-            <h3 class="card-subtitle">Tienda de almas</h3>
+            <h3 class="card-subtitle">Tienda de astillas</h3>
             <div id="prestige-shop" class="prestige-list"></div>
           </div>
         </div>
@@ -210,6 +215,8 @@
     </div>
     <div id="horde-boss" class="event-item hidden">
       <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><radialGradient id="bossglow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#e62e2e" stop-opacity="0.5"/><stop offset="100%" stop-color="#e62e2e" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="50" r="45" fill="url(#bossglow)"/><path d="M25 25 L35 45 L20 40 L40 55 L15 60 L45 70 L25 85 L55 75 L60 95 L70 70 L90 80 L80 55 L100 50 L80 45 L90 20 L70 30 L60 5 L55 25 L25 25" fill="#4a0f0f"/><circle cx="40" cy="45" r="5" fill="#ffbf00"/><circle cx="60" cy="45" r="5" fill="#ffbf00"/><path d="M35 70 Q50 60 65 70" fill="#2a2018"/></svg>
+      <div id="boss-hp-wrap" aria-hidden="true"><div id="boss-hp-bar"></div></div>
+      <div id="boss-hp-label">0/0</div>
     </div>
   </div>
   <script src="game.js"></script>
