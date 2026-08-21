@@ -236,3 +236,10 @@
 2026-08-20 17:56:21,274 [INFO] === RESUMEN: 14/14 tareas completadas ===
 2026-08-21 00:02:41,516 [INFO] tasks.json valido: 22 tareas
 2026-08-21 00:02:41,712 [INFO] Ollama OK, modelo 'qwen3.8:27b' disponible.
+2026-08-21 00:03:11,779 [INFO] tasks.json valido: 22 tareas
+2026-08-21 00:03:11,851 [INFO] Ollama OK, modelo 'qwen3.8:27b' disponible.
+2026-08-21 00:03:11,852 [INFO] Tareas a ejecutar: 22
+2026-08-21 00:03:11,852 [INFO] === Tarea v2-01-buy-max: Compra en bloque: x1/x10/xMax ===
+2026-08-21 00:03:11,882 [INFO]   intento 1/3 (llamando a qwen3.8:27b)...
+2026-08-21 00:35:52,557 [INFO] tasks.json valido: 22 tareas
+2026-08-21 00:35:52,619 [INFO] Ollama OK, modelo 'qwen3.8:27b' disponible.

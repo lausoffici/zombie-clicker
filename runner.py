@@ -244,6 +244,10 @@ def main():
     parser.add_argument("--dry-run", action="store_true",
                         help="valida tasks.json y la conexion con Ollama sin ejecutar nada")
     parser.add_argument("--only", metavar="TASK_ID", help="ejecuta una sola tarea")
+    parser.add_argument("--retry-blocked", action="store_true",
+                        help="reintenta tareas bloqueadas en bucle hasta que todas pasen")
+    parser.add_argument("--retry-delay", type=int, default=60,
+                        help="segundos de espera entre reintentos de bloqueadas (default: %(default)s)")
     args = parser.parse_args()
 
     setup_logging()
@@ -276,30 +280,45 @@ def main():
         return 0
 
     state = load_state()
-    todo = [t for t in tasks if state.get(t["id"]) != "done"]
-    if args.only:
-        todo = [t for t in tasks if t["id"] == args.only]
+
+    while True:
+        todo = [t for t in tasks if state.get(t["id"]) != "done"]
+        if args.only:
+            todo = [t for t in tasks if t["id"] == args.only]
+            if not todo:
+                logging.error("no existe la tarea '%s'", args.only)
+                return 1
+        else:
+            # sin retry, saltamos las bloqueadas como antes
+            if not args.retry_blocked:
+                todo = [t for t in todo if state.get(t["id"]) != "blocked"]
+
         if not todo:
-            logging.error("no existe la tarea '%s'", args.only)
-            return 1
+            logging.info("No hay tareas pendientes. Todo terminado.")
+            break
 
-    if not todo:
-        logging.info("No hay tareas pendientes. Todo terminado.")
-        return 0
+        logging.info("Tareas a ejecutar en este ciclo: %d", len(todo))
+        for task in todo:
+            run_task(args.model, args.num_ctx, data, task, state)
 
-    logging.info("Tareas a ejecutar: %d", len(todo))
-    for task in todo:
-        if state.get(task["id"]) == "blocked" and not args.only:
-            logging.info("Saltando %s (blocked). Usa --only %s para reintentar.",
-                         task["id"], task["id"])
-            continue
-        run_task(args.model, args.num_ctx, data, task, state)
+        if args.only:
+            break
+
+        blocked = [t["id"] for t in tasks if state.get(t["id"]) == "blocked"]
+        if not blocked:
+            break
+        if not args.retry_blocked:
+            break
+        logging.info("%d tareas bloqueadas; reintentando en %d segundos...",
+                     len(blocked), args.retry_delay)
+        time.sleep(args.retry_delay)
 
     done = sum(1 for t in tasks if state.get(t["id"]) == "done")
     blocked = [t["id"] for t in tasks if state.get(t["id"]) == "blocked"]
     logging.info("=== RESUMEN: %d/%d tareas completadas ===", done, len(tasks))
     if blocked:
-        logging.info("Bloqueadas (reintentar con --only): %s", ", ".join(blocked))
+        logging.info("Bloqueadas (reintentar con --only o --retry-blocked): %s",
+                     ", ".join(blocked))
     return 0 if not blocked else 2
 
 
