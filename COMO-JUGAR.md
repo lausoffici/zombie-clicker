@@ -15,6 +15,7 @@ Hecho en HTML/CSS/JS vanilla, sin dependencias de npm ni build step. **Serví el
 ### 🖱️ Click
 - Hacé click en el **zombie** para ganar cerebros.
 - El valor de cada click se multiplica con upgrades de click y con el **multiplicador global**.
+- Debajo del zombie se ven tus stats de click: **valor por click**, **% de crítico** y los **cerebros que da un crítico**.
 
 ### 🏭 Generadores
 - Comprá generadores para producir cerebros por segundo (BPS) de forma automática.
@@ -22,23 +23,27 @@ Hecho en HTML/CSS/JS vanilla, sin dependencias de npm ni build step. **Serví el
 - Podés comprar de a 1, 10 o la cantidad máxima que alcance.
 
 ### ⬆️ Mejoras
-- Son compras únicas que multiplican el click, un generador específico o todo el BPS global.
-- Una vez compradas, desaparecen de la lista.
+- Se compran con cerebros y tienen **hasta 5 niveles** cada una.
+- Cada nivel potencia click, un generador, el multiplicador global, críticos o costos más baratos.
+- El costo sube un **×2.5** por nivel. La carta muestra `Lv N/5` y una barra hacia el próximo costo.
+- Al llegar a nivel máximo se marca **MÁX** y queda visible.
+- Al prestigiar se reinician (las de prestigio / almas no).
 
 ### 🏆 Logros
 - Se desbloquean automáticamente al alcanzar milestones (clicks, cerebros totales, generadores).
 - Cada logro desbloqueado suma un **+2%** al multiplicador global.
 
 ### ✨ Prestigio
-**¿Qué son las Almas?**
+Las **Almas** no se pierden. Al **Ascender**, la horda vuelve a cero (cerebros, generadores y mejoras) y te quedás con Almas permanentes. Logros, skins y compras de la tienda de almas también se conservan.
 
-Las Almas son la moneda de Prestigio. Al **Ascender** reiniciás cerebros, generadores y mejoras, y ganás Almas permanentes.
+1. Juntá cerebros (cuenta el **total** de la partida).
+2. Ascendé para convertir ese progreso en Almas.
+3. Gastá Almas en la pestaña **Almas** de la tienda: esas mejoras no se reinician.
 
-- Cada Alma → **+5%** multiplicador global
-- Fórmula: `floor(sqrt(cerebrosTotales / 1e6))`
-- Gastá Almas en la tienda de abajo (mejoras permanentes)
+- Cada Alma → **+5%** a clicks y cerebros por segundo
+- La primera Alma aparece al **1 millón** de cerebros totales (4M → 2, 9M → 3, 25M → 5)
 
-En la pestaña **Prestigio** podés gastar almas en mejoras permanentes:
+En la tienda, pestaña **Almas**, podés gastarlas en mejoras permanentes:
   - **BPS Boost**: +10% BPS
   - **Click Boost**: +20% click
   - **Soul Start**: +100 cerebros iniciales tras reset
@@ -85,20 +90,28 @@ En la pestaña **Prestigio** podés gastar almas en mejoras permanentes:
 
 ---
 
-## ⬆️ Mejoras (10)
+## ⬆️ Mejoras (16, max Lv 5)
 
-| Nombre | Efecto |
-|--------|--------|
-| Dedos podridos | Click x2 |
-| Mandíbula filosa | Click x2 |
-| Garras infectadas | Click x3 |
-| Puño demolición | Click x5 |
-| Superviviente veloz | Superviviente x2 |
-| Mordedura profunda | Mordedor x2 |
-| Corredor mutado | Corredor x2 |
-| Rabia eterna | Rabioso x2 |
-| Jefe alpha | Jefe zombie x2 |
-| Fuerza sobrenatural | BPS global x1.5 |
+Cada mejora escala con `costo = base × 2.5^nivel`. Efecto por nivel según tipo:
+
+| Nombre | Tipo | Efecto por nivel |
+|--------|------|------------------|
+| Dedos podridos | click | ×1.5 click |
+| Mandíbula filosa | click | ×1.5 click |
+| Garras infectadas | click | ×1.6 click |
+| Puño demolición | click | ×1.7 click |
+| Reflejos muertos | click | ×1.5 click |
+| Superviviente veloz | generador | ×1.5 superviviente |
+| Mordedura profunda | generador | ×1.5 mordedor |
+| Corredor mutado | generador | ×1.5 corredor |
+| Rabia eterna | generador | ×1.5 rabioso |
+| Jefe alpha | generador | ×1.5 jefe |
+| Horda voraz | generador | ×1.5 horda |
+| Necrópolis oscura | generador | ×1.5 necrópolis |
+| Virus letal | generador | ×1.5 Virus Alfa |
+| Fuerza sobrenatural | global | +25% global |
+| Golpe crítico | crit | +5% chance de crítico ×10 |
+| Cerebros baratos | cheaper | −5% costo de generadores |
 
 ---
 
@@ -115,6 +128,7 @@ Cada uno da **+2%** multiplicador global.
 ## Atajos
 
 - **Pestañas**: Juego / Logros / Prestigio / Estadísticas.
+- **Tienda**: Generadores, Mejoras, Cosméticos y **Almas** (mejoras permanentes).
 - **Botones del header**: cuenta, 💾 guardar manual, 🔄 reiniciar partida.
 - **Prestigio**: el botón "Ascender" se habilita cuando tenés almas para ganar.
 

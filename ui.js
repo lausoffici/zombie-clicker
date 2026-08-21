@@ -69,7 +69,13 @@
     "corredor-mutado": SVG_ICONS.flask,
     "rabia-eterna": SVG_ICONS.fire,
     "jefe-alpha": SVG_ICONS.crown,
-    "fuerza-sobrenatural": SVG_ICONS.muscle
+    "fuerza-sobrenatural": SVG_ICONS.muscle,
+    "horde-voraz": SVG_ICONS.horde,
+    "necropolis-oscura": SVG_ICONS.necro,
+    "virus-letal": SVG_ICONS.virus,
+    "reflejos-muertos": SVG_ICONS.bolt,
+    "golpe-critico": SVG_ICONS.fist,
+    "cerebros-baratos": SVG_ICONS.bone
   };
 
   function $(id) { return document.getElementById(id); }
@@ -132,7 +138,15 @@
     if (!state) state = Game.createState();
     if (!state.prestige) state.prestige = { souls: 0, totalSoulsEarned: 0, upgrades: [] };
     if (!Array.isArray(state.prestige.upgrades)) state.prestige.upgrades = [];
-    if (!Array.isArray(state.upgrades)) state.upgrades = [];
+    if (Array.isArray(state.upgrades)) {
+      const migrated = {};
+      state.upgrades.forEach(function (id) {
+        if (typeof id === "string") migrated[id] = 1;
+      });
+      state.upgrades = migrated;
+    } else if (!state.upgrades || typeof state.upgrades !== "object") {
+      state.upgrades = {};
+    }
     if (!Array.isArray(state.achievements)) state.achievements = [];
     if (!state.generators) state.generators = {};
     if (!state.startedAt) state.startedAt = Date.now();
@@ -210,7 +224,7 @@
       renderShop();
       renderHeader();
       renderStats();
-      showToast("Mejora adquirida", "success");
+      showToast("Nivel de mejora subido", "success");
     }
   }
 
@@ -263,6 +277,7 @@
     if (Game.buyPrestigeUpgrade(state, id)) {
       renderPrestige();
       renderHeader();
+      patchSoulsShop();
       setupAutoClick();
       showToast("Mejora de almas comprada", "success");
     }
@@ -281,6 +296,7 @@
     saveGame();
     setupAutoClick();
     renderAll();
+    setShopTab("shop-list-souls");
     showToast("¡La horda renace! +" + gain + " almas", "success");
   }
 
@@ -301,13 +317,22 @@
     setStatText($("stat-bps"), bpsText);
     setStatText($("hero-brains"), brainsText);
     setStatText($("hero-bps"), bpsText);
-    setStatText($("stat-souls"), formatNumber(state.prestige.souls));
+    const soulsText = formatNumber(state.prestige.souls);
+    setStatText($("stat-souls"), soulsText);
+    const soulsShopCount = $("souls-shop-count");
+    if (soulsShopCount) soulsShopCount.textContent = soulsText;
   }
 
   function renderClicker() {
     if (!state) return;
+    const clickVal = Game.getClickValue(state);
     const clickValueEl = $("click-value");
-    if (clickValueEl) clickValueEl.textContent = "+" + formatNumber(Game.getClickValue(state)) + " por click";
+    if (clickValueEl) clickValueEl.textContent = "+" + formatNumber(clickVal) + " por click";
+    const critChance = Game.getCritChance(state);
+    const critEl = $("click-crit");
+    if (critEl) critEl.textContent = "Crítico " + Math.round(critChance * 100) + "% · ×10";
+    const critValueEl = $("click-crit-value");
+    if (critValueEl) critValueEl.textContent = "+" + formatNumber(clickVal * 10) + " en crítico";
   }
 
   function getBulkGeneratorCost(state, id, qty) {
@@ -359,6 +384,7 @@
     patchGenerators();
     patchUpgrades();
     patchCosmetics();
+    patchSoulsShop();
   }
 
   function buildGeneratorCard(gen) {
@@ -414,6 +440,34 @@
     });
   }
 
+  function formatUpgradeEffect(upg, level) {
+    if (level <= 0) {
+      if (upg.type === "click") return "×" + upg.perLevel.toFixed(2).replace(/\.?0+$/, "") + " click / niv.";
+      if (upg.type === "generator") return "×" + upg.perLevel.toFixed(2).replace(/\.?0+$/, "") + " gen / niv.";
+      if (upg.type === "global") return "+" + Math.round((upg.perLevel - 1) * 100) + "% global / niv.";
+      if (upg.type === "crit") return Math.round(upg.perLevel * 100) + "% crít. / niv.";
+      if (upg.type === "cheaper") return "−" + Math.round(upg.perLevel * 100) + "% costo / niv.";
+      return upg.desc;
+    }
+    if (upg.type === "click" || upg.type === "generator") {
+      const mult = Math.pow(upg.perLevel, level);
+      const label = upg.type === "click" ? "click" : "gen";
+      return "×" + (Math.round(mult * 100) / 100) + " " + label;
+    }
+    if (upg.type === "global") {
+      return "+" + Math.round((upg.perLevel - 1) * level * 100) + "% global";
+    }
+    if (upg.type === "crit") {
+      return "Crít. " + Math.round(upg.perLevel * level * 100) + "%";
+    }
+    if (upg.type === "cheaper") {
+      const factor = Math.pow(1 - upg.perLevel, level);
+      const pct = Math.round((1 - factor) * 100);
+      return "−" + pct + "% costo";
+    }
+    return upg.desc;
+  }
+
   function buildUpgradeCard(upg) {
     const div = document.createElement("div");
     div.setAttribute("data-upg-id", upg.id);
@@ -421,9 +475,13 @@
       '<span class="item-icon">' + (UPGRADE_ICON_MAP[upg.id] || upg.icon) + '</span>' +
       '<div class="item-info">' +
         '<div class="item-name">' + upg.name + '</div>' +
-        '<div class="item-desc">' + upg.desc + '</div>' +
+        '<div class="item-desc"></div>' +
+        '<div class="upgrade-progress" aria-hidden="true"><div class="upgrade-progress-fill"></div></div>' +
       '</div>' +
-      '<span class="item-cost">' + formatNumber(upg.cost) + '</span>';
+      '<div class="item-meta">' +
+        '<span class="item-cost"></span>' +
+        '<span class="item-count"></span>' +
+      '</div>';
     div.addEventListener("click", function () { buyUpgrade(upg.id); });
     return div;
   }
@@ -432,40 +490,49 @@
     const container = $("shop-list-upgrades");
     if (!container || !state) return;
 
+    const empty = container.querySelector("[data-empty-upgrades]");
+    if (empty && empty.parentNode) empty.parentNode.removeChild(empty);
+
     Game.UPGRADES.forEach(function (upg) {
-      const existing = container.querySelector('[data-upg-id="' + upg.id + '"]');
-      const owned = state.upgrades.indexOf(upg.id) !== -1;
-      if (owned) {
-        if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
-        return;
-      }
-      let div = existing;
+      let div = container.querySelector('[data-upg-id="' + upg.id + '"]');
       if (!div) {
         div = buildUpgradeCard(upg);
         container.appendChild(div);
       }
-      const canBuy = state.brains >= upg.cost;
-      div.className = "item-card" + (canBuy ? " affordable" : " disabled");
-      const costEl = div.querySelector(".item-cost");
-      if (costEl) costEl.textContent = formatNumber(upg.cost);
-    });
 
-    const empty = container.querySelector("[data-empty-upgrades]");
-    let any = false;
-    Game.UPGRADES.forEach(function (upg) {
-      if (state.upgrades.indexOf(upg.id) === -1) any = true;
-    });
-    if (!any) {
-      if (!empty) {
-        const el = document.createElement("div");
-        el.className = "item-card disabled";
-        el.setAttribute("data-empty-upgrades", "1");
-        el.innerHTML = '<span class="item-desc">¡Todas las mejoras compradas!</span>';
-        container.appendChild(el);
+      const level = Game.getUpgradeLevel(state, upg.id);
+      const maxed = level >= upg.maxLevel;
+      const cost = maxed ? Infinity : Game.getUpgradeCost(state, upg.id);
+      const canBuy = !maxed && isFinite(cost) && state.brains >= cost;
+
+      let className = "item-card";
+      if (maxed) {
+        className += " owned maxed";
+      } else if (canBuy) {
+        className += " affordable";
+      } else {
+        className += " disabled";
       }
-    } else if (empty && empty.parentNode) {
-      empty.parentNode.removeChild(empty);
-    }
+      div.className = className;
+
+      const descEl = div.querySelector(".item-desc");
+      if (descEl) descEl.textContent = formatUpgradeEffect(upg, level);
+
+      const countEl = div.querySelector(".item-count");
+      if (countEl) countEl.textContent = "Lv " + level + "/" + upg.maxLevel;
+
+      const costEl = div.querySelector(".item-cost");
+      if (costEl) costEl.textContent = maxed ? "MÁX" : formatNumber(cost);
+
+      const fill = div.querySelector(".upgrade-progress-fill");
+      if (fill) {
+        let pct = 100;
+        if (!maxed && isFinite(cost) && cost > 0) {
+          pct = Math.max(0, Math.min(100, (state.brains / cost) * 100));
+        }
+        fill.style.width = pct + "%";
+      }
+    });
   }
 
   function renderGenerators() { patchGenerators(); }
@@ -550,26 +617,48 @@
     if (soulsEl) soulsEl.textContent = formatNumber(state.prestige.souls);
     if (gainEl) gainEl.textContent = formatNumber(gain);
     if (multEl) multEl.textContent = "x" + Game.getGlobalMultiplier(state).toFixed(2);
-    if (btn) btn.disabled = gain <= 0;
+    if (btn) {
+      btn.disabled = gain <= 0;
+      btn.textContent = gain > 0 ? "Ascender (+" + formatNumber(gain) + ")" : "Ascender";
+    }
 
-    const shop = $("prestige-shop");
-    if (!shop) return;
-    shop.innerHTML = "";
+    const hintEl = $("prestige-hint");
+    if (hintEl) {
+      const nextAt = (gain + 1) * (gain + 1) * 1000000;
+      const remaining = Math.max(0, nextAt - state.totalBrainsEarned);
+      const almaWord = gain === 1 ? "Alma" : "Almas";
+      if (gain <= 0) {
+        hintEl.textContent = "Te faltan " + formatNumber(remaining) + " cerebros totales para la primera Alma.";
+      } else {
+        hintEl.textContent = "Si ascendés ahora: +" + formatNumber(gain) + " " + almaWord +
+          ". Para una más, juntá " + formatNumber(remaining) + " cerebros extra.";
+      }
+    }
+
+  }
+
+  function patchSoulsShop() {
+    const container = $("shop-list-souls");
+    if (!container || !state) return;
     Game.PRESTIGE_UPGRADES.forEach(function (pu) {
+      let div = container.querySelector('[data-pu-id="' + pu.id + '"]');
+      if (!div) {
+        div = document.createElement("div");
+        div.setAttribute("data-pu-id", pu.id);
+        div.innerHTML =
+          '<div class="item-info">' +
+            '<div class="item-name">' + pu.name + '</div>' +
+            '<div class="item-desc">' + pu.desc + '</div>' +
+          '</div>' +
+          '<span class="item-cost prestige-cost"></span>';
+        div.addEventListener("click", function () { buyPrestigeUpgrade(pu.id); });
+        container.appendChild(div);
+      }
       const owned = state.prestige.upgrades.indexOf(pu.id) !== -1;
       const canBuy = !owned && state.prestige.souls >= pu.cost;
-      const div = document.createElement("div");
       div.className = "item-card" + (owned ? " owned" : (canBuy ? " affordable" : " disabled"));
-      div.innerHTML =
-        '<div class="item-info">' +
-          '<div class="item-name">' + pu.name + '</div>' +
-          '<div class="item-desc">' + pu.desc + '</div>' +
-        '</div>' +
-        '<span class="item-cost prestige-cost">' + (owned ? "Comprado" : formatNumber(pu.cost) + " almas") + '</span>';
-      if (!owned) {
-        div.addEventListener("click", function () { buyPrestigeUpgrade(pu.id); });
-      }
-      shop.appendChild(div);
+      const costEl = div.querySelector(".item-cost");
+      if (costEl) costEl.textContent = owned ? "Comprado" : formatNumber(pu.cost) + " almas";
     });
   }
 
@@ -603,27 +692,50 @@
     applyCosmetics();
   }
 
+  function setShopTab(listId) {
+    const tabs = [
+      { btn: "shop-tab-generators", list: "shop-list-generators" },
+      { btn: "shop-tab-upgrades", list: "shop-list-upgrades" },
+      { btn: "shop-tab-cosmetics", list: "shop-list-cosmetics" },
+      { btn: "shop-tab-souls", list: "shop-list-souls" }
+    ];
+    const qtyBar = $("buy-qty-bar");
+    const soulsBar = $("souls-shop-bar");
+    tabs.forEach(function (t) {
+      const ob = $(t.btn);
+      const ol = $(t.list);
+      const on = t.list === listId;
+      if (ob) ob.classList.toggle("active", on);
+      if (ol) ol.classList.toggle("hidden", !on);
+    });
+    if (qtyBar) qtyBar.classList.toggle("hidden", listId === "shop-list-souls");
+    if (soulsBar) soulsBar.classList.toggle("hidden", listId !== "shop-list-souls");
+  }
+
   function setupShopTabs() {
     const tabs = [
       { btn: "shop-tab-generators", list: "shop-list-generators" },
       { btn: "shop-tab-upgrades", list: "shop-list-upgrades" },
-      { btn: "shop-tab-cosmetics", list: "shop-list-cosmetics" }
+      { btn: "shop-tab-cosmetics", list: "shop-list-cosmetics" },
+      { btn: "shop-tab-souls", list: "shop-list-souls" }
     ];
     tabs.forEach(function (t) {
       const btn = $(t.btn);
-      const list = $(t.list);
-      if (!btn || !list) return;
+      if (!btn) return;
       btn.addEventListener("click", function () {
-        tabs.forEach(function (other) {
-          const ob = $(other.btn);
-          const ol = $(other.list);
-          if (ob) ob.classList.remove("active");
-          if (ol) ol.classList.add("hidden");
-        });
-        btn.classList.add("active");
-        list.classList.remove("hidden");
+        setShopTab(t.list);
       });
     });
+  }
+
+  function openSoulsShop() {
+    setShopTab("shop-list-souls");
+    const mobileNav = $("mobile-nav");
+    const mobileVisible = mobileNav && window.getComputedStyle(mobileNav).display !== "none";
+    if (mobileVisible) {
+      const gameTab = document.querySelector("#mobile-nav .mobile-tab[data-mobile='game']");
+      if (gameTab) gameTab.click();
+    }
   }
 
   function setupSideTabs() {
@@ -793,6 +905,7 @@
       renderHeader();
       renderStats();
       renderShop();
+      renderPrestige();
     }
   }
 
@@ -1099,6 +1212,9 @@
 
     const btnPrestige = $("btn-prestige");
     if (btnPrestige) btnPrestige.addEventListener("click", doPrestige);
+
+    const btnOpenSoulsShop = $("btn-open-souls-shop");
+    if (btnOpenSoulsShop) btnOpenSoulsShop.addEventListener("click", openSoulsShop);
 
     const btnExport = $("btn-export");
     const btnImport = $("btn-import");
