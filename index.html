@@ -8,69 +8,38 @@
 </head>
 <body>
   <div id="app">
-    <header id="header">
-      <h1 id="title">Zombie Clicker</h1>
-      <div id="stats">
-        <div id="brains-display">
-          <span id="brains-count">0</span>
-          <span id="brains-label">cerebros</span>
-        </div>
-        <div id="bps-display">
-          <span id="bps-count">0</span>
-          <span id="bps-label">cerebros/seg</span>
-        </div>
+    <header id="topbar">
+      <div id="score-box">
+        <span id="score-label">Cerebros</span>
+        <span id="score-value">0</span>
+        <span id="bps-value">0 /s</span>
+      </div>
+      <div id="top-actions">
+        <button id="btn-save" title="Guardar">💾</button>
+        <button id="btn-reset" title="Reiniciar">🔄</button>
       </div>
     </header>
 
     <main id="main">
-      <section id="clicker-section">
-        <div id="zombie-container">
-          <div id="zombie" role="button" tabindex="0" aria-label="Golpear zombie">
-            <div id="zombie-face">
-              <div class="eye left"></div>
-              <div class="eye right"></div>
-              <div class="mouth"></div>
-            </div>
-            <div id="zombie-body"></div>
-          </div>
-          <div id="click-power-display">
-            <span id="click-power-value">1</span> por golpe
-          </div>
+      <section id="left-panel">
+        <div id="zombie-area">
+          <div id="zombie" class="zombie">🧟</div>
+          <div id="click-power">+1 por click</div>
         </div>
-        <div id="floating-texts"></div>
+        <div id="stats">
+          <div class="stat"><span>Total clicks:</span> <span id="stat-clicks">0</span></div>
+          <div class="stat"><span>Total cerebros:</span> <span id="stat-total">0</span></div>
+        </div>
       </section>
 
-      <section id="shop-section">
-        <div id="shop-tabs">
-          <button id="tab-generators" class="tab active">Generadores</button>
-          <button id="tab-upgrades" class="tab">Mejoras</button>
-          <button id="tab-achievements" class="tab">Logros</button>
-        </div>
-
-        <div id="shop-content">
-          <div id="generators-panel" class="panel active">
-            <div id="generators-list"></div>
-          </div>
-          <div id="upgrades-panel" class="panel">
-            <div id="upgrades-list"></div>
-          </div>
-          <div id="achievements-panel" class="panel">
-            <div id="achievements-list"></div>
-          </div>
-        </div>
+      <section id="right-panel">
+        <h2>Generadores</h2>
+        <div id="generators"></div>
+        <h2>Mejoras</h2>
+        <div id="upgrades"></div>
       </section>
     </main>
-
-    <footer id="footer">
-      <button id="save-btn">Guardar</button>
-      <button id="reset-btn">Reiniciar</button>
-    </footer>
   </div>
-
-  <div id="golden-brain" class="hidden" role="button" tabindex="0" aria-label="Cerebro Dorado">🧠</div>
-  <div id="toast-container"></div>
-
   <script src="game.js"></script>
-  <script src="ui.js"></script>
 </body>
 </html>

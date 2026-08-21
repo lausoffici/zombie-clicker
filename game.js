@@ -1,332 +1,277 @@
-// ===== ESTADO DEL JUEGO =====
-const state = {
-  brains: 0,
-  totalBrains: 0,
-  totalClicks: 0,
-  clickPower: 1,
-  generators: {},
-  upgrades: {},
-  achievements: {},
-  goldenBrainClicks: 0,
-  lastSave: Date.now()
-};
+(function () {
+  "use strict";
 
-// ===== DEFINICIONES DE GENERADORES =====
-const GENERATORS = [
-  { id: 'cursor', name: 'Cursor Mágico', desc: 'Clic automático', baseCost: 15, baseBps: 0.1, icon: '👆' },
-  { id: 'grandma', name: 'Abuela Zombi', desc: 'Hace clic por ti', baseCost: 100, baseBps: 1, icon: '👵' },
-  { id: 'farm', name: 'Granja de Cerebros', desc: 'Cultiva cerebros', baseCost: 1100, baseBps: 8, icon: '🌾' },
-  { id: 'mine', name: 'Mina de Cerebros', desc: 'Extrae cerebros', baseCost: 12000, baseBps: 47, icon: '⛏️' },
-  { id: 'factory', name: 'Fábrica Zombi', desc: 'Producción masiva', baseCost: 130000, baseBps: 260, icon: '🏭' },
-  { id: 'bank', name: 'Banco de Cerebros', desc: 'Invierte cerebros', baseCost: 1400000, baseBps: 1400, icon: '🏦' },
-  { id: 'temple', name: 'Templo Zombi', desc: 'Adora cerebros', baseCost: 20000000, baseBps: 7800, icon: '🛕' },
-  { id: 'wizard', name: 'Hechicero', desc: 'Magia cerebral', baseCost: 330000000, baseBps: 44000, icon: '🧙' },
-  { id: 'shrine', name: 'Santuario', desc: 'Poder ancestral', baseCost: 5100000000, baseBps: 260000, icon: '⛩️' },
-  { id: 'portal', name: 'Portal Dimensional', desc: 'Cerebros de otros mundos', baseCost: 75000000000, baseBps: 1600000, icon: '🌀' }
-];
+  const GENERATORS = [
+    { id: "g1", name: "Zombi Podrido", icon: "🧟", baseCost: 15, baseBps: 0.5, desc: "Un zombi básico que muerde y suelta un poco de cerebro." },
+    { id: "g2", name: "Zombi Cojeante", icon: "🧟‍♂️", baseCost: 100, baseBps: 2, desc: "Camina lento pero produce más." },
+    { id: "g3", name: "Zombi Corredor", icon: "🏃", baseCost: 1100, baseBps: 8, desc: "Rápido y hambriento de materia gris." },
+    { id: "g4", name: "Zombi Bruto", icon: "💪", baseCost: 12000, baseBps: 47, desc: "Fuerte como una roca, produce montones." },
+    { id: "g5", name: "Zombi Escupidero", icon: "🤮", baseCost: 130000, baseBps: 260, desc: "Escupe ácido que disuelve cerebros." },
+    { id: "g6", name: "Zombi Portador", icon: "👹", baseCost: 1.4e6, baseBps: 1400, desc: "Arrastra hordas enteras de zombis." },
+    { id: "g7", name: "Zombi Leviatán", icon: "🐲", baseCost: 2e7, baseBps: 7800, desc: "Un coloso devorador de ciudades." },
+    { id: "g8", name: "Apocalipsis", icon: "☢️", baseCost: 3.3e8, baseBps: 44000, desc: "El fin del mundo, literalmente." },
+    { id: "g9", name: "Zombi Espectral", icon: "👻", baseCost: 5e9, baseBps: 260000, desc: "Un fantasma hambriento que atraviesa la materia." },
+    { id: "g10", name: "Dios Zombi", icon: "🌌", baseCost: 7.5e10, baseBps: 1.6e6, desc: "La entidad final que devora universos." }
+  ];
 
-// ===== DEFINICIONES DE MEJORAS =====
-const UPGRADES = [
-  { id: 'click1', name: 'Guante Reforzado', desc: 'Duplica poder de clic', cost: 100, type: 'click', multiplier: 2, icon: '🧤' },
-  { id: 'click2', name: 'Guante de Acero', desc: 'Duplica poder de clic', cost: 1000, type: 'click', multiplier: 2, icon: '🛡️' },
-  { id: 'click3', name: 'Guante Mágico', desc: 'Duplica poder de clic', cost: 10000, type: 'click', multiplier: 2, icon: '✨' },
-  { id: 'cursor1', name: 'Cursors Rápidos', desc: 'Cursors 2x más rápidos', cost: 500, type: 'generator', target: 'cursor', multiplier: 2, icon: '⚡' },
-  { id: 'grandma1', name: 'Recetas Secretas', desc: 'Abuelas 2x más rápidas', cost: 5000, type: 'generator', target: 'grandma', multiplier: 2, icon: '📖' },
-  { id: 'farm1', name: 'Fertilizante', desc: 'Granjas 2x más rápidas', cost: 55000, type: 'generator', target: 'farm', multiplier: 2, icon: '🌱' },
-  { id: 'mine1', name: 'Diamantes', desc: 'Minas 2x más rápidas', cost: 600000, type: 'generator', target: 'mine', multiplier: 2, icon: '💎' },
-  { id: 'factory1', name: 'Automatización', desc: 'Fábricas 2x más rápidas', cost: 6500000, type: 'generator', target: 'factory', multiplier: 2, icon: '🤖' },
-  { id: 'bank1', name: 'Intereses Compuestos', desc: 'Bancos 2x más rápidos', cost: 70000000, type: 'generator', target: 'bank', multiplier: 2, icon: '💰' },
-  { id: 'temple1', name: 'Bendición', desc: 'Templos 2x más rápidos', cost: 1000000000, type: 'generator', target: 'temple', multiplier: 2, icon: '🙏' },
-  { id: 'wizard1', name: 'Poción de Poder', desc: 'Hechiceros 2x más rápidos', cost: 16500000000, type: 'generator', target: 'wizard', multiplier: 2, icon: '🧪' },
-  { id: 'shrine1', name: 'Reliquia', desc: 'Santuarios 2x más rápidos', cost: 255000000000, type: 'generator', target: 'shrine', multiplier: 2, icon: '🏺' },
-  { id: 'portal1', name: 'Multiverso', desc: 'Portales 2x más rápidos', cost: 3750000000000, type: 'generator', target: 'portal', multiplier: 2, icon: '🌌' }
-];
+  const UPGRADES = [
+    { id: "u1", name: "Manos Ágiles", icon: "✋", cost: 100, type: "click", mult: 2, desc: "Duplica el cerebro por click." },
+    { id: "u2", name: "Puños de Acero", icon: "🥊", cost: 1000, type: "click", mult: 2, desc: "Duplica el cerebro por click otra vez." },
+    { id: "u3", name: "Guantes de Espino", icon: "🧤", cost: 10000, type: "click", mult: 3, desc: "x3 cerebro por click." },
+    { id: "u4", name: "Dientes Filosos", icon: "🦷", cost: 500, type: "gen", gen: "g1", mult: 2, desc: "Duplica producción de Zombis Podridos." },
+    { id: "u5", name: "Cojeras Rápidas", icon: "🦵", cost: 2500, type: "gen", gen: "g2", mult: 2, desc: "Duplica producción de Zombis Cojeantes." },
+    { id: "u6", name: "Adrenalina", icon: "⚡", cost: 25000, type: "gen", gen: "g3", mult: 2, desc: "Duplica producción de Zombis Corredores." },
+    { id: "u7", name: "Músculos Infinitos", icon: "🏋️", cost: 250000, type: "gen", gen: "g4", mult: 2, desc: "Duplica producción de Zombis Brutos." },
+    { id: "u8", name: "Ácido Concentrado", icon: "🧪", cost: 2.5e6, type: "gen", gen: "g5", mult: 2, desc: "Duplica producción de Zombis Escupideros." },
+    { id: "u9", name: "Horda Organizada", icon: "📋", cost: 5e4, type: "global", mult: 1.5, desc: "x1.5 a TODA la producción." },
+    { id: "u10", name: "Culto Zombi", icon: "🕯️", cost: 5e6, type: "global", mult: 2, desc: "x2 a TODA la producción." }
+  ];
 
-// ===== DEFINICIONES DE LOGROS =====
-const ACHIEVEMENTS = [
-  { id: 'click10', name: 'Primeros Golpes', desc: 'Haz 10 clics', check: () => state.totalClicks >= 10, icon: '👊' },
-  { id: 'click100', name: 'Golpeador', desc: 'Haz 100 clics', check: () => state.totalClicks >= 100, icon: '💪' },
-  { id: 'click1000', name: 'Máquina de Golpes', desc: 'Haz 1000 clics', check: () => state.totalClicks >= 1000, icon: '🤖' },
-  { id: 'brains100', name: 'Cerebro Inicial', desc: 'Gana 100 cerebros', check: () => state.totalBrains >= 100, icon: '🧠' },
-  { id: 'brains1000', name: 'Coleccionista', desc: 'Gana 1000 cerebros', check: () => state.totalBrains >= 1000, icon: '📦' },
-  { id: 'brains10000', name: 'Magnate', desc: 'Gana 10000 cerebros', check: () => state.totalBrains >= 10000, icon: '💼' },
-  { id: 'brains100000', name: 'Millonario', desc: 'Gana 100000 cerebros', check: () => state.totalBrains >= 100000, icon: '💰' },
-  { id: 'brains1000000', name: 'Millonario Zombi', desc: 'Gana 1M cerebros', check: () => state.totalBrains >= 1000000, icon: '👑' },
-  { id: 'gen1', name: 'Primer Generador', desc: 'Compra 1 generador', check: () => Object.values(state.generators).some(c => c >= 1), icon: '🏗️' },
-  { id: 'gen10', name: 'Constructor', desc: 'Compra 10 generadores', check: () => Object.values(state.generators).reduce((a, b) => a + b, 0) >= 10, icon: '🔨' },
-  { id: 'gen50', name: 'Arquitecto', desc: 'Compra 50 generadores', check: () => Object.values(state.generators).reduce((a, b) => a + b, 0) >= 50, icon: '📐' },
-  { id: 'gen100', name: 'Magnate Industrial', desc: 'Compra 100 generadores', check: () => Object.values(state.generators).reduce((a, b) => a + b, 0) >= 100, icon: '🏭' },
-  { id: 'upg1', name: 'Mejora Inicial', desc: 'Compra 1 mejora', check: () => Object.keys(state.upgrades).length >= 1, icon: '⬆️' },
-  { id: 'upg5', name: 'Innovador', desc: 'Compra 5 mejoras', check: () => Object.keys(state.upgrades).length >= 5, icon: '💡' },
-  { id: 'upg10', name: 'Genio', desc: 'Compra 10 mejoras', check: () => Object.keys(state.upgrades).length >= 10, icon: '🎓' },
-  { id: 'golden1', name: 'Suerte Dorada', desc: 'Haz clic en 1 cerebro dorado', check: () => state.goldenBrainClicks >= 1, icon: '🍀' },
-  { id: 'golden5', name: 'Cazador Dorado', desc: 'Haz clic en 5 cerebros dorados', check: () => state.goldenBrainClicks >= 5, icon: '🎯' },
-  { id: 'golden10', name: 'Leyenda Dorada', desc: 'Haz clic en 10 cerebros dorados', check: () => state.goldenBrainClicks >= 10, icon: '🏆' }
-];
+  const SAVE_KEY = "zombieClickerSave";
 
-// ===== INICIALIZACIÓN =====
-function initGame() {
-  GENERATORS.forEach(g => {
-    state.generators[g.id] = 0;
-  });
-  UPGRADES.forEach(u => {
-    state.upgrades[u.id] = false;
-  });
-  ACHIEVEMENTS.forEach(a => {
-    state.achievements[a.id] = false;
-  });
-}
-
-// ===== CÁLCULOS =====
-function getGeneratorCost(genId) {
-  const gen = GENERATORS.find(g => g.id === genId);
-  const count = state.generators[genId];
-  return Math.floor(gen.baseCost * Math.pow(1.15, count));
-}
-
-function getGeneratorBps(genId) {
-  const gen = GENERATORS.find(g => g.id === genId);
-  let multiplier = 1;
-  UPGRADES.forEach(u => {
-    if (state.upgrades[u.id] && u.type === 'generator' && u.target === genId) {
-      multiplier *= u.multiplier;
-    }
-  });
-  return gen.baseBps * multiplier;
-}
-
-function getTotalBps() {
-  let total = 0;
-  GENERATORS.forEach(g => {
-    total += state.generators[g.id] * getGeneratorBps(g.id);
-  });
-  return total;
-}
-
-function getClickPower() {
-  let power = 1;
-  UPGRADES.forEach(u => {
-    if (state.upgrades[u.id] && u.type === 'click') {
-      power *= u.multiplier;
-    }
-  });
-  return power;
-}
-
-// ===== ACCIONES =====
-function clickZombie() {
-  const power = getClickPower();
-  state.brains += power;
-  state.totalBrains += power;
-  state.totalClicks++;
-  checkAchievements();
-  return power;
-}
-
-function buyGenerator(genId) {
-  const cost = getGeneratorCost(genId);
-  if (state.brains >= cost) {
-    state.brains -= cost;
-    state.generators[genId]++;
-    checkAchievements();
-    return true;
+  function createState() {
+    return {
+      brains: 0,
+      totalBrains: 0,
+      totalClicks: 0,
+      clickMult: 1,
+      globalMult: 1,
+      generators: {},
+      upgrades: {}
+    };
   }
-  return false;
-}
 
-function buyUpgrade(upgId) {
-  const upg = UPGRADES.find(u => u.id === upgId);
-  if (!state.upgrades[upgId] && state.brains >= upg.cost) {
-    state.brains -= upg.cost;
-    state.upgrades[upgId] = true;
-    checkAchievements();
-    return true;
-  }
-  return false;
-}
+  let state = createState();
 
-function clickGoldenBrain() {
-  state.goldenBrainClicks++;
-  const bonus = Math.max(100, Math.floor(getTotalBps() * 60));
-  state.brains += bonus;
-  state.totalBrains += bonus;
-  checkAchievements();
-  return bonus;
-}
-
-// ===== LOGROS =====
-function checkAchievements() {
-  ACHIEVEMENTS.forEach(a => {
-    if (!state.achievements[a.id] && a.check()) {
-      state.achievements[a.id] = true;
-      if (typeof showToast === 'function') {
-        showToast(`🏆 Logro desbloqueado: ${a.name}`);
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(SAVE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        state = Object.assign(createState(), parsed);
       }
-    }
-  });
-}
-
-// ===== GUARDADO / CARGA =====
-function saveGame() {
-  state.lastSave = Date.now();
-  try {
-    localStorage.setItem('zombieClickerSave', JSON.stringify(state));
-    if (typeof showToast === 'function') {
-      showToast('💾 Juego guardado');
-    }
-  } catch (e) {
-    if (typeof showToast === 'function') {
-      showToast('⚠️ Error al guardar');
+    } catch (e) {
+      state = createState();
     }
   }
-}
 
-function loadGame() {
-  try {
-    const saved = localStorage.getItem('zombieClickerSave');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      Object.assign(state, parsed);
-      // Asegurar que todos los generadores existan
-      GENERATORS.forEach(g => {
-        if (state.generators[g.id] === undefined) {
-          state.generators[g.id] = 0;
-        }
-      });
-      UPGRADES.forEach(u => {
-        if (state.upgrades[u.id] === undefined) {
-          state.upgrades[u.id] = false;
-        }
-      });
-      ACHIEVEMENTS.forEach(a => {
-        if (state.achievements[a.id] === undefined) {
-          state.achievements[a.id] = false;
-        }
-      });
+  function saveState() {
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+    } catch (e) {}
+  }
+
+  function resetState() {
+    if (typeof confirm === "function" && !confirm("¿Seguro que quieres reiniciar todo el progreso?")) {
+      return;
+    }
+    state = createState();
+    saveState();
+    render();
+  }
+
+  function getGenCost(gen) {
+    const count = state.generators[gen.id] || 0;
+    return Math.floor(gen.baseCost * Math.pow(1.15, count));
+  }
+
+  function getGenBps(gen) {
+    const count = state.generators[gen.id] || 0;
+    if (count === 0) return 0;
+    let mult = 1;
+    UPGRADES.forEach(u => {
+      if (state.upgrades[u.id] && u.type === "gen" && u.gen === gen.id) {
+        mult *= u.mult;
+      }
+    });
+    return count * gen.baseBps * mult * state.globalMult;
+  }
+
+  function getTotalBps() {
+    let total = 0;
+    GENERATORS.forEach(g => { total += getGenBps(g); });
+    return total;
+  }
+
+  function getClickPower() {
+    let power = 1;
+    UPGRADES.forEach(u => {
+      if (state.upgrades[u.id] && u.type === "click") {
+        power *= u.mult;
+      }
+    });
+    return power;
+  }
+
+  function buyGenerator(genId) {
+    const gen = GENERATORS.find(g => g.id === genId);
+    if (!gen) return false;
+    const cost = getGenCost(gen);
+    if (state.brains >= cost) {
+      state.brains -= cost;
+      state.generators[gen.id] = (state.generators[gen.id] || 0) + 1;
+      saveState();
+      render();
       return true;
     }
-  } catch (e) {
-    // Error al cargar
+    return false;
   }
-  return false;
-}
 
-function resetGame() {
-  if (confirm('¿Estás seguro de que quieres reiniciar el juego? Se perderá todo el progreso.')) {
-    localStorage.removeItem('zombieClickerSave');
-    state.brains = 0;
-    state.totalBrains = 0;
-    state.totalClicks = 0;
-    state.clickPower = 1;
-    state.goldenBrainClicks = 0;
-    state.lastSave = Date.now();
-    initGame();
-    if (typeof showToast === 'function') {
-      showToast('🔄 Juego reiniciado');
+  function buyUpgrade(upgId) {
+    const upg = UPGRADES.find(u => u.id === upgId);
+    if (!upg || state.upgrades[upg.id]) return false;
+    if (state.brains >= upg.cost) {
+      state.brains -= upg.cost;
+      state.upgrades[upg.id] = true;
+      if (upg.type === "global") {
+        state.globalMult *= upg.mult;
+      }
+      saveState();
+      render();
+      return true;
+    }
+    return false;
+  }
+
+  function doClick() {
+    const power = getClickPower();
+    state.brains += power;
+    state.totalBrains += power;
+    state.totalClicks += 1;
+    render();
+    return power;
+  }
+
+  function formatNum(n) {
+    if (n < 1000) return Math.floor(n).toString();
+    if (n < 1e6) return (n / 1e3).toFixed(1) + "K";
+    if (n < 1e9) return (n / 1e6).toFixed(1) + "M";
+    if (n < 1e12) return (n / 1e9).toFixed(1) + "B";
+    return (n / 1e12).toFixed(1) + "T";
+  }
+
+  function render() {
+    if (typeof document === "undefined") return;
+    const scoreEl = document.getElementById("score-value");
+    const bpsEl = document.getElementById("bps-value");
+    const clickPowerEl = document.getElementById("click-power");
+    const statClicksEl = document.getElementById("stat-clicks");
+    const statTotalEl = document.getElementById("stat-total");
+
+    if (scoreEl) scoreEl.textContent = formatNum(state.brains);
+    if (bpsEl) bpsEl.textContent = formatNum(getTotalBps()) + " /s";
+    if (clickPowerEl) clickPowerEl.textContent = "+" + formatNum(getClickPower()) + " por click";
+    if (statClicksEl) statClicksEl.textContent = formatNum(state.totalClicks);
+    if (statTotalEl) statTotalEl.textContent = formatNum(state.totalBrains);
+
+    const genContainer = document.getElementById("generators");
+    if (genContainer) {
+      genContainer.innerHTML = "";
+      GENERATORS.forEach(gen => {
+        const cost = getGenCost(gen);
+        const count = state.generators[gen.id] || 0;
+        const canBuy = state.brains >= cost;
+        const div = document.createElement("div");
+        div.className = "gen-item" + (canBuy ? "" : " disabled");
+        div.innerHTML =
+          '<div class="gen-info">' +
+            '<span class="gen-icon">' + gen.icon + '</span>' +
+            '<div>' +
+              '<div class="gen-name">' + gen.name + (count > 0 ? ' <span class="gen-count">x' + count + '</span>' : '') + '</div>' +
+              '<div class="gen-desc">' + gen.desc + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<span class="gen-cost">' + formatNum(cost) + '</span>';
+        div.addEventListener("click", () => buyGenerator(gen.id));
+        genContainer.appendChild(div);
+      });
+    }
+
+    const upgContainer = document.getElementById("upgrades");
+    if (upgContainer) {
+      upgContainer.innerHTML = "";
+      UPGRADES.forEach(upg => {
+        if (state.upgrades[upg.id]) return;
+        const canBuy = state.brains >= upg.cost;
+        const div = document.createElement("div");
+        div.className = "upg-item" + (canBuy ? "" : " disabled");
+        div.innerHTML =
+          '<div class="upg-info">' +
+            '<span class="upg-icon">' + upg.icon + '</span>' +
+            '<div>' +
+              '<div class="upg-name">' + upg.name + '</div>' +
+              '<div class="upg-desc">' + upg.desc + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<span class="upg-cost">' + formatNum(upg.cost) + '</span>';
+        div.addEventListener("click", () => buyUpgrade(upg.id));
+        upgContainer.appendChild(div);
+      });
+      if (upgContainer.children.length === 0) {
+        upgContainer.innerHTML = '<div class="upg-item disabled"><span class="upg-desc">¡Todas las mejoras compradas!</span></div>';
+      }
     }
   }
-}
 
-// ===== BUCLE DE JUEGO =====
-let gameLoopId = null;
-let lastTick = Date.now();
-
-function gameTick() {
-  const now = Date.now();
-  const delta = (now - lastTick) / 1000;
-  lastTick = now;
-
-  const bps = getTotalBps();
-  const earned = bps * delta;
-  state.brains += earned;
-  state.totalBrains += earned;
-
-  checkAchievements();
-}
-
-function startGameLoop() {
-  if (gameLoopId) {
-    clearInterval(gameLoopId);
+  function tick() {
+    const bps = getTotalBps();
+    if (bps > 0) {
+      state.brains += bps / 10;
+      state.totalBrains += bps / 10;
+      render();
+    }
   }
-  lastTick = Date.now();
-  gameLoopId = setInterval(gameTick, 100);
-}
 
-function stopGameLoop() {
-  if (gameLoopId) {
-    clearInterval(gameLoopId);
-    gameLoopId = null;
+  function init() {
+    loadState();
+    render();
+
+    const zombieEl = document.getElementById("zombie");
+    if (zombieEl) zombieEl.addEventListener("click", doClick);
+
+    const btnSave = document.getElementById("btn-save");
+    if (btnSave) btnSave.addEventListener("click", () => { saveState(); });
+
+    const btnReset = document.getElementById("btn-reset");
+    if (btnReset) btnReset.addEventListener("click", resetState);
+
+    setInterval(tick, 100);
+    setInterval(saveState, 15000);
   }
-}
 
-// ===== CEREbro DORADO =====
-let goldenBrainTimeout = null;
-let goldenBrainInterval = null;
-
-function scheduleGoldenBrain() {
-  if (goldenBrainTimeout) {
-    clearTimeout(goldenBrainTimeout);
+  if (typeof document !== "undefined") {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", init);
+    } else {
+      init();
+    }
   }
-  const delay = 60000 + Math.random() * 120000; // 60-180 segundos
-  goldenBrainTimeout = setTimeout(spawnGoldenBrain, delay);
-}
 
-function spawnGoldenBrain() {
-  const el = document.getElementById('golden-brain');
-  if (el) {
-    el.classList.remove('hidden');
-    // Desaparece después de 10 segundos si no se hace clic
-    goldenBrainInterval = setTimeout(() => {
-      el.classList.add('hidden');
-      scheduleGoldenBrain();
-    }, 10000);
+  const Game = {
+    GENERATORS,
+    UPGRADES,
+    state,
+    createState,
+    loadState,
+    saveState,
+    resetState,
+    getGenCost,
+    getGenBps,
+    getTotalBps,
+    getClickPower,
+    buyGenerator,
+    buyUpgrade,
+    doClick,
+    formatNum,
+    render,
+    tick,
+    init
+  };
+
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports = Game;
   }
-}
-
-function hideGoldenBrain() {
-  const el = document.getElementById('golden-brain');
-  if (el) {
-    el.classList.add('hidden');
+  if (typeof window !== "undefined") {
+    window.Game = Game;
   }
-  if (goldenBrainInterval) {
-    clearTimeout(goldenBrainInterval);
-    goldenBrainInterval = null;
-  }
-  scheduleGoldenBrain();
-}
-
-// ===== FORMATO DE NÚMEROS =====
-function formatNumber(num) {
-  if (num < 1000) {
-    return num % 1 === 0 ? num.toString() : num.toFixed(1);
-  } else if (num < 1000000) {
-    return (num / 1000).toFixed(1) + 'K';
-  } else if (num < 1000000000) {
-    return (num / 1000000).toFixed(1) + 'M';
-  } else if (num < 1000000000000) {
-    return (num / 1000000000).toFixed(1) + 'B';
-  } else {
-    return (num / 1000000000000).toFixed(1) + 'T';
-  }
-}
-
-// ===== INICIALIZACIÓN DEL JUEGO =====
-function init() {
-  initGame();
-  loadGame();
-  startGameLoop();
-  scheduleGoldenBrain();
-
-  // Auto-guardado cada 30 segundos
-  setInterval(saveGame, 30000);
-
-  // Guardar al cerrar
-  window.addEventListener('beforeunload', saveGame);
-}
-
-// Iniciar cuando el DOM esté listo
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init);
-} else {
-  init();
-}
+})();

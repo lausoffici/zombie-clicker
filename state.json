@@ -25,5 +25,10 @@
   "v2-10-apply-prestige-multiplier": "blocked",
   "v2-11-new-generators": "blocked",
   "v2-12-new-base-upgrades": "blocked",
-  "v2-13-golden-brain-event": "done"
+  "v2-13-golden-brain-event": "done",
+  "v2-14-horde-boss-event": "blocked",
+  "v2-15-tabs-navigation": "blocked",
+  "v2-16-stats-panel": "blocked",
+  "v2-17-export-import-save": "blocked",
+  "v2-18-auto-click-upgrade": "done"
 }
