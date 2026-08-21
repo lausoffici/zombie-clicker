@@ -279,6 +279,9 @@ button { font-family: inherit; }
 .topbar-stat--souls .topbar-stat-value {
   color: var(--gold-400);
 }
+.topbar-stat--bones .topbar-stat-value {
+  color: #d8d0c4;
+}
 
 .topbar-stat-value.is-bump {
   animation: countPop 0.25s ease;
@@ -1198,14 +1201,40 @@ button { font-family: inherit; }
 }
 
 #horde-boss {
+  position: fixed;
   top: 80px;
   left: 50%;
   width: 100px;
-  height: 100px;
+  height: 120px;
   transform: translateX(-50%);
   animation: bossEntrance 0.5s ease, bossHover 2s ease-in-out infinite;
 }
-#horde-boss svg { width: 100%; height: 100%; }
+#horde-boss svg { width: 100px; height: 100px; }
+#boss-hp-wrap {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 16px;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 3px;
+  overflow: hidden;
+}
+#boss-hp-bar {
+  height: 100%;
+  width: 100%;
+  background: #e62e2e;
+}
+#boss-hp-label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  text-align: center;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: #eef2ea;
+}
 @keyframes bossEntrance {
   from { transform: translateX(-50%) scale(0); opacity: 0; }
   to { transform: translateX(-50%) scale(1); opacity: 1; }

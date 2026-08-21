@@ -1,79 +1,78 @@
-# 🧟 Zombie Clicker — Cómo jugar
+# Zombie Clicker — Cómo jugar
 
 ## ¿Qué es?
 
-**Zombie Clicker** es un juego *clicker incremental* de temática zombie. Tu objetivo es acumular **cerebros** 🧠 haciendo click en un zombie y comprando **generadores** y **mejoras** que produzcan cerebros automáticamente. Con el tiempo podés **prestigiar** para ganar almas y multiplicadores permanentes.
+**Zombie Clicker** es un juego *clicker incremental* de temática zombie. Tu objetivo es acumular **cerebros** haciendo click en un zombie y comprando **generadores** y **mejoras** que produzcan cerebros automáticamente. Con el tiempo podés **prestigiar** para subir el nivel de Almas y ganar **astillas**. Los **huesos** se acumulan con eventos; todavía no se gastan.
 
 Hecho en HTML/CSS/JS vanilla, sin dependencias de npm ni build step. **Serví el juego por HTTP** (`python -m http.server 8000`) y abrí `http://localhost:8000`. Abrir `index.html` como `file://` funciona para jugar local, pero **rompe el login en la nube**.
 
-> 💡 El progreso se guarda automáticamente en este dispositivo (`localStorage`) cada 15 segundos y al cerrar la pestaña. Si creás una cuenta, también se sincroniza a la nube para seguir en otro lado.
+> El progreso se guarda automáticamente en este dispositivo (`localStorage`) cada 15 segundos y al cerrar la pestaña. Si creás una cuenta, también se sincroniza a la nube para seguir en otro lado.
 
----
 
 ## Mecánicas principales
 
-### 🖱️ Click
+### Click
 - Hacé click en el **zombie** para ganar cerebros.
-- El valor de cada click se multiplica con upgrades de click y con el **multiplicador global**.
+- El valor de cada click se multiplica con upgrades de click, el **multiplicador global** y el prestige **Click Boost** (solo click, no BPS).
 - Debajo del zombie se ven tus stats de click: **valor por click**, **% de crítico** y los **cerebros que da un crítico**.
 
-### 🏭 Generadores
-- Comprá generadores para producir cerebros por segundo (BPS) de forma automática.
-- Cada generador comprado aumenta su costo en un **15%**.
-- Podés comprar de a 1, 10 o la cantidad máxima que alcance.
+### Generadores
+- 15 tipos. Cada compra sube el costo un **15%**.
+- **Hitos gratis:** a las 25, 50, 100, 200 y 400 unidades, ese generador duplica su BPS.
+- Compra x1 / x10 / Max.
 
-### ⬆️ Mejoras
+### Mejoras
 - Se compran con cerebros y tienen **hasta 5 niveles** cada una.
 - Cada nivel potencia click, un generador, el multiplicador global, críticos o costos más baratos.
 - El costo sube un **×2.5** por nivel. La carta muestra `Lv N/5` y una barra hacia el próximo costo.
 - Al llegar a nivel máximo se marca **MÁX** y queda visible.
 - Al prestigiar se reinician (las de prestigio / almas no).
 
-### 🏆 Logros
-- Se desbloquean automáticamente al alcanzar milestones (clicks, cerebros totales, generadores).
-- Cada logro desbloqueado suma un **+2%** al multiplicador global.
+### Logros
+- Se desbloquean solos. Cada uno suma **+2%** al multiplicador global.
 
-### ✨ Prestigio
-Las **Almas** no se pierden. Al **Ascender**, la horda vuelve a cero (cerebros, generadores y mejoras) y te quedás con Almas permanentes. Logros, skins y compras de la tienda de almas también se conservan.
+### Prestigio: Almas vs astillas
+Al **Ascender** reiniciás cerebros, generadores y mejoras de **esta run**.
 
-1. Juntá cerebros (cuenta el **total** de la partida).
-2. Ascendé para convertir ese progreso en Almas.
-3. Gastá Almas en la pestaña **Almas** de la tienda: esas mejoras no se reinician.
+- **Almas (nivel):** permanentes. No se gastan. Cada una → **+5%** multiplicador global.
+- **Astillas:** se ganan igual que las almas al ascender, y **sí** se gastan en la tienda de prestige y en cosméticos.
+- Fórmula de la run: `floor(sqrt(cerebrosDeLaRun / 1e9))` — la primera alma pide 1.000 millones de cerebros de esta vida.
+- Consejo: conviene ascender cuando puedas **duplicar tu nivel** de almas.
 
-- Cada Alma → **+5%** a clicks y cerebros por segundo
-- La primera Alma aparece al **1 millón** de cerebros totales (4M → 2, 9M → 3, 25M → 5)
-
-En la tienda, pestaña **Almas**, podés gastarlas en mejoras permanentes:
+En la tienda, pestaña **Almas**, podés gastar **astillas** en mejoras permanentes:
   - **BPS Boost**: +10% BPS
-  - **Click Boost**: +20% click
+  - **Click Boost**: +20% click (no BPS)
   - **Soul Start**: +100 cerebros iniciales tras reset
   - **Offline Boost**: +50% cap de offline
   - **Cheaper Generators**: -10% costo
   - **Auto Click**: click automático cada 2 segundos
 
-### 🌙 Progreso offline
-- Si cerrás el juego, tus generadores siguen produciendo hasta **8 horas**.
-- El upgrade **Offline Boost** aumenta ese límite un 50% por nivel.
-- Al volver, aparece un toast con los cerebros ganados.
+### Huesos
+- Caen del cerebro dorado (a veces) y al **matar** al jefe de la horda (clicks a su barra de vida).
+- Persisten al prestigiar. Aún no hay tienda de huesos.
 
-### ⚡ Eventos
-- **Cerebro dorado** 🧠: aparece cada 1–3 minutos. Clickalo para ganar cerebros instantáneos.
-- **Jefe de la horda** 👹: aparece cada 3–6 minutos. Clickalo rápido para derrotarlo y ganar una recompensa.
+### Cosméticos
+- Vanity (no cambian BPS). Se pagan con **astillas**. Persisten al prestigiar.
 
-### 💾 Exportar / importar
+### Progreso offline
+- Hasta **8 horas** de BPS. El upgrade **Offline Boost** sube ese tope un 50% por compra.
+
+### Exportar / importar
 - En la pestaña **Estadísticas** podés copiar tu partida como texto o pegar una para restaurarla.
 - Si estás logueado, importar o reiniciar también actualiza la nube.
 
-### 👤 Cuenta (opcional)
+### Cuenta (opcional)
 - Podés jugar como invitado: el progreso queda en este navegador.
 - El botón de **usuario** en la barra de arriba abre Crear cuenta / Entrar (email + contraseña + apodo).
 - Al entrar, se elige el save con **más progreso** (almas totales, luego cerebros totales).
 - Cerrar sesión no borra el progreso local ni el de la nube.
 - Setup de la nube (una vez): ver `docs/superpowers/specs/2026-08-21-accounts-supabase.md`.
 
----
+### Eventos
+- **Cerebro dorado:** cada 1–3 minutos. Cerebros instantáneos o, a veces, un hueso.
+- **Jefe de la horda:** cada 3–6 minutos. Clickalo para bajarle la vida; al matarlo da cerebros y un hueso. Si se va, no hay premio.
 
-## 🏭 Generadores (10)
+## Generadores (15)
 
 | # | Nombre | Costo base | BPS |
 |---|--------|------------|-----|
@@ -87,10 +86,13 @@ En la tienda, pestaña **Almas**, podés gastarlas en mejoras permanentes:
 | 8 | Virus Alfa | 200,000,000 | 44,000 |
 | 9 | Apocalipsis | 3,300,000,000 | 260,000 |
 | 10 | Zombie Dios | 51,000,000,000 | 1,500,000 |
+| 11 | Cementerio infinito | 7.5e11 | 8.5e6 |
+| 12 | Plaga mundial | 1.1e13 | 5.0e7 |
+| 13 | Dimensión rota | 1.6e14 | 2.8e8 |
+| 14 | Trono de huesos | 2.5e15 | 1.6e9 |
+| 15 | Vacío verdoso | 4.0e16 | 9.0e9 |
 
----
-
-## ⬆️ Mejoras (16, max Lv 5)
+## Mejoras (niveles, max Lv 5)
 
 Cada mejora escala con `costo = base × 2.5^nivel`. Efecto por nivel según tipo:
 
@@ -101,6 +103,7 @@ Cada mejora escala con `costo = base × 2.5^nivel`. Efecto por nivel según tipo
 | Garras infectadas | click | ×1.6 click |
 | Puño demolición | click | ×1.7 click |
 | Reflejos muertos | click | ×1.5 click |
+| Click del fin | click | ×2 click (tarde) |
 | Superviviente veloz | generador | ×1.5 superviviente |
 | Mordedura profunda | generador | ×1.5 mordedor |
 | Corredor mutado | generador | ×1.5 corredor |
@@ -109,27 +112,25 @@ Cada mejora escala con `costo = base × 2.5^nivel`. Efecto por nivel según tipo
 | Horda voraz | generador | ×1.5 horda |
 | Necrópolis oscura | generador | ×1.5 necrópolis |
 | Virus letal | generador | ×1.5 Virus Alfa |
+| (+ mejoras de gens altos) | generador | ×1.5 por gen restante |
 | Fuerza sobrenatural | global | +25% global |
+| Hambre colectiva | global | +50% global (tarde) |
+| Silencio de dioses | global | +50% global (tarde) |
 | Golpe crítico | crit | +5% chance de crítico ×10 |
 | Cerebros baratos | cheaper | −5% costo de generadores |
 
----
+## Prestige (tienda de astillas)
 
-## 🏆 Logros (8)
-
-- Primer cerebro, Cerebros x100, Clicks x100, Clicks x1000
-- Primer generador, Horda pequeña (10), Horda grande (50)
-- Ejército completo (1 de cada generador)
-
-Cada uno da **+2%** multiplicador global.
-
----
+- **BPS Boost**: +10% BPS
+- **Click Boost**: +20% click (no BPS)
+- **Soul Start**: +100 cerebros al resetear
+- **Offline Boost**: +50% cap offline
+- **Cheaper Generators**: -10% costo
+- **Auto Click**: click cada 2 segundos
 
 ## Atajos
 
 - **Pestañas**: Juego / Logros / Prestigio / Estadísticas.
 - **Tienda**: Generadores, Mejoras, Cosméticos y **Almas** (mejoras permanentes).
-- **Botones del header**: cuenta, 💾 guardar manual, 🔄 reiniciar partida.
+- **Botones del header**: cuenta, guardar manual, reiniciar partida.
 - **Prestigio**: el botón "Ascender" se habilita cuando tenés almas para ganar.
-
-¡A convertir humanos en cerebros! 🧠🧟

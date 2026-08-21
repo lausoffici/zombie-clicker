@@ -8,23 +8,24 @@ function approxEqual(a, b, eps) {
   return Math.abs(a - b) <= eps;
 }
 
-// 0a. buyCosmetic gasta cerebros y marca owned
+// 0a. buyCosmetic gasta astillas y marca owned
 (function testBuyCosmetic() {
   const s = Game.createState();
-  s.brains = 10000;
+  s.prestige.soulChips = 10;
+  const chipsBefore = s.prestige.soulChips;
   assert.strictEqual(Game.buyCosmetic(s, "skin-rot"), true, 'buyCosmetic debe comprar skin-rot');
-  assert.strictEqual(s.brains, 10000 - 5000, 'buyCosmetic debe descontar el costo');
+  assert.strictEqual(s.prestige.soulChips, chipsBefore - 1, 'buyCosmetic debe descontar astillas');
   assert.ok(s.cosmetics.owned.indexOf("skin-rot") !== -1, 'skin-rot debe estar en owned');
   assert.strictEqual(Game.buyCosmetic(s, "skin-rot"), false, 'no se puede comprar dos veces');
-  s.brains = 10;
-  assert.strictEqual(Game.buyCosmetic(s, "skin-neon"), false, 'sin fondos no se puede comprar');
+  s.prestige.soulChips = 0;
+  assert.strictEqual(Game.buyCosmetic(s, "skin-neon"), false, 'sin astillas no se puede comprar');
 })();
 
 // 0b. equipCosmetic requiere owned
 (function testEquipCosmetic() {
   const s = Game.createState();
   assert.strictEqual(Game.equipCosmetic(s, "skin-neon"), false, 'no se puede equipar sin comprar');
-  s.brains = 100000;
+  s.prestige.soulChips = 10;
   Game.buyCosmetic(s, "skin-neon");
   assert.strictEqual(Game.equipCosmetic(s, "skin-neon"), true, 'equipCosmetic debe funcionar tras comprar');
   assert.strictEqual(s.cosmetics.equipped.skin, "skin-neon", 'equipped.skin debe actualizarse');
@@ -33,7 +34,7 @@ function approxEqual(a, b, eps) {
 // 0c. prestige conserva cosmetics
 (function testPrestigeKeepsCosmetics() {
   const s = Game.createState();
-  s.brains = 100000;
+  s.prestige.soulChips = 10;
   Game.buyCosmetic(s, "skin-neon");
   Game.equipCosmetic(s, "skin-neon");
   s.prestige.souls = 10;
@@ -302,10 +303,10 @@ function approxEqual(a, b, eps) {
   const s = Game.createState();
   const cos = Game.COSMETICS.find((c) => c.id === 'skin-rot');
   assert.ok(cos, 'debe existir skin-rot en el catálogo');
-  s.brains = cos.cost;
+  s.prestige.soulChips = cos.cost;
   const ok = Game.buyCosmetic(s, 'skin-rot');
   assert.strictEqual(ok, true, 'buyCosmetic debe devolver true si alcanza el costo');
-  assert.strictEqual(s.brains, 0, 'debe descontar el costo');
+  assert.strictEqual(s.prestige.soulChips, 0, 'debe descontar astillas');
   assert.ok(s.cosmetics.owned.indexOf('skin-rot') !== -1, 'debe marcar como owned');
   const again = Game.buyCosmetic(s, 'skin-rot');
   assert.strictEqual(again, false, 'no se puede comprar dos veces');
@@ -317,7 +318,7 @@ function approxEqual(a, b, eps) {
 (function testEquipCosmetic() {
   const s = Game.createState();
   assert.strictEqual(Game.equipCosmetic(s, 'skin-neon'), false, 'no se puede equipar sin owned');
-  s.brains = 50000;
+  s.prestige.soulChips = 10;
   Game.buyCosmetic(s, 'skin-neon');
   const ok = Game.equipCosmetic(s, 'skin-neon');
   assert.strictEqual(ok, true, 'equipCosmetic debe devolver true si está owned');
@@ -327,7 +328,7 @@ function approxEqual(a, b, eps) {
 // 18. prestige conserva cosmetics
 (function testPrestigeKeepsCosmetics() {
   const s = Game.createState();
-  s.brains = 5000;
+  s.prestige.soulChips = 5;
   Game.buyCosmetic(s, 'skin-rot');
   Game.equipCosmetic(s, 'skin-rot');
   s.totalBrainsEarned = 2000000;
@@ -435,7 +436,113 @@ function approxEqual(a, b, eps) {
   assert.strictEqual(empty.best_bps, 0);
 })();
 
-// 24. crit chance y hit ×10
+// 24. gastar chips no baja el nivel de almas
+(function testChipsDoNotLowerLevel() {
+  const s = Game.createState();
+  s.prestige.totalSoulsEarned = 20;
+  s.prestige.souls = 20;
+  s.prestige.soulChips = 20;
+  const levelBefore = Game.getSoulLevel(s);
+  const multBefore = Game.getGlobalMultiplier(s);
+  assert.strictEqual(Game.buyPrestigeUpgrade(s, 'bpsBoost'), true, 'debe poder comprar bpsBoost con chips');
+  assert.strictEqual(Game.getSoulLevel(s), levelBefore, 'el nivel no debe bajar al gastar chips');
+  assert.strictEqual(s.prestige.totalSoulsEarned, 20, 'totalSoulsEarned no baja');
+  assert.ok(Game.getSoulChips(s) < 20, 'los chips deben bajar');
+  assert.ok(Game.getGlobalMultiplier(s) >= multBefore, 'el multi de nivel no debe caer');
+})();
+
+// 25. clickBoost no es global / no sube BPS
+(function testClickBoostNotGlobal() {
+  const s = Game.createState();
+  s.generators.superviviente = 10;
+  const bpsBefore = Game.getBrainsPerSecond(s);
+  const clickBefore = Game.getClickValue(s);
+  const globalBefore = Game.getGlobalMultiplier(s);
+  s.prestige.soulChips = 5;
+  s.prestige.totalSoulsEarned = 0;
+  assert.strictEqual(Game.buyPrestigeUpgrade(s, 'clickBoost'), true, 'compra clickBoost');
+  assert.ok(approxEqual(Game.getBrainsPerSecond(s), bpsBefore), 'clickBoost no debe cambiar BPS');
+  assert.ok(approxEqual(Game.getGlobalMultiplier(s), globalBefore), 'clickBoost no entra al multi global');
+  assert.ok(Game.getClickValue(s) > clickBefore, 'clickBoost debe subir el click');
+})();
+
+// 26. fórmula prestige 1e9
+(function testPrestigeFormula() {
+  const s = Game.createState();
+  s.totalBrainsEarned = 1e9 - 1;
+  assert.strictEqual(Game.getPrestigeGain(s), 0, 'sin 1e9 no hay alma');
+  s.totalBrainsEarned = 1e9;
+  assert.strictEqual(Game.getPrestigeGain(s), 1, '1e9 cerebros = 1 alma');
+  s.totalBrainsEarned = 4e9;
+  assert.strictEqual(Game.getPrestigeGain(s), 2, '4e9 cerebros = 2 almas');
+})();
+
+// 27. prestige suma nivel y chips, no resetea huesos
+(function testPrestigeSplitsAndKeepsBones() {
+  const s = Game.createState();
+  s.totalBrainsEarned = 1e9;
+  s.bones = 3;
+  s.prestige.totalSoulsEarned = 4;
+  s.prestige.souls = 4;
+  s.prestige.soulChips = 1;
+  const ns = Game.prestige(s);
+  assert.strictEqual(ns.prestige.totalSoulsEarned, 5, 'nivel 4+1');
+  assert.strictEqual(ns.prestige.soulChips, 2, 'chips 1+1');
+  assert.strictEqual(ns.bones, 3, 'huesos persisten');
+  assert.strictEqual(ns.prestigeCount, 1, 'cuenta ascensiones');
+  assert.strictEqual(ns.brains, 0, 'run reseteada');
+})();
+
+// 28. hitos duplican BPS del gen
+(function testMilestones() {
+  assert.strictEqual(Game.getMilestoneMultiplier(0), 1, '0 owned = x1');
+  assert.strictEqual(Game.getMilestoneMultiplier(24), 1, '24 = x1');
+  assert.strictEqual(Game.getMilestoneMultiplier(25), 2, '25 = x2');
+  assert.strictEqual(Game.getMilestoneMultiplier(50), 4, '50 = x4');
+  assert.strictEqual(Game.getMilestoneMultiplier(100), 8, '100 = x8');
+  const s = Game.createState();
+  s.generators.mordedor = 24;
+  const low = Game.getGeneratorBps(s, 'mordedor');
+  s.generators.mordedor = 25;
+  const high = Game.getGeneratorBps(s, 'mordedor');
+  assert.ok(approxEqual(high, low * 2), 'cruzar 25 duplica bps del gen');
+})();
+
+// 29. 15 generadores y upgrades de gens altos
+(function testContentCounts() {
+  assert.strictEqual(Game.GENERATORS.length, 15, '15 generadores');
+  assert.ok(Game.ACHIEVEMENTS.length >= 40, 'al menos 40 logros');
+  assert.ok(Game.UPGRADES.some((u) => u.generatorId === 'horde'), 'upgrade de horda');
+  assert.ok(Game.UPGRADES.some((u) => u.generatorId === 'vacio-verdoso'), 'upgrade del vacío');
+  assert.ok(Game.GENERATORS.some((g) => g.id === 'vacio-verdoso'), 'existe vacío verdoso');
+})();
+
+// 30. migración save viejo: souls gastables → chips, nivel = total
+(function testLegacyPrestigeMigrate() {
+  const loaded = Game.deserialize(JSON.stringify({
+    brains: 10,
+    prestige: { souls: 5, totalSoulsEarned: 14, upgrades: ['bpsBoost'] }
+  }));
+  assert.strictEqual(Game.getSoulLevel(loaded), 14, 'nivel desde totalSoulsEarned');
+  assert.strictEqual(Game.getSoulChips(loaded), 5, 'chips desde souls viejas');
+  assert.ok(loaded.prestige.upgrades.indexOf('bpsBoost') !== -1, 'upgrades prestige se conservan');
+})();
+
+// 31. eventos huesos
+(function testEventDrops() {
+  const s = Game.createState();
+  const bone = Game.applyGoldenBrain(s, 0);
+  assert.strictEqual(bone.type, 'bones', 'roll 0 da hueso');
+  assert.strictEqual(s.bones, 1, 'bones += 1');
+  const brains = Game.applyGoldenBrain(s, 0.5);
+  assert.strictEqual(brains.type, 'brains', 'roll alto da cerebros');
+  const kill = Game.applyBossKill(s);
+  assert.ok(kill.brains >= 500, 'jefe da cerebros');
+  assert.strictEqual(s.bones, 2, 'jefe da hueso');
+  assert.ok(Game.getBossMaxHp(s) >= 15, 'HP mínimo 15');
+})();
+
+// 32. crit chance y hit ×10
 (function testCrit() {
   const s = Game.createState();
   const crit = Game.UPGRADES.find((u) => u.type === 'crit');
@@ -453,7 +560,7 @@ function approxEqual(a, b, eps) {
   Game._random = null;
 })();
 
-// 25. cheaper reduce costo de generadores
+// 33. cheaper reduce costo de generadores
 (function testCheaperUpgrade() {
   const s = Game.createState();
   const genId = 'jefe'; // baseCost alto para que el ceil no anule el descuento
@@ -466,9 +573,10 @@ function approxEqual(a, b, eps) {
   assert.strictEqual(after, Math.ceil(before * (1 - cheap.perLevel)), 'factor 0.95 en L1');
 })();
 
-// 26. catálogo ampliado (16 upgrades)
+// 34. catálogo con niveles + gen altos + crit/cheaper
 (function testUpgradeCatalogSize() {
-  assert.strictEqual(Game.UPGRADES.length, 16, 'debe haber 16 upgrades');
+  assert.ok(Game.UPGRADES.length >= 16, 'debe haber al menos 16 upgrades');
+  assert.ok(Game.UPGRADES.every((u) => u.maxLevel === 5 && u.costGrowth === 2.5), 'todas con niveles');
   assert.ok(Game.UPGRADES.some((u) => u.id === 'golpe-critico'), 'golpe-critico presente');
   assert.ok(Game.UPGRADES.some((u) => u.id === 'horde-voraz'), 'horde-voraz presente');
 })();
