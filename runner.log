@@ -294,3 +294,44 @@
 2026-08-21 01:51:23,581 [INFO]   escrito: game.js (7501 bytes)
 2026-08-21 01:51:23,582 [INFO]   escrito: ui.js (6735 bytes)
 2026-08-21 01:51:23,679 [INFO]   verificacion OK
+2026-08-21 01:51:23,781 [INFO]   commit: v2-03-toast-system: Sistema de notificaciones toast
+2026-08-21 01:51:23,782 [INFO] === Tarea v2-04-achievements-data: Sistema de logros: datos y chequeo ===
+2026-08-21 01:51:23,810 [INFO]   intento 1/3 (llamando a qwen3.8:27b)...
+2026-08-21 01:56:13,671 [INFO]   respuesta recibida en 290s (10770 chars)
+2026-08-21 01:56:13,672 [INFO]   escrito: game.js (10741 bytes)
+2026-08-21 01:56:13,776 [WARNING]   verificacion FALLO: C:\Users\lauta\zombie-clicker\game.js:241
+  window.Game = Game;
+  ^
+
+ReferenceError: window is not defined
+    at C:\Users\lauta\zombie-clicker\game.js:241:3
+    at Object.<anonymous> (C:\Users\lauta\zombie-clicker\game.js:242:3)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingCh
+2026-08-21 01:56:13,777 [INFO]   intento 2/3 (llamando a qwen3.8:27b)...
+2026-08-21 01:58:09,932 [INFO]   respuesta recibida en 116s (3712 chars)
+2026-08-21 01:58:09,933 [WARNING]   la respuesta no contenia bloques <<<FILE: ...>>> validos
+2026-08-21 01:58:09,933 [INFO]   intento 3/3 (llamando a qwen3.8:27b)...
+2026-08-21 02:02:22,842 [INFO]   respuesta recibida en 253s (11091 chars)
+2026-08-21 02:02:22,844 [INFO]   escrito: game.js (11062 bytes)
+2026-08-21 02:02:22,940 [WARNING]   verificacion FALLO: C:\Users\lauta\zombie-clicker\tests\logic.test.js:13
+  const s = Game.createState();
+                 ^
+
+TypeError: Game.createState is not a function
+    at testClick (C:\Users\lauta\zombie-clicker\tests\logic.test.js:13:18)
+    at Object.<anonymous> (C:\Users\lauta\zombie-clicker\tests\logic.test.js:19:3)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+  
+2026-08-21 02:02:22,940 [ERROR]   tarea v2-04-achievements-data BLOQUEADA tras 3 intentos
+2026-08-21 02:02:22,941 [INFO] === Tarea v2-05-achievements-ui: UI de logros ===
+2026-08-21 02:02:22,942 [INFO]   intento 1/3 (llamando a qwen3.8:27b)...
+2026-08-21 02:06:14,031 [INFO]   respuesta recibida en 231s (9788 chars)
+2026-08-21 02:06:14,032 [INFO]   escrito: index.html (1363 bytes)
+2026-08-21 02:06:14,033 [INFO]   escrito: ui.js (8348 bytes)
+2026-08-21 02:06:14,138 [INFO]   verificacion OK

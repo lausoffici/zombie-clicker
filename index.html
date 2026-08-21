@@ -1,45 +1,74 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zombie Clicker</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zombie Clicker</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="game-header">
-    <h1>🧟 Zombie Clicker</h1>
-  </header>
-
-  <main class="game-main">
-    <section class="counter-section">
-      <div id="brains" class="brains-counter">0</div>
-      <div id="bps" class="bps-indicator">0 cerebros/s</div>
-    </section>
-
-    <section class="zombie-section">
-      <div id="click-float-layer" class="click-float-layer"></div>
-      <button id="zombie-btn" class="zombie-btn">🧟 ¡Golpear zombie!</button>
-    </section>
-
-    <section class="shop-section">
-      <div class="shop-column">
-        <h2 class="shop-title">Generadores</h2>
-        <div id="shop-generators" class="shop-list"></div>
+  <div id="app">
+    <header id="header">
+      <h1 id="title">Zombie Clicker</h1>
+      <div id="stats">
+        <div id="brains-display">
+          <span id="brains-count">0</span>
+          <span id="brains-label">cerebros</span>
+        </div>
+        <div id="bps-display">
+          <span id="bps-count">0</span>
+          <span id="bps-label">cerebros/seg</span>
+        </div>
       </div>
-      <div class="shop-column">
-        <h2 class="shop-title">Mejoras</h2>
-        <div id="shop-upgrades" class="shop-list"></div>
-      </div>
-    </section>
+    </header>
 
-    <section class="achievements-section">
-      <h2 class="shop-title">Logros</h2>
-      <div id="achievements-list" class="achievements-list"></div>
-    </section>
-  </main>
+    <main id="main">
+      <section id="clicker-section">
+        <div id="zombie-container">
+          <div id="zombie" role="button" tabindex="0" aria-label="Golpear zombie">
+            <div id="zombie-face">
+              <div class="eye left"></div>
+              <div class="eye right"></div>
+              <div class="mouth"></div>
+            </div>
+            <div id="zombie-body"></div>
+          </div>
+          <div id="click-power-display">
+            <span id="click-power-value">1</span> por golpe
+          </div>
+        </div>
+        <div id="floating-texts"></div>
+      </section>
 
-  <div id="toast-container" class="toast-container"></div>
+      <section id="shop-section">
+        <div id="shop-tabs">
+          <button id="tab-generators" class="tab active">Generadores</button>
+          <button id="tab-upgrades" class="tab">Mejoras</button>
+          <button id="tab-achievements" class="tab">Logros</button>
+        </div>
+
+        <div id="shop-content">
+          <div id="generators-panel" class="panel active">
+            <div id="generators-list"></div>
+          </div>
+          <div id="upgrades-panel" class="panel">
+            <div id="upgrades-list"></div>
+          </div>
+          <div id="achievements-panel" class="panel">
+            <div id="achievements-list"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer id="footer">
+      <button id="save-btn">Guardar</button>
+      <button id="reset-btn">Reiniciar</button>
+    </footer>
+  </div>
+
+  <div id="golden-brain" class="hidden" role="button" tabindex="0" aria-label="Cerebro Dorado">🧠</div>
+  <div id="toast-container"></div>
 
   <script src="game.js"></script>
   <script src="ui.js"></script>

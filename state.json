@@ -17,5 +17,13 @@
   "v2-02-stats-core": "done",
   "v2-03-toast-system": "done",
   "v2-04-achievements-data": "blocked",
-  "v2-05-achievements-ui": "done"
+  "v2-05-achievements-ui": "done",
+  "v2-06-prestige-formula": "blocked",
+  "v2-07-prestige-reset": "blocked",
+  "v2-08-prestige-shop-data": "blocked",
+  "v2-09-prestige-shop-ui": "blocked",
+  "v2-10-apply-prestige-multiplier": "blocked",
+  "v2-11-new-generators": "blocked",
+  "v2-12-new-base-upgrades": "blocked",
+  "v2-13-golden-brain-event": "done"
 }
