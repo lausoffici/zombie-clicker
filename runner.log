@@ -234,3 +234,5 @@
 2026-08-20 17:56:21,199 [INFO]   verificacion OK
 2026-08-20 17:56:21,274 [INFO]   commit: 14-docs: Documentación del juego
 2026-08-20 17:56:21,274 [INFO] === RESUMEN: 14/14 tareas completadas ===
+2026-08-21 00:02:41,516 [INFO] tasks.json valido: 22 tareas
+2026-08-21 00:02:41,712 [INFO] Ollama OK, modelo 'qwen3.8:27b' disponible.

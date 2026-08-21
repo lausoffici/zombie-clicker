@@ -1,0 +1,162 @@
+{
+  "project": "Zombie Clicker v2 — mejoras profundas para un clicker incremental de temática zombie en HTML/CSS/JS vanilla. Se ejecuta como continuación del juego base.",
+  "contract": [
+    "CONTRATO DE API v2 (obligatorio, no cambiar firmas ni nombres):",
+    "- game.js contiene la lógica pura. Define `const Game = (function() { ... })();` y al final: `if (typeof module !== 'undefined') module.exports = Game;` para Node.",
+    "- Funciones existentes que DEBEN seguir funcionando: createState, click(state), buyGenerator(state, id), buyUpgrade(state, id), tick(state, dtSeconds), getBrainsPerSecond(state), getClickValue(state), getGeneratorCost(state, id), formatNumber(n), serialize(state), deserialize(text), applyOfflineProgress(state, elapsedSeconds).",
+    "- Nuevas funciones obligatorias en game.js:",
+    "    * buyGenerators(state, id, count) : compra hasta `count` generadores del id, devolviendo cuántos compró.",
+    "    * getMaxAffordable(state, id) : cantidad máxima de generadores que se pueden comprar con state.brains.",
+    "    * getGlobalMultiplier(state) : multiplicador total aplicado a click y bps. Base 1 + almas * 0.05 + suma de bonuses de logros (0.02 c/u) + bonuses de prestige upgrades.",
+    "    * getPrestigeGain(state) : almas que otorgaría un reset ahora = floor(sqrt(state.totalBrainsEarned / 1_000_000)). Mínimo 0.",
+    "    * prestige(state) : devuelve un NUEVO estado con brains=0, generators={}, upgrades=[], totalBrainsEarned=0, bestBps=0, pero conservando achievements, prestige.souls (suma getPrestigeGain), prestige.totalSoulsEarned, prestige.upgrades, startedAt.",
+    "    * buyPrestigeUpgrade(state, id) : gasta almas; devuelve true/false.",
+    "    * checkAchievements(state) : desbloquea logros cumplidos; devuelve array de ids recién desbloqueados.",
+    "    * getStats(state) : { totalBrainsEarned, totalClicks, bestBps, elapsedSeconds (ahora - startedAt), generatorsOwned (suma de cantidades) }.",
+    "    * exportSave(state) / importSave(text) : string seguro; base64 de JSON preferido.",
+    "- Datos:",
+    "    * GENERATORS: empezar con 6 existentes y extender a 10 total.",
+    "    * UPGRADES: empezar con 4 existentes y extender a 10 total.",
+    "    * ACHIEVEMENTS: array { id, name, desc, type, threshold, bonus }. type puede ser 'clicks'|'totalBrains'|'generatorCount'|'generators'. bonus siempre 0.02.",
+    "    * PRESTIGE_UPGRADES: array { id, name, desc, cost, effect }. Efectos: 'bpsBoost' +10%, 'clickBoost' +20%, 'soulStart' +100 cerebros iniciales tras reset, 'offlineBoost' +50% offline cap, 'cheaperGenerators' -10% costo, 'autoClick' click automático cada 2s.",
+    "- Estado:",
+    "    { brains, totalClicks, totalBrainsEarned, bestBps, generators, upgrades, achievements, prestige: { souls, totalSoulsEarned, upgrades }, startedAt, lastSaved }",
+    "- ui.js es el único archivo que toca DOM y localStorage. Usa window.Game.",
+    "- index.html usa pestañas con ids: #tab-game, #tab-achievements, #tab-prestige, #tab-stats; botones #btn-tab-game, #btn-tab-achievements, #btn-tab-prestige, #btn-tab-stats.",
+    "- Contenedores: #toast-container, #golden-brain, #horde-boss, #stats-content, #achievements-list, #prestige-shop, #prestige-info."
+  ],
+  "tasks": [
+    {
+      "id": "v2-01-buy-max",
+      "title": "Compra en bloque: x1/x10/xMax",
+      "prompt": "Agregá en game.js las funciones buyGenerators(state, id, count) y getMaxAffordable(state, id). buyGenerators compra hasta `count` unidades del generador (o las que alcancen) y devuelve cuántas compró. No modifiques buyGenerator. Luego, en ui.js, al renderizar cada botón de generador agregá tres botones pequeños: x1, x10 y Max. x1 usa buyGenerator; x10 y Max usan buyGenerators. Actualizá el display tras comprar. Mantené el contrato y no rompas tests existentes.",
+      "verify": "node --check game.js && node --check ui.js && node tests/logic.test.js && node -e \"const G=require('./game.js');const s=G.createState();s.brains=1e9;const n=G.getMaxAffordable(s,'superviviente');if(n<1)process.exit(1);const bought=G.buyGenerators(s,'superviviente',10);if(bought!==10||s.generators['superviviente']!==10)process.exit(1)\""
+    },
+    {
+      "id": "v2-02-stats-core",
+      "title": "Estadísticas core: cerebros totales, mejor bps, inicio",
+      "prompt": "Extendé el estado en game.js: createState y deserialize deben incluir totalBrainsEarned:0, bestBps:0, startedAt:Date.now(). Modificá click() para sumar getClickValue(state) a totalBrainsEarned. Modificá tick() para sumar bps*dt a totalBrainsEarned y actualizar bestBps si el bps actual es mayor. Agregá getStats(state) que devuelva { totalBrainsEarned, totalClicks, bestBps, elapsedSeconds: (Date.now()-startedAt)/1000, generatorsOwned }. En ui.js mostrá totalBrainsEarned junto al contador de cerebros. No rompas la API ni los tests.",
+      "verify": "node --check game.js && node --check ui.js && node tests/logic.test.js && node -e \"const G=require('./game.js');const s=G.createState();G.click(s);G.tick(s,10);if(s.totalBrainsEarned<1)process.exit(1);const st=G.getStats(s);if(st.totalClicks!==1||st.elapsedSeconds<0)process.exit(1)\""
+    },
+    {
+      "id": "v2-03-toast-system",
+      "title": "Sistema de notificaciones toast",
+      "prompt": "En index.html agregá un contenedor #toast-container fijo arriba a la derecha. En style.css agregá la clase .toast y animación de entrada/salida. En ui.js creá showToast(message, type='info') que cree un div.toast, lo muestre 3 segundos y lo elimine. Reemplazá el alert() de showOfflineMessage por showToast(). No modifiques game.js.",
+      "verify": "node -e \"const fs=require('fs');for(const f of ['index.html','style.css','ui.js']){fs.accessSync(f)};const h=fs.readFileSync('index.html','utf8');if(!h.includes('toast-container'))process.exit(1);const c=fs.readFileSync('style.css','utf8');if(!c.includes('.toast'))process.exit(1);const u=fs.readFileSync('ui.js','utf8');if(!u.includes('showToast'))process.exit(1)\" && node --check ui.js"
+    },
+    {
+      "id": "v2-04-achievements-data",
+      "title": "Sistema de logros: datos y chequeo",
+      "prompt": "En game.js definí ACHIEVEMENTS con 8 logros temáticos zombie. Cada uno: { id, name, desc, type, threshold, bonus:0.02 }. Tipos: 'clicks' (totalClicks >= threshold), 'totalBrains' (totalBrainsEarned >= threshold), 'generatorCount' (suma de generadores >= threshold), 'generators' (poseer al menos 1 de cada id listado en target). Implementá checkAchievements(state) que recorra ACHIEVEMENTS, desbloquee los que cumplan condición y no estén en state.achievements, y devuelva un array de ids recién desbloqueados. Actualizá createState y deserialize para incluir achievements: []. Asegurate de que getGlobalMultiplier sume los bonuses de logros desbloqueados (prepará la función, aunque todavía no la uses en getClickValue).",
+      "verify": "node --check game.js && node tests/logic.test.js && node -e \"const G=require('./game.js');if(G.ACHIEVEMENTS.length!==8)process.exit(1);const s=G.createState();s.totalClicks=100;const nuevos=G.checkAchievements(s);if(nuevos.length<1)process.exit(1);if(!s.achievements.includes(nuevos[0]))process.exit(1)\""
+    },
+    {
+      "id": "v2-05-achievements-ui",
+      "title": "UI de logros",
+      "prompt": "En index.html agregá una sección #achievements-list dentro de #tab-achievements (creá el div si no existe). En ui.js implementá renderAchievements() que liste todos los logros (Game.ACHIEVEMENTS), mostrando nombre, descripción y un candado o check según state.achievements. Llamá a renderAchievements() en init y actualizala cuando se desbloquee uno nuevo (podés llamar checkAchievements periódicamente o tras click/compra). No modifiques game.js.",
+      "verify": "node --check ui.js && node -e \"const fs=require('fs');const h=fs.readFileSync('index.html','utf8');if(!h.includes('achievements-list'))process.exit(1);const u=fs.readFileSync('ui.js','utf8');if(!u.includes('renderAchievements'))process.exit(1)\""
+    },
+    {
+      "id": "v2-06-prestige-formula",
+      "title": "Fórmula de prestige (almas)",
+      "prompt": "En game.js actualizá createState y deserialize para incluir prestige: { souls:0, totalSoulsEarned:0, upgrades:[] }. Implementá getPrestigeGain(state) = Math.floor(Math.sqrt(state.totalBrainsEarned / 1_000_000)). Asegurate de que totalBrainsEarned se actualice en click() y tick() (si no lo hiciste en v2-02, hacelo ahora). No implementes el reset todavía.",
+      "verify": "node --check game.js && node tests/logic.test.js && node -e \"const G=require('./game.js');const s=G.createState();s.totalBrainsEarned=4e6;const gain=G.getPrestigeGain(s);if(gain!==2)process.exit(1);if(!s.prestige||s.prestige.souls!==0)process.exit(1)\""
+    },
+    {
+      "id": "v2-07-prestige-reset",
+      "title": "Reset de prestige (Ascender)",
+      "prompt": "Implementá prestige(state) en game.js: devuelve un NUEVO estado (no mutar el original) con brains=0, generators={}, upgrades=[], totalBrainsEarned=0, bestBps=0, pero conservando achievements, prestige.souls += getPrestigeGain(state), prestige.totalSoulsEarned += getPrestigeGain(state), prestige.upgrades, startedAt. Si el jugador tiene el prestige upgrade 'soulStart', sumale su valor a brains iniciales. En ui.js agregá un botón #prestige-btn en #prestige-info que muestre 'Ascender (+X almas)'; al clickear, si confirm() o directo, reemplace state por Game.prestige(state), guarde y recargue la página (location.reload()) para reiniciar la UI limpia. No rompas tests.",
+      "verify": "node --check game.js && node --check ui.js && node tests/logic.test.js && node -e \"const G=require('./game.js');const s=G.createState();s.totalBrainsEarned=1e7;s.prestige.upgrades=['soulStart'];const r=G.prestige(s);if(r.brains!==100||r.generators['superviviente']||r.upgrades.length||r.prestige.souls<3)process.exit(1);if(r.achievements.length!==s.achievements.length)process.exit(1)\""
+    },
+    {
+      "id": "v2-08-prestige-shop-data",
+      "title": "Tienda de prestige: datos",
+      "prompt": "En game.js definí PRESTIGE_UPGRADES con 6 mejoras permanentes: 'bpsBoost' (+10% bps, costo 1), 'clickBoost' (+20% click, costo 1), 'soulStart' (+100 cerebros iniciales, costo 2), 'cheaperGenerators' (-10% costo, costo 3), 'offlineBoost' (+50% cap offline, costo 2), 'autoClick' (click automático cada 2s, costo 5). Implementá buyPrestigeUpgrade(state, id): descuenta almas si alcanza y no está comprado; true/false. Agregá helper getPrestigeUpgradeEffect(state, effectName) que devuelva el multiplicador acumulado de ese efecto (cantidad comprada * valor). No modifiques ui.js.",
+      "verify": "node --check game.js && node tests/logic.test.js && node -e \"const G=require('./game.js');if(G.PRESTIGE_UPGRADES.length!==6)process.exit(1);const s=G.createState();s.prestige.souls=10;if(!G.buyPrestigeUpgrade(s,'bpsBoost'))process.exit(1);if(G.buyPrestigeUpgrade(s,'bpsBoost'))process.exit(1);if(s.prestige.souls!==9)process.exit(1)\""
+    },
+    {
+      "id": "v2-09-prestige-shop-ui",
+      "title": "UI de tienda de prestige",
+      "prompt": "En index.html agregá #prestige-info (almas actuales + botón ascender) y #prestige-shop dentro de #tab-prestige. En ui.js implementá renderPrestigeShop(): lista PRESTIGE_UPGRADES con nombre, desc, costo, botón comprar deshabilitado si no hay almas o ya comprado. Actualizá al comprar y guardá. No modifiques game.js.",
+      "verify": "node --check ui.js && node -e \"const fs=require('fs');const h=fs.readFileSync('index.html','utf8');for(const id of ['prestige-info','prestige-shop','tab-prestige']){if(!h.includes(id))process.exit(1)};const u=fs.readFileSync('ui.js','utf8');if(!u.includes('renderPrestigeShop'))process.exit(1)\""
+    },
+    {
+      "id": "v2-10-apply-prestige-multiplier",
+      "title": "Aplicar multiplicador global a click y bps",
+      "prompt": "En game.js implementá getGlobalMultiplier(state) = 1 + prestige.souls*0.05 + suma de bonuses de logros desbloqueados (0.02 cada uno) + suma de efectos de prestige upgrades (bpsBoost +10% c/u para bps, clickBoost +20% c/u para click). Modificá getClickValue(state) para multiplicar por getGlobalMultiplier(state). Modificá getBrainsPerSecond(state) para multiplicar por getGlobalMultiplier(state). También aplicá el descuento de cheaperGenerators a getGeneratorCost (costo base * 0.9^cantidad). No cambies firmas. Actualizá tests si los valores esperados cambian.",
+      "verify": "node --check game.js && node tests/logic.test.js && node -e \"const G=require('./game.js');const s=G.createState();s.totalClicks=100;G.checkAchievements(s);s.prestige.souls=10;if(G.getGlobalMultiplier(s)<=1)process.exit(1);const click=G.getClickValue(s);const bps=G.getBrainsPerSecond(s);if(click<=1)process.exit(1)\""
+    },
+    {
+      "id": "v2-11-new-generators",
+      "title": "Extender generadores a 10",
+      "prompt": "En game.js extendé GENERATORS a 10 total. Mantené los 6 originales exactamente iguales (ids, costos, bps). Agregá 4 nuevos con temática zombie, costos y bps progresivos: sugeridos 'necropolis' (15M, 7.8k), 'virus-alfa' (200M, 44k), 'apocalipsis' (3.3B, 260k), 'zombie-dios' (51B, 1.5M). costGrowth 1.15. No modifiques funciones.",
+      "verify": "node --check game.js && node tests/logic.test.js && node -e \"const G=require('./game.js');if(G.GENERATORS.length!==10)process.exit(1);const s=G.createState();s.brains=1e15;for(const g of G.GENERATORS){if(!G.buyGenerator(s,g.id))process.exit(1)};if(G.getBrainsPerSecond(s)<=0)process.exit(1)\""
+    },
+    {
+      "id": "v2-12-new-base-upgrades",
+      "title": "Extender upgrades base a 10",
+      "prompt": "En game.js extendé UPGRADES a 10 total. Mantené los 4 originales. Agregá 6 nuevos: 2 de click x2, 2 de generator x2 (para nuevos generadores), 1 de 'global' bps x1.5 (type='allGenerators', target=null, multiplier=1.5), y 1 de 'crit' que duplica click crítico (implementar como click x2 por simplicidad). No modifiques funciones.",
+      "verify": "node --check game.js && node tests/logic.test.js && node -e \"const G=require('./game.js');if(G.UPGRADES.length!==10)process.exit(1);const s=G.createState();s.brains=1e20;for(const u of G.UPGRADES){if(!G.buyUpgrade(s,u.id))process.exit(1)};if(G.getClickValue(s)<=1)process.exit(1)\""
+    },
+    {
+      "id": "v2-13-golden-brain-event",
+      "title": "Evento: Cerebro Dorado",
+      "prompt": "En ui.js implementá un evento aleatorio 'Cerebro Dorado': cada 60-120 segundos aparece un botón/emoji dorado 🧠 flotante en pantalla durante 10 segundos (usá #golden-brain). Al clickearlo, aplica un bonus: 60 segundos de producción instantánea O x7 bps por 30 segundos (elegí uno y dejalo consistente). Mostrá un toast. El estado del evento no se guarda. En index.html agregá #golden-brain oculto por defecto. En style.css agregá estilo dorado y animación.",
+      "verify": "node --check ui.js && node -e \"const fs=require('fs');const h=fs.readFileSync('index.html','utf8');if(!h.includes('golden-brain'))process.exit(1);const c=fs.readFileSync('style.css','utf8');if(!c.includes('golden'))process.exit(1);const u=fs.readFileSync('ui.js','utf8');if(!u.includes('golden'))process.exit(1)\""
+    },
+    {
+      "id": "v2-14-horde-boss-event",
+      "title": "Evento: Horda de jefe",
+      "prompt": "En ui.js implementá un evento de horda cada 5 minutos: aparece #horde-boss con una barra de vida. Cada click reduce la vida en getClickValue(state). Al derrotarlo, recompensa = 120 segundos de producción instantánea. Mostrá toast y animación de muerte. El boss no afecta la lógica core; es pura UI. Agregá el HTML y CSS necesarios.",
+      "verify": "node --check ui.js && node -e \"const fs=require('fs');const h=fs.readFileSync('index.html','utf8');if(!h.includes('horde-boss'))process.exit(1);const c=fs.readFileSync('style.css','utf8');if(!c.includes('horde')||!c.includes('health'))process.exit(1)\""
+    },
+    {
+      "id": "v2-15-tabs-navigation",
+      "title": "Navegación por pestañas",
+      "prompt": "En index.html reemplazá la estructura de shop-section por un layout con pestañas: botones #btn-tab-game, #btn-tab-achievements, #btn-tab-prestige, #btn-tab-stats y contenedores #tab-game, #tab-achievements, #tab-prestige, #tab-stats. #tab-game contiene el zombie y la tienda. Las otras pestañas empiezan vacías. En ui.js implementá switchTab(name) que muestre el contenedor activo y oculte los demás. Llamá switchTab('game') en init. No modifiques game.js.",
+      "verify": "node --check ui.js && node -e \"const fs=require('fs');const h=fs.readFileSync('index.html','utf8');for(const id of ['btn-tab-game','btn-tab-achievements','btn-tab-prestige','btn-tab-stats','tab-game','tab-achievements','tab-prestige','tab-stats']){if(!h.includes(id))process.exit(1)};const u=fs.readFileSync('ui.js','utf8');if(!u.includes('switchTab'))process.exit(1)\""
+    },
+    {
+      "id": "v2-16-stats-panel",
+      "title": "Panel de estadísticas",
+      "prompt": "En ui.js implementá renderStats() que muestre en #tab-stats: cerebros actuales, cerebros totales ganados, clicks totales, mejor bps, tiempo jugado, generadores poseídos, almas de prestige, logros desbloqueados/total. Usá Game.getStats. Actualizá #tab-stats periódicamente (cada 1s). No modifiques game.js.",
+      "verify": "node --check ui.js && node -e \"const fs=require('fs');const u=fs.readFileSync('ui.js','utf8');if(!u.includes('renderStats'))process.exit(1);const h=fs.readFileSync('index.html','utf8');if(!h.includes('tab-stats'))process.exit(1)\""
+    },
+    {
+      "id": "v2-17-export-import-save",
+      "title": "Exportar e importar partida",
+      "prompt": "En game.js implementá exportSave(state) que devuelva btoa(JSON.stringify(state)) y importSave(text) que devuelva deserialize(atob(text)) (manejá errores devolviendo createState()). En ui.js, en la pestaña Estadísticas, agregá un textarea #save-string y botones 'Exportar' y 'Importar'. Exportar copia el string; Importar parsea y, si es válido, reemplaza state, guarda y recarga la página. No modifiques la API de serialize/deserialize.",
+      "verify": "node --check game.js && node --check ui.js && node tests/logic.test.js && node -e \"const G=require('./game.js');const s=G.createState();s.brains=1234;const txt=G.exportSave(s);const r=G.importSave(txt);if(r.brains!==1234)process.exit(1);const bad=G.importSave('!!!');if(bad.brains!==0)process.exit(1)\""
+    },
+    {
+      "id": "v2-18-auto-click-upgrade",
+      "title": "Upgrade de auto-click",
+      "prompt": "En ui.js, si state.prestige.upgrades incluye 'autoClick', iniciá un setInterval que simule un click en #zombie-btn cada 2 segundos (llamá handleClick sin evento). Asegurate de limpiar el intervalo si se hace prestige (se recarga la página, así que no es necesario). No modifiques game.js.",
+      "verify": "node --check ui.js && node -e \"const fs=require('fs');const u=fs.readFileSync('ui.js','utf8');if(!u.includes('autoClick'))process.exit(1)\""
+    },
+    {
+      "id": "v2-19-offline-cap-prestige",
+      "title": "Cap de offline mejorado por prestige",
+      "prompt": "En game.js implementá getOfflineCapSeconds(state): base 8 horas (28800s) + 50% por cada 'offlineBoost' comprado. Modificá applyOfflineProgress para usar Math.min(elapsedSeconds, getOfflineCapSeconds(state)). Actualizá los tests y ui.js si es necesario (no debería). No rompas la API.",
+      "verify": "node --check game.js && node tests/logic.test.js && node -e \"const G=require('./game.js');const s=G.createState();s.generators={superviviente:10};s.prestige.upgrades=['offlineBoost'];const base=G.applyOfflineProgress(G.createState(),999999);if(base<=0)process.exit(1);const g=G.applyOfflineProgress(s,999999);if(g<=base*1.4)process.exit(1)\""
+    },
+    {
+      "id": "v2-20-visual-polish-v2",
+      "title": "Pulido visual v2: tabs, eventos, partículas",
+      "prompt": "En style.css mejorá la UI: estilos para pestañas activas/inactivas, animación de aparición del Cerebro Dorado, animación de daño/despawn de la Horda, pequeña partícula verde al comprar un generador (puede ser un flash en el botón). En ui.js agregá efectos visuales mínimos al comprar (clase temporal 'purchased' en el botón). No modifiques game.js. Asegurate de que los tests sigan pasando.",
+      "verify": "node --check ui.js && node tests/logic.test.js && node -e \"const fs=require('fs');const c=fs.readFileSync('style.css','utf8');for(const k of ['tab','golden','horde','purchased']){if(!c.includes(k))process.exit(1)}\""
+    },
+    {
+      "id": "v2-21-tests-v2",
+      "title": "Tests de todas las nuevas mecánicas",
+      "prompt": "Extendé tests/logic.test.js para cubrir: buyGenerators/getMaxAffordable, totalBrainsEarned aumenta con click/tick, checkAchievements desbloquea logros y aplica bonus, getPrestigeGain, prestige resetea lo correcto, buyPrestigeUpgrade, getGlobalMultiplier > 1 con almas/logros, exportSave/importSave roundtrip, applyOfflineProgress cap con offlineBoost. Mantené los tests viejos. Al final imprimí 'Todos los tests pasaron'.",
+      "verify": "node tests/logic.test.js"
+    },
+    {
+      "id": "v2-22-docs-v2",
+      "title": "Documentación de las nuevas mecánicas",
+      "prompt": "Actualizá COMO-JUGAR.md con secciones para: Prestigio/Almas, Logros, Pestañas, Cerebro Dorado, Horda, Estadísticas, Exportar/Importar. Incluí lista de Prestige Upgrades y Logros. Actualizá README.md si es necesario. No modifiques código.",
+      "verify": "node tests/logic.test.js && node -e \"const fs=require('fs');const t=fs.readFileSync('COMO-JUGAR.md','utf8');for(const s of ['Prestigio','Logros','Cerebro Dorado','Horda','Exportar']){if(!t.includes(s))process.exit(1)};if(t.length<2000)process.exit(1)\""
+    }
+  ]
+}

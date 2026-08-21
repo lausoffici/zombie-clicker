@@ -61,8 +61,9 @@ def setup_logging():
     )
 
 
-def load_tasks():
-    with open(TASKS_FILE, encoding="utf-8") as f:
+def load_tasks(tasks_file):
+    path = BASE_DIR / tasks_file
+    with open(path, encoding="utf-8") as f:
         data = json.load(f)
     return data
 
@@ -235,6 +236,8 @@ def run_task(model, num_ctx, data, task, state):
 
 def main():
     parser = argparse.ArgumentParser(description="Runner autonomo de tareas con Ollama")
+    parser.add_argument("--tasks-file", default="tasks.json",
+                        help="archivo JSON con las tareas (default: %(default)s)")
     parser.add_argument("--model", default=DEFAULT_MODEL, help="modelo de Ollama a usar")
     parser.add_argument("--num-ctx", type=int, default=DEFAULT_NUM_CTX,
                         help="ventana de contexto en tokens (default: %(default)s)")
@@ -244,7 +247,7 @@ def main():
     args = parser.parse_args()
 
     setup_logging()
-    data = load_tasks()
+    data = load_tasks(args.tasks_file)
     tasks = data["tasks"]
 
     # validacion de tasks.json
