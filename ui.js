@@ -107,6 +107,7 @@
         if (Game.buyGenerator(state, id)) {
           showToast('Compraste ' + gen.name + '!', 'success');
           updateDisplay();
+          checkAndRenderAchievements();
         } else {
           showToast('No tienes suficientes cerebros.', 'error');
         }
@@ -135,11 +136,52 @@
         if (Game.buyUpgrade(state, id)) {
           showToast('Mejora comprada: ' + up.name + '!', 'success');
           updateDisplay();
+          checkAndRenderAchievements();
         } else {
           showToast('No tienes suficientes cerebros.', 'error');
         }
       });
       container.appendChild(btn);
+    }
+  }
+
+  function renderAchievements() {
+    var container = document.getElementById('achievements-list');
+    if (!container) return;
+    container.innerHTML = '';
+    for (var i = 0; i < Game.ACHIEVEMENTS.length; i++) {
+      var ach = Game.ACHIEVEMENTS[i];
+      var unlocked = state.achievements && state.achievements.indexOf(ach.id) !== -1;
+      var item = document.createElement('div');
+      item.className = 'achievement-item' + (unlocked ? ' unlocked' : ' locked');
+      item.setAttribute('data-ach-id', ach.id);
+      item.innerHTML =
+        '<div class="ach-header">' +
+        '<span class="ach-icon">' + (unlocked ? '✅' : '🔒') + '</span>' +
+        '<span class="ach-name">' + ach.name + '</span>' +
+        '</div>' +
+        '<div class="ach-desc">' + ach.desc + '</div>';
+      container.appendChild(item);
+    }
+  }
+
+  function checkAndRenderAchievements() {
+    var newlyUnlocked = Game.checkAchievements(state);
+    if (newlyUnlocked && newlyUnlocked.length > 0) {
+      for (var i = 0; i < newlyUnlocked.length; i++) {
+        var achId = newlyUnlocked[i];
+        var ach = null;
+        for (var j = 0; j < Game.ACHIEVEMENTS.length; j++) {
+          if (Game.ACHIEVEMENTS[j].id === achId) {
+            ach = Game.ACHIEVEMENTS[j];
+            break;
+          }
+        }
+        if (ach) {
+          showToast('Logro desbloqueado: ' + ach.name + '!', 'success');
+        }
+      }
+      renderAchievements();
     }
   }
 
@@ -167,6 +209,7 @@
     var y = e.clientY - (rect ? rect.top : 0);
     spawnClickFloat(x, y, power);
     updateDisplay();
+    checkAndRenderAchievements();
   }
 
   function tick() {
@@ -182,6 +225,7 @@
       state.totalBrains += gain;
     }
     updateDisplay();
+    checkAndRenderAchievements();
   }
 
   function saveGame() {
@@ -205,6 +249,7 @@
 
     renderShop();
     renderUpgrades();
+    renderAchievements();
     updateDisplay();
 
     var zombieBtn = document.getElementById('zombie-btn');

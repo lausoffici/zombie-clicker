@@ -29,13 +29,16 @@
       { id: 'cerebro_platino', name: 'Cerebro de Platino', desc: 'Tus golpes valen 10 veces más.', cost: 100000000, type: 'click', multiplier: 10 }
     ],
 
-    state: {
-      brains: 0,
-      totalBrains: 0,
-      clicks: 0,
-      generators: {},
-      upgrades: {}
-    },
+    ACHIEVEMENTS: [
+      { id: 'primer_mordisco', name: 'Primer Mordisco', desc: 'Golpea a un zombie por primera vez.', type: 'clicks', threshold: 1, bonus: 0.02 },
+      { id: 'manos_sangrientas', name: 'Manos Sangrientas', desc: 'Acumula 100 golpes maniacos.', type: 'clicks', threshold: 100, bonus: 0.02 },
+      { id: 'cerebro_inicial', name: 'Cerebro Inicial', desc: 'Gana 1.000 cerebros en total.', type: 'totalBrains', threshold: 1000, bonus: 0.02 },
+      { id: 'banquete_gris', name: 'Banquete Gris', desc: 'Gana 1.000.000 de cerebros en total.', type: 'totalBrains', threshold: 1000000, bonus: 0.02 },
+      { id: 'junta_horda', name: 'Junta la Horda', desc: 'Posee 10 generadores en total.', type: 'generatorCount', threshold: 10, bonus: 0.02 },
+      { id: 'ejercito_necro', name: 'Ejército Necro', desc: 'Posee 100 generadores en total.', type: 'generatorCount', threshold: 100, bonus: 0.02 },
+      { id: 'coleccionista', name: 'Coleccionista de Muertos', desc: 'Posee al menos 1 de cada tipo de generador.', type: 'generators', target: ['zombie', 'esqueleto', 'vampiro', 'licantropo', 'frankenstein', 'zombi_nuclear', 'zombi_cibernético', 'zombi_cosmico'], bonus: 0.02 },
+      { id: 'senor_de_los_malditos', name: 'Señor de los Malditos', desc: 'Posee 500 generadores en total.', type: 'generatorCount', threshold: 500, bonus: 0.02 }
+    ],
 
     SAVE_KEY: 'zombie-clicker-save',
 
@@ -129,6 +132,60 @@
       return true;
     },
 
+    checkAchievements: function (state) {
+      if (!state.achievements) state.achievements = [];
+      var newlyUnlocked = [];
+      for (var i = 0; i < Game.ACHIEVEMENTS.length; i++) {
+        var ach = Game.ACHIEVEMENTS[i];
+        if (state.achievements.indexOf(ach.id) !== -1) continue;
+        var met = false;
+        if (ach.type === 'clicks') {
+          met = (state.clicks || 0) >= ach.threshold;
+        } else if (ach.type === 'totalBrains') {
+          met = (state.totalBrains || 0) >= ach.threshold;
+        } else if (ach.type === 'generatorCount') {
+          var total = 0;
+          for (var g in state.generators) {
+            if (Object.prototype.hasOwnProperty.call(state.generators, g)) {
+              total += (state.generators[g] || 0);
+            }
+          }
+          met = total >= ach.threshold;
+        } else if (ach.type === 'generators') {
+          met = true;
+          if (ach.target && ach.target.length > 0) {
+            for (var t = 0; t < ach.target.length; t++) {
+              if ((state.generators[ach.target[t]] || 0) < 1) {
+                met = false;
+                break;
+              }
+            }
+          }
+        }
+        if (met) {
+          state.achievements.push(ach.id);
+          newlyUnlocked.push(ach.id);
+        }
+      }
+      return newlyUnlocked;
+    },
+
+    getGlobalMultiplier: function (state) {
+      var mult = 1;
+      if (state.achievements && state.achievements.length > 0) {
+        for (var i = 0; i < state.achievements.length; i++) {
+          var achId = state.achievements[i];
+          for (var j = 0; j < Game.ACHIEVEMENTS.length; j++) {
+            if (Game.ACHIEVEMENTS[j].id === achId) {
+              mult += (Game.ACHIEVEMENTS[j].bonus || 0);
+              break;
+            }
+          }
+        }
+      }
+      return mult;
+    },
+
     save: function (state) {
       try {
         var data = {
@@ -137,9 +194,12 @@
           clicks: state.clicks,
           generators: state.generators,
           upgrades: state.upgrades,
+          achievements: state.achievements || [],
           savedAt: Date.now()
         };
-        localStorage.setItem(Game.SAVE_KEY, JSON.stringify(data));
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem(Game.SAVE_KEY, JSON.stringify(data));
+        }
         return true;
       } catch (e) {
         return false;
@@ -148,6 +208,7 @@
 
     load: function () {
       try {
+        if (typeof localStorage === 'undefined') return null;
         var raw = localStorage.getItem(Game.SAVE_KEY);
         if (!raw) return null;
         var data = JSON.parse(raw);
@@ -158,6 +219,7 @@
           clicks: typeof data.clicks === 'number' ? data.clicks : 0,
           generators: data.generators && typeof data.generators === 'object' ? data.generators : {},
           upgrades: data.upgrades && typeof data.upgrades === 'object' ? data.upgrades : {},
+          achievements: Array.isArray(data.achievements) ? data.achievements : [],
           savedAt: data.savedAt || null
         };
       } catch (e) {
@@ -171,12 +233,20 @@
       state.clicks = 0;
       state.generators = {};
       state.upgrades = {};
+      state.achievements = [];
       try {
-        localStorage.removeItem(Game.SAVE_KEY);
+        if (typeof localStorage !== 'undefined') {
+          localStorage.removeItem(Game.SAVE_KEY);
+        }
       } catch (e) {}
       return true;
     }
   };
 
-  window.Game = Game;
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = Game;
+  }
+  if (typeof window !== 'undefined') {
+    window.Game = Game;
+  }
 })();

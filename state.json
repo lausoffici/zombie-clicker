@@ -15,5 +15,7 @@
   "14-docs": "done",
   "v2-01-buy-max": "done",
   "v2-02-stats-core": "done",
-  "v2-03-toast-system": "done"
+  "v2-03-toast-system": "done",
+  "v2-04-achievements-data": "blocked",
+  "v2-05-achievements-ui": "done"
 }
