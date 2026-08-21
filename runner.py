@@ -123,6 +123,7 @@ def call_ollama(model, messages, num_ctx):
         "messages": messages,
         "stream": False,
         "think": False,
+        "keep_alive": "2h",
         "options": {"temperature": 0.2, "num_ctx": num_ctx},
     }
     req = urllib.request.Request(
