@@ -19,11 +19,32 @@ body {
   border-radius: 6px; cursor: pointer; font-size: 16px; margin-left: 6px;
 }
 #top-actions button:hover { background: #1a5276; }
+
+/* ---------- Pestañas ---------- */
+#tabs {
+  display: flex; gap: 6px; margin-bottom: 12px;
+  background: #16213e; padding: 6px; border-radius: 10px;
+}
+.tab-btn {
+  flex: 1; background: transparent; color: #a0a0c0; border: none;
+  padding: 10px 12px; border-radius: 8px; cursor: pointer;
+  font-size: 14px; font-weight: 600; transition: all 0.2s;
+}
+.tab-btn:hover { background: #1a5276; color: #fff; }
+.tab-btn.active {
+  background: #0f3460; color: #ffd93d;
+  box-shadow: 0 0 0 2px #ffd93d inset;
+}
+.tab-panel { display: none; }
+.tab-panel.active { display: block; animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
 #main { display: flex; gap: 16px; }
 #left-panel { flex: 1; display: flex; flex-direction: column; align-items: center; }
 #zombie-area {
   background: #16213e; border-radius: 12px; padding: 30px;
   display: flex; flex-direction: column; align-items: center; margin-bottom: 12px;
+  position: relative;
 }
 #zombie {
   font-size: 100px; cursor: pointer; user-select: none;
@@ -39,7 +60,7 @@ body {
 .gen-item, .upg-item {
   display: flex; justify-content: space-between; align-items: center;
   background: #16213e; border-radius: 8px; padding: 10px 14px;
-  cursor: pointer; transition: background 0.2s;
+  cursor: pointer; transition: background 0.2s; position: relative; overflow: hidden;
 }
 .gen-item:hover, .upg-item:hover { background: #1a5276; }
 .gen-item.disabled, .upg-item.disabled { opacity: 0.5; cursor: not-allowed; }
@@ -49,7 +70,150 @@ body {
 .gen-desc, .upg-desc { font-size: 12px; color: #a0a0c0; }
 .gen-cost, .upg-cost { font-size: 14px; color: #6bcb77; white-space: nowrap; }
 .gen-count { font-size: 14px; color: #ffd93d; margin-left: 8px; }
+
+/* ---------- Flash verde al comprar ---------- */
+.gen-item.purchased, .upg-item.purchased {
+  animation: purchaseFlash 0.5s ease;
+}
+@keyframes purchaseFlash {
+  0% { box-shadow: 0 0 0 0 rgba(107, 203, 119, 0); }
+  30% { box-shadow: 0 0 0 4px rgba(107, 203, 119, 0.7); background: #1a5276; }
+  100% { box-shadow: 0 0 0 0 rgba(107, 203, 119, 0); }
+}
+/* Partícula verde que sube desde el botón */
+.purchase-particle {
+  position: absolute; left: 50%; top: 50%;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #6bcb77; pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: particleRise 0.6s ease-out forwards;
+}
+@keyframes particleRise {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -120px) scale(0.3); }
+}
+
+/* ---------- Cerebro Dorado ---------- */
+#golden-brain {
+  position: fixed; font-size: 48px; cursor: pointer; z-index: 1000;
+  display: none; user-select: none;
+  filter: drop-shadow(0 0 12px #ffd93d);
+}
+#golden-brain.visible {
+  display: block;
+  animation: goldenAppear 0.4s ease, goldenPulse 1.2s ease-in-out infinite 0.4s;
+}
+#golden-brain.popping {
+  display: block;
+  animation: goldenPop 0.4s ease forwards;
+}
+@keyframes goldenAppear {
+  0% { opacity: 0; transform: scale(0) rotate(-30deg); }
+  70% { opacity: 1; transform: scale(1.2) rotate(10deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+@keyframes goldenPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+@keyframes goldenPop {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2) rotate(40deg); }
+}
+
+/* ---------- Horda Boss ---------- */
+#horde-boss {
+  position: fixed; left: 50%; top: 15%; transform: translateX(-50%);
+  font-size: 80px; z-index: 999; display: none; user-select: none;
+  filter: drop-shadow(0 0 16px #ff6b6b);
+}
+#horde-boss.active {
+  display: block;
+  animation: bossEnter 0.5s ease, bossShake 0.4s ease-in-out infinite 0.5s;
+}
+#horde-boss.dying {
+  display: block;
+  animation: bossDie 0.6s ease forwards;
+}
+@keyframes bossEnter {
+  0% { opacity: 0; transform: translateX(-50%) scale(0.3) translateY(-40px); }
+  100% { opacity: 1; transform: translateX(-50%) scale(1) translateY(0); }
+}
+@keyframes bossShake {
+  0%, 100% { transform: translateX(-50%) rotate(0); }
+  25% { transform: translateX(-50%) rotate(-6deg); }
+  75% { transform: translateX(-50%) rotate(6deg); }
+}
+@keyframes bossDie {
+  0% { opacity: 1; transform: translateX(-50%) scale(1) rotate(0); }
+  100% { opacity: 0; transform: translateX(-50%) scale(0.2) rotate(180deg); }
+}
+
+/* ---------- Toasts ---------- */
+#toast-container {
+  position: fixed; bottom: 20px; right: 20px; z-index: 2000;
+  display: flex; flex-direction: column; gap: 8px; max-width: 320px;
+}
+.toast {
+  background: #16213e; color: #fff; padding: 12px 16px; border-radius: 8px;
+  border-left: 4px solid #a0a0c0; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  animation: toastIn 0.3s ease; font-size: 14px;
+}
+.toast.success { border-left-color: #6bcb77; }
+.toast.warn { border-left-color: #ffd93d; }
+.toast.error { border-left-color: #ff6b6b; }
+.toast.toast-out { animation: toastOut 0.3s ease forwards; }
+@keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
+@keyframes toastOut { to { opacity: 0; transform: translateX(40px); } }
+
+/* ---------- Floating text ---------- */
+.floating-text {
+  position: fixed; color: #ffd93d; font-weight: bold; font-size: 18px;
+  pointer-events: none; z-index: 1500;
+  animation: floatUp 0.8s ease-out forwards;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+}
+@keyframes floatUp {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-50px); }
+}
+
+/* ---------- Logros ---------- */
+#achievements-list { display: flex; flex-direction: column; gap: 8px; }
+.ach-item {
+  display: flex; justify-content: space-between; align-items: center;
+  background: #16213e; border-radius: 8px; padding: 10px 14px;
+}
+.ach-item.unlocked { border-left: 4px solid #6bcb77; }
+.ach-item.locked { opacity: 0.6; border-left: 4px solid #a0a0c0; }
+.ach-name { font-weight: bold; }
+.ach-desc { font-size: 12px; color: #a0a0c0; }
+.ach-bonus { font-size: 14px; color: #ffd93d; white-space: nowrap; }
+
+/* ---------- Prestigio ---------- */
+#prestige-info {
+  background: #16213e; border-radius: 10px; padding: 14px; margin-bottom: 12px;
+}
+.prestige-stat { display: flex; justify-content: space-between; padding: 4px 0; font-size: 14px; }
+#prestige-shop { display: flex; flex-direction: column; gap: 8px; }
+.prestige-item {
+  display: flex; justify-content: space-between; align-items: center;
+  background: #16213e; border-radius: 8px; padding: 10px 14px; cursor: pointer;
+  transition: background 0.2s;
+}
+.prestige-item:hover { background: #1a5276; }
+.prestige-item.disabled { opacity: 0.5; cursor: not-allowed; }
+.prestige-item.owned { border-left: 4px solid #6bcb77; cursor: default; }
+.prestige-name { font-weight: bold; }
+.prestige-desc { font-size: 12px; color: #a0a0c0; }
+.prestige-cost { font-size: 14px; color: #ffd93d; white-space: nowrap; }
+
+/* ---------- Stats ---------- */
+#stats-content { background: #16213e; border-radius: 10px; padding: 14px; }
+
 @media (max-width: 768px) {
   #main { flex-direction: column; }
   #zombie { font-size: 70px; }
+  #tabs { flex-wrap: wrap; }
+  .tab-btn { flex: 1 1 40%; }
 }
