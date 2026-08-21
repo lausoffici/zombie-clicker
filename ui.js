@@ -13,6 +13,12 @@
   let bossMultiplier = 1;
   let generatorQty = 1; // 1, 10, 0=max
   let prevAchievements = [];
+  let lastCloudSyncAt = 0;
+  let warnedCloudOffline = false;
+  let accountMode = "signup";
+  let cachedDisplayName = "";
+  let cloudMergeInFlight = false;
+  let offlineApplied = false;
 
   const SVG_ICONS = {
     survivor: '<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="10" r="5" fill="#8fa085"/><path d="M8 28 L12 14 L20 14 L24 28" fill="#5d705a"/><circle cx="14" cy="10" r="1" fill="#000"/><circle cx="18" cy="10" r="1" fill="#000"/></svg>',
@@ -102,6 +108,20 @@
     if (!state) return;
     state.lastSaved = Date.now();
     try { localStorage.setItem(SAVE_KEY, Game.serialize(state)); } catch (e) {}
+    if (typeof Cloud !== "undefined" && Cloud.hasSession()) {
+      Cloud.pushSave(state).then(function (res) {
+        if (res && res.ok) {
+          lastCloudSyncAt = Cloud.getLastSyncAt() || Date.now();
+          warnedCloudOffline = false;
+          updateAccountSyncLabel();
+        } else if (res && !res.skipped && (res.offline || res.error)) {
+          if (!warnedCloudOffline) {
+            warnedCloudOffline = true;
+            showToast("Sin conexión: se guarda en este dispositivo", "warn");
+          }
+        }
+      });
+    }
   }
 
   function loadGame() {
@@ -127,9 +147,9 @@
 
   function resetGame() {
     if (typeof confirm === "function" && !confirm("¿Seguro que quieres reiniciar TODO el progreso?")) return;
-    try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
     state = Game.createState();
     prevAchievements = [];
+    saveGame();
     renderAll();
     showToast("Progreso reiniciado", "info");
   }
@@ -776,6 +796,288 @@
     }
   }
 
+  function pad2(n) {
+    return n < 10 ? "0" + n : String(n);
+  }
+
+  function formatSyncTime(ts) {
+    if (!ts) return "—";
+    const d = new Date(ts);
+    return pad2(d.getHours()) + ":" + pad2(d.getMinutes());
+  }
+
+  function setAccountError(msg) {
+    const el = $("account-error");
+    if (!el) return;
+    if (!msg) {
+      el.textContent = "";
+      el.classList.add("hidden");
+    } else {
+      el.textContent = msg;
+      el.classList.remove("hidden");
+    }
+  }
+
+  function updateAccountSyncLabel() {
+    const el = $("account-last-sync");
+    if (!el) return;
+    const ts = lastCloudSyncAt || (typeof Cloud !== "undefined" ? Cloud.getLastSyncAt() : 0);
+    el.textContent = ts ? ("Último sync: " + formatSyncTime(ts)) : "Último sync: —";
+  }
+
+  function updateAccountModal() {
+    const configured = typeof Cloud !== "undefined" && Cloud.isConfigured();
+    const unconf = $("account-unconfigured");
+    const guest = $("account-guest");
+    const authedBox = $("account-authed");
+    const session = typeof Cloud !== "undefined" && Cloud.hasSession();
+    if (unconf) unconf.classList.toggle("hidden", configured);
+    if (!configured) {
+      if (guest) guest.classList.add("hidden");
+      if (authedBox) authedBox.classList.add("hidden");
+      return;
+    }
+    if (session) {
+      if (guest) guest.classList.add("hidden");
+      if (authedBox) authedBox.classList.remove("hidden");
+      const nm = $("account-authed-name");
+      if (nm) nm.textContent = cachedDisplayName || "jugador";
+      updateAccountSyncLabel();
+    } else {
+      if (guest) guest.classList.remove("hidden");
+      if (authedBox) authedBox.classList.add("hidden");
+    }
+  }
+
+  function updateAccountChrome() {
+    const btn = $("btn-account");
+    const nameEl = $("account-name");
+    const authed = typeof Cloud !== "undefined" && Cloud.hasSession();
+    if (btn) {
+      btn.classList.toggle("is-authed", authed);
+      const label = authed && cachedDisplayName ? cachedDisplayName : "Cuenta";
+      btn.setAttribute("aria-label", label);
+      btn.title = label;
+    }
+    if (nameEl) {
+      if (authed && cachedDisplayName) {
+        nameEl.textContent = cachedDisplayName;
+        nameEl.classList.remove("hidden");
+      } else {
+        nameEl.textContent = "";
+        nameEl.classList.add("hidden");
+      }
+    }
+    updateAccountModal();
+  }
+
+  function setAccountMode(mode) {
+    accountMode = mode === "login" ? "login" : "signup";
+    const tabS = $("account-tab-signup");
+    const tabL = $("account-tab-login");
+    const fieldName = $("account-field-name");
+    const submit = $("account-submit");
+    const pass = $("account-password");
+    if (tabS) {
+      tabS.classList.toggle("active", accountMode === "signup");
+      tabS.setAttribute("aria-selected", accountMode === "signup" ? "true" : "false");
+    }
+    if (tabL) {
+      tabL.classList.toggle("active", accountMode === "login");
+      tabL.setAttribute("aria-selected", accountMode === "login" ? "true" : "false");
+    }
+    if (fieldName) fieldName.classList.toggle("hidden", accountMode === "login");
+    const nameInput = $("account-display-name");
+    if (nameInput) {
+      if (accountMode === "signup") nameInput.setAttribute("required", "required");
+      else nameInput.removeAttribute("required");
+    }
+    if (submit) submit.textContent = accountMode === "login" ? "Entrar" : "Crear cuenta";
+    if (pass) pass.setAttribute("autocomplete", accountMode === "login" ? "current-password" : "new-password");
+    setAccountError("");
+  }
+
+  function openAccountModal() {
+    const modal = $("account-modal");
+    if (!modal) return;
+    updateAccountModal();
+    modal.classList.remove("hidden");
+    if (typeof Cloud !== "undefined" && Cloud.isConfigured() && !Cloud.hasSession()) {
+      const first = accountMode === "signup" ? $("account-display-name") : $("account-email");
+      if (first && typeof first.focus === "function") first.focus();
+    }
+  }
+
+  function closeAccountModal() {
+    const modal = $("account-modal");
+    if (modal) modal.classList.add("hidden");
+    setAccountError("");
+  }
+
+  function applyOfflineProgressOnce() {
+    if (offlineApplied || !state) return;
+    offlineApplied = true;
+    if (!state.lastSaved) return;
+    const elapsed = (Date.now() - state.lastSaved) / 1000;
+    if (elapsed <= 60) return;
+    const cap = typeof Game.getOfflineCapSeconds === "function"
+      ? Game.getOfflineCapSeconds(state)
+      : OFFLINE_CAP_SECONDS;
+    const effective = Math.min(elapsed, cap);
+    const gained = Game.applyOfflineProgress(state, effective);
+    if (gained > 0) {
+      showToast("🌙 Mientras estabas fuera ganaste " + formatNumber(gained) + " cerebros", "info");
+      renderHeader();
+    }
+  }
+
+  function mergeWithCloud(opts) {
+    opts = opts || {};
+    if (typeof Cloud === "undefined" || !Cloud.hasSession()) {
+      applyOfflineProgressOnce();
+      return Promise.resolve();
+    }
+    if (cloudMergeInFlight) return Promise.resolve();
+    cloudMergeInFlight = true;
+    const localSnapshot = state;
+    return Cloud.pullSave().then(function (cloudState) {
+      const picked = Game.pickPreferredSave(localSnapshot, cloudState);
+      state = picked.state;
+      if (!state.prestige) state.prestige = { souls: 0, totalSoulsEarned: 0, upgrades: [] };
+      if (!Array.isArray(state.achievements)) state.achievements = [];
+      prevAchievements = state.achievements.slice();
+      saveGame();
+      setupAutoClick();
+      renderAll();
+      updateAccountChrome();
+      if (opts.toast !== false) {
+        if (picked.source === "cloud" && !Game.isFreshState(picked.state)) {
+          showToast("Se cargó el progreso de la nube", "info");
+        } else if (picked.source === "local" && !cloudState) {
+          showToast("Se subió el progreso de este dispositivo", "info");
+        } else if (picked.source === "local" && Game.isFreshState(cloudState)) {
+          showToast("Se subió el progreso de este dispositivo", "info");
+        }
+      }
+      applyOfflineProgressOnce();
+    }).catch(function () {
+      if (!warnedCloudOffline) {
+        warnedCloudOffline = true;
+        showToast("Sin conexión: se guarda en este dispositivo", "warn");
+      }
+      applyOfflineProgressOnce();
+    }).then(function () {
+      cloudMergeInFlight = false;
+    });
+  }
+
+  function refreshProfileName() {
+    if (typeof Cloud === "undefined" || !Cloud.hasSession()) {
+      cachedDisplayName = "";
+      updateAccountChrome();
+      return Promise.resolve();
+    }
+    return Cloud.getProfile().then(function (profile) {
+      cachedDisplayName = profile && profile.display_name ? profile.display_name : cachedDisplayName;
+      updateAccountChrome();
+    });
+  }
+
+  function submitAccountForm(e) {
+    if (e && typeof e.preventDefault === "function") e.preventDefault();
+    if (typeof Cloud === "undefined" || !Cloud.isConfigured()) return;
+    const submit = $("account-submit");
+    const emailEl = $("account-email");
+    const passwordEl = $("account-password");
+    const nameEl = $("account-display-name");
+    const email = emailEl ? emailEl.value : "";
+    const password = passwordEl ? passwordEl.value : "";
+    const name = nameEl ? nameEl.value.trim() : "";
+    setAccountError("");
+    if (submit) submit.disabled = true;
+    const done = function () { if (submit) submit.disabled = false; };
+    const action = accountMode === "login"
+      ? Cloud.signIn(email, password)
+      : Cloud.signUp(email, password, name);
+    action.then(function (res) {
+      done();
+      if (!res || !res.ok) {
+        setAccountError((res && res.error) || "No se pudo completar.");
+        return;
+      }
+      if (res.needsEmailConfirm) {
+        setAccountError("Revisá tu email para confirmar la cuenta.");
+        showToast("Revisá tu email", "info");
+        return;
+      }
+      if (accountMode === "signup") {
+        cachedDisplayName = name;
+        showToast("Cuenta creada", "success");
+      } else {
+        showToast("Sesión iniciada", "success");
+      }
+      closeAccountModal();
+      refreshProfileName();
+    }).catch(function () {
+      done();
+      setAccountError("No se pudo completar.");
+    });
+  }
+
+  function setupAccount() {
+    if (typeof Cloud !== "undefined") Cloud.init();
+
+    const btn = $("btn-account");
+    if (btn) btn.addEventListener("click", openAccountModal);
+    const closeBtn = $("account-modal-close");
+    if (closeBtn) closeBtn.addEventListener("click", closeAccountModal);
+    const backdrop = $("account-modal-backdrop");
+    if (backdrop) backdrop.addEventListener("click", closeAccountModal);
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") closeAccountModal();
+    });
+
+    const tabS = $("account-tab-signup");
+    const tabL = $("account-tab-login");
+    if (tabS) tabS.addEventListener("click", function () { setAccountMode("signup"); });
+    if (tabL) tabL.addEventListener("click", function () { setAccountMode("login"); });
+    setAccountMode("signup");
+
+    const form = $("account-form");
+    if (form) form.addEventListener("submit", submitAccountForm);
+
+    const signout = $("account-signout");
+    if (signout) {
+      signout.addEventListener("click", function () {
+        if (typeof Cloud === "undefined") return;
+        Cloud.signOut().then(function () {
+          cachedDisplayName = "";
+          updateAccountChrome();
+          showToast("Sesión cerrada", "info");
+          closeAccountModal();
+        });
+      });
+    }
+
+    if (typeof Cloud !== "undefined") {
+      Cloud.onAuthChange(function (session, event) {
+        if (event === "SIGNED_OUT") {
+          cachedDisplayName = "";
+          updateAccountChrome();
+          return;
+        }
+        if (event === "SIGNED_IN") {
+          refreshProfileName().then(function () {
+            return mergeWithCloud({ toast: true });
+          });
+          return;
+        }
+        updateAccountChrome();
+      });
+    }
+    updateAccountChrome();
+  }
+
   function init() {
     loadGame();
     renderAll();
@@ -784,6 +1086,7 @@
     setupSideTabs();
     setupMobileNav();
     setupAutoClick();
+    setupAccount();
 
     const zombieEl = $("zombie-btn");
     if (zombieEl) zombieEl.addEventListener("click", handleClick);
@@ -830,16 +1133,19 @@
       });
     }
 
-    if (state.lastSaved) {
-      const elapsed = (Date.now() - state.lastSaved) / 1000;
-      if (elapsed > 60) {
-        const cap = typeof Game.getOfflineCapSeconds === "function"
-          ? Game.getOfflineCapSeconds(state)
-          : OFFLINE_CAP_SECONDS;
-        const effective = Math.min(elapsed, cap);
-        const gained = Game.applyOfflineProgress(state, effective);
-        if (gained > 0) showToast("🌙 Mientras estabas fuera ganaste " + formatNumber(gained) + " cerebros", "info");
-      }
+    if (typeof Cloud !== "undefined" && Cloud.isConfigured()) {
+      Promise.resolve(Cloud.getSession()).then(function (session) {
+        if (session) {
+          return refreshProfileName().then(function () {
+            return mergeWithCloud({ toast: true });
+          });
+        }
+        applyOfflineProgressOnce();
+      }).catch(function () {
+        applyOfflineProgressOnce();
+      });
+    } else {
+      applyOfflineProgressOnce();
     }
 
     scheduleGoldenBrain();

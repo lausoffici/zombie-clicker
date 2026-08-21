@@ -321,4 +321,90 @@ function approxEqual(a, b, eps) {
   assert.strictEqual(s2.cosmetics.equipped.bg, 'bg-void', 'default equipped bg');
 })();
 
+// 20. isValidDisplayName
+(function testValidDisplayName() {
+  assert.strictEqual(Game.isValidDisplayName('Ada'), true, 'Ada es válido');
+  assert.strictEqual(Game.isValidDisplayName('Necro_King16'), true, 'underscore y números');
+  assert.strictEqual(Game.isValidDisplayName('ab'), false, 'corto');
+  assert.strictEqual(Game.isValidDisplayName('abcdefghijklmnopq'), false, 'largo');
+  assert.strictEqual(Game.isValidDisplayName('Ada King'), false, 'espacios');
+  assert.strictEqual(Game.isValidDisplayName('Adán'), false, 'unicode');
+  assert.strictEqual(Game.isValidDisplayName(''), false, 'vacío');
+  assert.strictEqual(Game.isValidDisplayName(null), false, 'null');
+})();
+
+// 21. isFreshState
+(function testFreshState() {
+  const fresh = Game.createState();
+  assert.strictEqual(Game.isFreshState(fresh), true, 'createState es fresco');
+  const clicked = Game.createState();
+  Game.click(clicked);
+  assert.strictEqual(Game.isFreshState(clicked), false, 'un click ya no es fresco');
+  const souls = Game.createState();
+  souls.prestige.totalSoulsEarned = 2;
+  assert.strictEqual(Game.isFreshState(souls), false, 'almas totales no es fresco');
+  assert.strictEqual(Game.isFreshState(null), true, 'null es fresco');
+})();
+
+// 22. pickPreferredSave
+(function testPickPreferredSave() {
+  const local = Game.createState();
+  local.totalBrainsEarned = 100;
+  local.totalClicks = 5;
+  local.lastSaved = 1000;
+
+  const noCloud = Game.pickPreferredSave(local, null);
+  assert.strictEqual(noCloud.source, 'local', 'sin nube usa local');
+  assert.strictEqual(noCloud.state, local);
+
+  const cloudFresh = Game.createState();
+  const vsFreshCloud = Game.pickPreferredSave(local, cloudFresh);
+  assert.strictEqual(vsFreshCloud.source, 'local', 'nube fresca pierde contra local con progreso');
+
+  const localFresh = Game.createState();
+  const cloudProgress = Game.createState();
+  cloudProgress.totalBrainsEarned = 50;
+  cloudProgress.totalClicks = 3;
+  const vsFreshLocal = Game.pickPreferredSave(localFresh, cloudProgress);
+  assert.strictEqual(vsFreshLocal.source, 'cloud', 'local fresco pierde contra nube con cerebros');
+
+  const localSouls = Game.createState();
+  localSouls.totalBrainsEarned = 10;
+  localSouls.prestige.totalSoulsEarned = 5;
+  localSouls.lastSaved = 9000;
+  const cloudBrains = Game.createState();
+  cloudBrains.totalBrainsEarned = 999999;
+  cloudBrains.prestige.totalSoulsEarned = 1;
+  cloudBrains.lastSaved = 10000;
+  const soulsWin = Game.pickPreferredSave(localSouls, cloudBrains);
+  assert.strictEqual(soulsWin.source, 'local', 'más almas ganan aunque haya menos cerebros');
+
+  const a = Game.createState();
+  a.totalBrainsEarned = 100;
+  a.prestige.totalSoulsEarned = 2;
+  a.lastSaved = 100;
+  const b = Game.createState();
+  b.totalBrainsEarned = 100;
+  b.prestige.totalSoulsEarned = 2;
+  b.lastSaved = 200;
+  const tie = Game.pickPreferredSave(a, b);
+  assert.strictEqual(tie.source, 'cloud', 'empate almas+cerebros usa lastSaved');
+})();
+
+// 23. cloudStatsFromState
+(function testCloudStatsFromState() {
+  const s = Game.createState();
+  s.totalBrainsEarned = 123.5;
+  s.prestige.souls = 7;
+  s.bestBps = 42;
+  const stats = Game.cloudStatsFromState(s);
+  assert.strictEqual(stats.total_brains_earned, 123.5);
+  assert.strictEqual(stats.prestige_souls, 7);
+  assert.strictEqual(stats.best_bps, 42);
+  const empty = Game.cloudStatsFromState(null);
+  assert.strictEqual(empty.total_brains_earned, 0);
+  assert.strictEqual(empty.prestige_souls, 0);
+  assert.strictEqual(empty.best_bps, 0);
+})();
+
 console.log('Todos los tests pasaron correctamente.');

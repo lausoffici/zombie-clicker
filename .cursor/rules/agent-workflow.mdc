@@ -36,6 +36,7 @@ Project config: `opencode.json` (Ollama provider + default model).
 ## Game constraints
 
 - Vanilla HTML/CSS/JS only
-- `game.js` = logic; `ui.js` = DOM; `style.css` = look; `index.html` = structure
+- `game.js` = logic; `ui.js` = DOM; `cloud.js` = optional Supabase; `style.css` = look; `index.html` = structure
+- No own backend; optional cloud save via Supabase CDN
 - Run `node tests/logic.test.js` after logic/save changes
 - Spanish UI copy

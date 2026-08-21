@@ -436,6 +436,76 @@
     }
   }
 
+  function isValidDisplayName(name) {
+    return typeof name === "string" && /^[A-Za-z0-9_]{3,16}$/.test(name);
+  }
+
+  function totalSoulsEarned(state) {
+    if (!state || !state.prestige) return 0;
+    return typeof state.prestige.totalSoulsEarned === "number" ? state.prestige.totalSoulsEarned : 0;
+  }
+
+  function isFreshState(state) {
+    if (!state) return true;
+    return (state.totalBrainsEarned || 0) === 0
+      && (state.totalClicks || 0) === 0
+      && totalSoulsEarned(state) === 0;
+  }
+
+  function cloudStatsFromState(state) {
+    if (!state) {
+      return { total_brains_earned: 0, prestige_souls: 0, best_bps: 0 };
+    }
+    const souls = state.prestige && typeof state.prestige.souls === "number" ? state.prestige.souls : 0;
+    return {
+      total_brains_earned: typeof state.totalBrainsEarned === "number" ? state.totalBrainsEarned : 0,
+      prestige_souls: souls,
+      best_bps: typeof state.bestBps === "number" ? state.bestBps : 0
+    };
+  }
+
+  function pickPreferredSave(local, cloud) {
+    if (!cloud && !local) {
+      return { source: "local", state: createState(), reason: "empty" };
+    }
+    if (!cloud) {
+      return { source: "local", state: local, reason: "no-cloud" };
+    }
+    if (!local) {
+      return { source: "cloud", state: cloud, reason: "no-local" };
+    }
+
+    const localFresh = isFreshState(local);
+    const cloudFresh = isFreshState(cloud);
+    if (localFresh && !cloudFresh) {
+      return { source: "cloud", state: cloud, reason: "local-fresh" };
+    }
+    if (cloudFresh && !localFresh) {
+      return { source: "local", state: local, reason: "cloud-fresh" };
+    }
+
+    const localSouls = totalSoulsEarned(local);
+    const cloudSouls = totalSoulsEarned(cloud);
+    if (cloudSouls !== localSouls) {
+      if (cloudSouls > localSouls) return { source: "cloud", state: cloud, reason: "souls" };
+      return { source: "local", state: local, reason: "souls" };
+    }
+
+    const localBrains = local.totalBrainsEarned || 0;
+    const cloudBrains = cloud.totalBrainsEarned || 0;
+    if (cloudBrains !== localBrains) {
+      if (cloudBrains > localBrains) return { source: "cloud", state: cloud, reason: "brains" };
+      return { source: "local", state: local, reason: "brains" };
+    }
+
+    const localSaved = local.lastSaved || 0;
+    const cloudSaved = cloud.lastSaved || 0;
+    if (cloudSaved > localSaved) {
+      return { source: "cloud", state: cloud, reason: "lastSaved" };
+    }
+    return { source: "local", state: local, reason: "lastSaved" };
+  }
+
   const Game = {
     GENERATORS: GENERATORS,
     UPGRADES: UPGRADES,
@@ -474,7 +544,11 @@
     exportSave: exportSave,
     importSave: importSave,
     getGeneratorBps: getGeneratorBps,
-    getOfflineCapSeconds: getOfflineCapSeconds
+    getOfflineCapSeconds: getOfflineCapSeconds,
+    isValidDisplayName: isValidDisplayName,
+    isFreshState: isFreshState,
+    pickPreferredSave: pickPreferredSave,
+    cloudStatsFromState: cloudStatsFromState
   };
 
   if (typeof module !== "undefined" && module.exports) {

@@ -17,7 +17,7 @@ Regla corta: **Cursor/Kimi = cerebro. Qwen (Ollama loop) = manos. Orca = hangar.
 
 ## Stack de ejecución
 
-- Juego: HTML/CSS/JS vanilla (`index.html`, `style.css`, `game.js`, `ui.js`)
+- Juego: HTML/CSS/JS vanilla (`index.html`, `style.css`, `game.js`, `ui.js`, `cloud.js`)
 - Tests: `node tests/logic.test.js`
 - Executor AFK (default): `node scripts/execute-plan-ollama.mjs` (tools `read_file` / `write_file` / `replace_in_file`)
 - Wrapper: `.\scripts\run-opencode-plan.ps1` (por defecto `-Engine ollama`)
@@ -111,9 +111,10 @@ Cuando el usuario pide **monitorear** (no construir):
 
 ## Convenciones del juego
 
-- Lógica `game.js`, DOM `ui.js`, look `style.css`, estructura `index.html`
+- Lógica `game.js`, DOM `ui.js`, nube `cloud.js`, look `style.css`, estructura `index.html`
 - UI en español
-- Sin build / framework / sonidos / backend
+- Sin build / framework / sonidos / **backend propio**
+- Persistencia local (`localStorage`) + cuentas opcionales con Supabase (CDN, RLS). Spec: `docs/superpowers/specs/2026-08-21-accounts-supabase.md`
 - Tras lógica: `node tests/logic.test.js`
 
 ## Legacy

@@ -269,7 +269,20 @@ button { font-family: inherit; }
   animation: bpsFlash 0.35s ease;
 }
 
-#topbar-actions { display: flex; gap: 8px; }
+#topbar-actions { display: flex; align-items: center; gap: 8px; }
+.account-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--teal-300);
+  max-width: 96px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.icon-btn.is-authed {
+  color: var(--teal-300);
+  border-color: var(--border-strong);
+}
 .icon-btn {
   width: 36px;
   height: 36px;
@@ -786,6 +799,104 @@ button { font-family: inherit; }
   100% { transform: translateY(-50px) scale(0.9); opacity: 0; }
 }
 
+.account-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.account-modal.hidden { display: none !important; }
+.account-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(9, 13, 16, 0.72);
+}
+.account-modal-card {
+  position: relative;
+  z-index: 1;
+  width: min(420px, 100%);
+  background: var(--bg-800);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 20px 20px 18px;
+}
+.account-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+.account-copy {
+  margin: 0 0 12px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.account-muted {
+  margin: 0 0 16px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.account-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.account-tab {
+  flex: 1;
+  min-height: 40px;
+  border: 1px solid var(--border);
+  background: var(--bg-700);
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+.account-tab.active {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+  background: var(--bg-600);
+}
+.account-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.account-field input {
+  min-height: 40px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-900);
+  color: var(--text-primary);
+  padding: 8px 12px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.account-error {
+  margin: 0 0 12px;
+  color: var(--gold-500);
+  font-size: 13px;
+}
+.btn-account-submit {
+  width: 100%;
+  background: var(--teal-500);
+  border-color: transparent;
+  color: #07120f;
+}
+.btn-account-submit:hover { background: var(--teal-400); }
+
 #toast-container {
   position: fixed;
   top: 16px;
@@ -978,6 +1089,7 @@ button { font-family: inherit; }
   #zombie-btn { width: 176px; height: 176px; }
   #brand-name { font-size: 18px; }
   .icon-btn { width: 36px; height: 36px; }
+  .account-name { display: none; }
   .card { padding: 14px; }
   .card-title { font-size: 18px; }
   .shop-list { max-height: none; }
