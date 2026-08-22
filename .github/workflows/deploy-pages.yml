@@ -28,11 +28,14 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_ANON_KEY" ]; then
+          # Strip BOM/CR/whitespace (PowerShell `gh secret set` pipes can inject U+FEFF)
+          URL=$(printf '%s' "$SUPABASE_URL" | tr -d '\r' | sed $'s/^\xEF\xBB\xBF//;s/^[[:space:]]*//;s/[[:space:]]*$//')
+          KEY=$(printf '%s' "$SUPABASE_ANON_KEY" | tr -d '\r' | sed $'s/^\xEF\xBB\xBF//;s/^[[:space:]]*//;s/[[:space:]]*$//')
+          if [ -n "$URL" ] && [ -n "$KEY" ]; then
             cat > config.js <<EOF
           window.ZombieClickerConfig = {
-            supabaseUrl: "${SUPABASE_URL}",
-            supabaseAnonKey: "${SUPABASE_ANON_KEY}"
+            supabaseUrl: "${URL}",
+            supabaseAnonKey: "${KEY}"
           };
           EOF
             echo "config.js written from secrets"

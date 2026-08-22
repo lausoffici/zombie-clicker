@@ -14,12 +14,18 @@
     return window.ZombieClickerConfig || null;
   }
 
+  function stripConfigValue(value) {
+    if (typeof value !== "string") return "";
+    // U+FEFF can sneak in via Windows/PowerShell when setting GH secrets
+    return value.replace(/^\uFEFF/, "").trim();
+  }
+
   function isConfigured() {
     const cfg = getConfig();
     if (!cfg) return false;
-    const url = cfg.supabaseUrl;
-    const key = cfg.supabaseAnonKey;
-    if (typeof url !== "string" || typeof key !== "string") return false;
+    const url = stripConfigValue(cfg.supabaseUrl);
+    const key = stripConfigValue(cfg.supabaseAnonKey);
+    if (!url || !key) return false;
     if (url.indexOf("YOUR-PROJECT") !== -1) return false;
     if (key.indexOf("YOUR-ANON") !== -1) return false;
     if (url.indexOf("https://") !== 0) return false;
@@ -63,7 +69,10 @@
     if (client) return true;
     if (!isConfigured() || !hasSdk()) return false;
     const cfg = getConfig();
-    client = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    client = window.supabase.createClient(
+      stripConfigValue(cfg.supabaseUrl),
+      stripConfigValue(cfg.supabaseAnonKey)
+    );
     client.auth.onAuthStateChange(function (event, session) {
       notifyAuth(event, session);
     });

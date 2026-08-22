@@ -336,6 +336,7 @@
     const chips = typeof Game.getSoulChips === "function"
       ? Game.getSoulChips(state)
       : (state.prestige.soulChips || 0);
+    setStatText($("stat-chips"), formatNumber(chips));
     const soulsShopCount = $("souls-shop-count");
     if (soulsShopCount) soulsShopCount.textContent = formatNumber(chips);
   }
@@ -661,7 +662,11 @@
       : (state.prestige.soulChips || 0);
     if (soulsEl) soulsEl.textContent = formatNumber(soulLevel);
     if (chipsEl) chipsEl.textContent = formatNumber(chips);
-    if (gainEl) gainEl.textContent = formatNumber(gain);
+    if (gainEl) {
+      gainEl.textContent = gain > 0
+        ? "+" + formatNumber(gain) + " de cada una"
+        : "0";
+    }
     if (multEl) multEl.textContent = "x" + Game.getGlobalMultiplier(state).toFixed(2);
     if (btn) {
       btn.disabled = gain <= 0;
@@ -675,10 +680,11 @@
       const remaining = Math.max(0, nextAt - state.totalBrainsEarned);
       const almaWord = gain === 1 ? "Alma" : "Almas";
       if (gain <= 0) {
-        hintEl.textContent = "Te faltan " + formatNumber(remaining) + " cerebros de esta vida para la primera Alma.";
+        hintEl.textContent = "Te faltan " + formatNumber(remaining) + " cerebros en esta vida para tu primera Alma (y su astilla).";
       } else {
         hintEl.textContent = "Si ascendés ahora: +" + formatNumber(gain) + " " + almaWord +
-          " y astillas. Para una más, juntá " + formatNumber(remaining) + " cerebros extra.";
+          " de nivel y +" + formatNumber(gain) + " astillas. Para una Alma más, juntá " +
+          formatNumber(remaining) + " cerebros extra.";
       }
     }
 
