@@ -95,9 +95,15 @@ Cómo conseguirlos: a veces del cerebro dorado, y siempre al derrotar al jefe de
                 <span class="hero-stat-label">Cerebros</span>
                 <span id="hero-brains" class="hero-stat-value" aria-live="polite">0</span>
               </div>
-              <div class="hero-stat hero-stat--bps">
-                <span class="hero-stat-label">Por segundo</span>
-                <span id="hero-bps" class="hero-stat-value">0/s</span>
+              <div class="hero-stat-row">
+                <div class="hero-stat hero-stat--bps">
+                  <span class="hero-stat-label">Por segundo</span>
+                  <span id="hero-bps" class="hero-stat-value">0/s</span>
+                </div>
+                <div class="hero-stat hero-stat--click">
+                  <span class="hero-stat-label">Por click</span>
+                  <span id="hero-click" class="hero-stat-value">+1</span>
+                </div>
               </div>
             </div>
             <button id="zombie-btn" aria-label="Ganar cerebro">
@@ -131,10 +137,9 @@ Cómo conseguirlos: a veces del cerebro dorado, y siempre al derrotar al jefe de
               </span>
             </button>
             <div id="clicker-info">
-              <div id="click-value">+1 por click</div>
               <div class="clicker-stats" aria-live="polite">
                 <div id="click-crit">Crítico 0% · ×10</div>
-                <div id="click-crit-value">+10 en crítico</div>
+                <div id="click-crit-value">Crítico: +10</div>
               </div>
               <div id="click-hint">Clic para recolectar</div>
             </div>

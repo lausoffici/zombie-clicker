@@ -234,6 +234,7 @@
     if (Game.buyUpgrade(state, id)) {
       renderShop();
       renderHeader();
+      renderClicker();
       renderStats();
       showToast("Nivel de mejora subido", "success");
     }
@@ -288,6 +289,7 @@
     if (Game.buyPrestigeUpgrade(state, id)) {
       renderPrestige();
       renderHeader();
+      renderClicker();
       patchSoulsShop();
       setupAutoClick();
       showToast("Mejora permanente comprada", "success");
@@ -344,13 +346,15 @@
   function renderClicker() {
     if (!state) return;
     const clickVal = Game.getClickValue(state);
-    const clickValueEl = $("click-value");
-    if (clickValueEl) clickValueEl.textContent = "+" + formatNumber(clickVal) + " por click";
+    const heroClick = $("hero-click");
+    if (heroClick) setStatText(heroClick, "+" + formatNumber(clickVal));
+    const legacyClick = $("click-value");
+    if (legacyClick) legacyClick.textContent = "+" + formatNumber(clickVal) + " por click";
     const critChance = Game.getCritChance(state);
     const critEl = $("click-crit");
     if (critEl) critEl.textContent = "Crítico " + Math.round(critChance * 100) + "% · ×10";
     const critValueEl = $("click-crit-value");
-    if (critValueEl) critValueEl.textContent = "+" + formatNumber(clickVal * 10) + " en crítico";
+    if (critValueEl) critValueEl.textContent = "Crítico: +" + formatNumber(clickVal * 10);
   }
 
   function getBulkGeneratorCost(state, id, qty) {
@@ -978,6 +982,7 @@
         renderAchievements(newAch);
       }
       renderHeader();
+      renderClicker();
       renderStats();
       renderShop();
       renderPrestige();
