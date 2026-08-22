@@ -284,6 +284,25 @@ function approxEqual(a, b, eps) {
   assert.ok(after > base, 'los upgrades de click deben aumentar el valor');
 })();
 
+// 14b. click multiplica el BPS
+(function testClickScalesWithBps() {
+  const s = Game.createState();
+  s.generators.mordedor = 1; // 1 BPS base
+  const bps = Game.getBrainsPerSecond(s);
+  assert.ok(bps > 0, 'bps > 0');
+  assert.ok(approxEqual(Game.getClickValue(s), Math.max(1, bps)), 'click base = max(1, bps)');
+  const up = Game.UPGRADES.find((u) => u.type === 'click');
+  s.upgrades[up.id] = 1;
+  assert.ok(
+    approxEqual(Game.getClickValue(s), Math.max(1, bps) * up.perLevel),
+    'click = bps * multiplicadores de click'
+  );
+  assert.ok(
+    approxEqual(Game.getClickMultiplier(s), up.perLevel),
+    'getClickMultiplier solo cuenta upgrades de click'
+  );
+})();
+
 // 15. estado inicial valido
 (function testInitialState() {
   const s = Game.createState();

@@ -1309,10 +1309,16 @@ button { font-family: inherit; }
   position: fixed;
   cursor: pointer;
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  pointer-events: auto;
   z-index: 90;
   display: none;
 }
-.event-item.visible { display: block; }
+.event-item.visible {
+  display: block;
+}
 
 #golden-brain {
   width: 72px;

@@ -481,7 +481,7 @@
 
   function formatUpgradeEffect(upg, level) {
     if (level <= 0) {
-      if (upg.type === "click") return "×" + upg.perLevel.toFixed(2).replace(/\.?0+$/, "") + " click / niv.";
+      if (upg.type === "click") return "×" + upg.perLevel.toFixed(2).replace(/\.?0+$/, "") + " BPS-click / niv.";
       if (upg.type === "generator") return "×" + upg.perLevel.toFixed(2).replace(/\.?0+$/, "") + " gen / niv.";
       if (upg.type === "global") return "+" + Math.round((upg.perLevel - 1) * 100) + "% global / niv.";
       if (upg.type === "crit") return Math.round(upg.perLevel * 100) + "% crít. / niv.";
@@ -490,7 +490,7 @@
     }
     if (upg.type === "click" || upg.type === "generator") {
       const mult = Math.pow(upg.perLevel, level);
-      const label = upg.type === "click" ? "click" : "gen";
+      const label = upg.type === "click" ? "BPS-click" : "gen";
       return "×" + (Math.round(mult * 100) / 100) + " " + label;
     }
     if (upg.type === "global") {
@@ -950,6 +950,7 @@
   function spawnGoldenBrain() {
     const el = $("golden-brain");
     if (!el) return;
+    el.classList.remove("hidden");
     el.classList.add("visible");
     el.classList.remove("popping");
     el.style.left = (10 + Math.random() * 80) + "%";
@@ -957,8 +958,13 @@
     const timeout = setTimeout(function () {
       el.classList.remove("visible");
       goldenBrainTimer = null;
-    }, 8000);
-    el.onclick = function () {
+    }, 10000);
+    function collectGolden(ev) {
+      if (ev) {
+        if (typeof ev.preventDefault === "function") ev.preventDefault();
+        if (typeof ev.stopPropagation === "function") ev.stopPropagation();
+      }
+      if (!el.classList.contains("visible")) return;
       clearTimeout(timeout);
       el.classList.remove("visible");
       el.classList.add("popping");
@@ -973,13 +979,19 @@
         }
         renderHeader();
         renderStats();
+        renderAchievements();
       }
+      setTimeout(function () { el.classList.remove("popping"); }, 400);
+    }
+    el.onclick = collectGolden;
+    el.onkeydown = function (ev) {
+      if (ev.key === "Enter" || ev.key === " ") collectGolden(ev);
     };
   }
 
   function scheduleGoldenBrain() {
     if (goldenBrainTimer) return;
-    const delay = 60000 + Math.random() * 120000;
+    const delay = 15000 + Math.random() * 45000;
     goldenBrainTimer = setTimeout(function () {
       goldenBrainTimer = null;
       spawnGoldenBrain();
@@ -992,12 +1004,15 @@
     const label = $("boss-hp-label");
     const pct = bossMaxHp > 0 ? Math.max(0, (bossHp / bossMaxHp) * 100) : 0;
     if (bar) bar.style.width = pct + "%";
-    if (label) label.textContent = Math.max(0, bossHp) + "/" + bossMaxHp;
+    if (label) label.textContent = Math.max(0, Math.ceil(bossHp)) + "/" + bossMaxHp;
   }
 
   function clearBoss() {
     const el = $("horde-boss");
-    if (el) el.classList.remove("visible");
+    if (el) {
+      el.classList.remove("visible");
+      el.classList.remove("hidden");
+    }
     bossActive = false;
     bossHp = 0;
     bossMaxHp = 0;
@@ -1007,6 +1022,7 @@
   function spawnBoss() {
     const el = $("horde-boss");
     if (!el) return;
+    el.classList.remove("hidden");
     bossActive = true;
     bossMaxHp = typeof Game.getBossMaxHp === "function" ? Game.getBossMaxHp(state) : 15;
     bossHp = bossMaxHp;
@@ -1018,9 +1034,16 @@
       clearBoss();
       showToast("El jefe se fue", "info");
     }, 45000);
-    el.onclick = function () {
+    function hitBoss(ev) {
+      if (ev) {
+        if (typeof ev.preventDefault === "function") ev.preventDefault();
+        if (typeof ev.stopPropagation === "function") ev.stopPropagation();
+      }
       if (!bossActive || !state) return;
-      bossHp -= 1;
+      const dmg = Math.max(1, Math.floor(
+        typeof Game.getClickMultiplier === "function" ? Game.getClickMultiplier(state) : 1
+      ));
+      bossHp -= dmg;
       updateBossHpUi();
       if (bossHp > 0) return;
       clearTimeout(timeout);
@@ -1029,12 +1052,17 @@
       showToast("💀 ¡Derrotaste al jefe! +" + formatNumber(reward.brains) + " cerebros y +" + reward.bones + " hueso", "success");
       renderHeader();
       renderStats();
+      renderAchievements();
+    }
+    el.onclick = hitBoss;
+    el.onkeydown = function (ev) {
+      if (ev.key === "Enter" || ev.key === " ") hitBoss(ev);
     };
   }
 
   function scheduleBoss() {
     if (bossTimer) return;
-    const delay = 180000 + Math.random() * 180000;
+    const delay = 45000 + Math.random() * 75000;
     bossTimer = setTimeout(function () {
       bossTimer = null;
       spawnBoss();
