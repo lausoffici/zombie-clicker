@@ -916,25 +916,35 @@
     const clicker = $("col-clicker");
     const side = $("col-side");
     const shop = $("col-shop");
+
+    function showMobileGame() {
+      if (clicker) clicker.classList.add("active");
+      if (shop) shop.classList.add("active");
+      if (side) side.classList.remove("active");
+    }
+
+    function showMobileSide(target) {
+      if (clicker) clicker.classList.remove("active");
+      if (shop) shop.classList.remove("active");
+      if (side) side.classList.add("active");
+      const sideBtn = $("side-tab-" + target);
+      if (sideBtn) sideBtn.click();
+    }
+
     mobileTabs.forEach(function (tab) {
       tab.addEventListener("click", function () {
         const target = tab.getAttribute("data-mobile");
         mobileTabs.forEach(function (t) { t.classList.remove("active"); });
         tab.classList.add("active");
 
-        if (target === "game") {
-          if (clicker) clicker.classList.add("active");
-          if (shop) shop.classList.add("active");
-          if (side) side.classList.remove("active");
-        } else {
-          if (clicker) clicker.classList.remove("active");
-          if (shop) shop.classList.remove("active");
-          if (side) side.classList.add("active");
-          const sideBtn = $("side-tab-" + target);
-          if (sideBtn) sideBtn.click();
-        }
+        if (target === "game") showMobileGame();
+        else showMobileSide(target);
       });
     });
+
+    const mobileNav = $("mobile-nav");
+    const mobileVisible = mobileNav && window.getComputedStyle(mobileNav).display !== "none";
+    if (mobileVisible) showMobileGame();
   }
 
   function spawnGoldenBrain() {
