@@ -766,10 +766,9 @@
     if (!state) {
       return { total_brains_earned: 0, prestige_souls: 0, best_bps: 0 };
     }
-    const souls = state.prestige && typeof state.prestige.souls === "number" ? state.prestige.souls : 0;
     return {
       total_brains_earned: typeof state.totalBrainsEarned === "number" ? state.totalBrainsEarned : 0,
-      prestige_souls: souls,
+      prestige_souls: totalSoulsEarned(state),
       best_bps: typeof state.bestBps === "number" ? state.bestBps : 0
     };
   }

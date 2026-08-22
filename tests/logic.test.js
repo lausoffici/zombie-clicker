@@ -424,7 +424,8 @@ function approxEqual(a, b, eps) {
 (function testCloudStatsFromState() {
   const s = Game.createState();
   s.totalBrainsEarned = 123.5;
-  s.prestige.souls = 7;
+  s.prestige.totalSoulsEarned = 7;
+  s.prestige.souls = 3;
   s.bestBps = 42;
   const stats = Game.cloudStatsFromState(s);
   assert.strictEqual(stats.total_brains_earned, 123.5);

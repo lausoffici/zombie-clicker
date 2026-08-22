@@ -190,6 +190,10 @@ Cómo conseguirlos: a veces del cerebro dorado, y siempre al derrotar al jefe de
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
             Stats
           </button>
+          <button id="side-tab-ranking" class="side-tab" data-side="ranking">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v4a5 5 0 0 1-10 0V4z"/><path d="M17 5h3a2 2 0 0 1-2 4"/><path d="M7 5H4a2 2 0 0 0 2 4"/></svg>
+            Ranking
+          </button>
         </div>
 
         <div id="side-panel-achievements" class="side-panel active">
@@ -235,6 +239,18 @@ Cómo conseguirlos: a veces del cerebro dorado, y siempre al derrotar al jefe de
             <textarea id="save-area" class="save-area hidden" placeholder="Pega tu save aquí..."></textarea>
           </div>
         </div>
+
+        <div id="side-panel-ranking" class="side-panel">
+          <div class="card">
+            <h2 class="card-title">Ranking</h2>
+            <p class="ranking-disclaimer">Las stats las reporta cada jugador.</p>
+            <div class="ranking-actions">
+              <button type="button" id="btn-ranking-refresh" class="btn">Actualizar</button>
+            </div>
+            <p id="ranking-status" class="ranking-status" aria-live="polite"></p>
+            <div id="ranking-list" class="ranking-list" role="table" aria-label="Ranking de jugadores"></div>
+          </div>
+        </div>
       </section>
     </main>
 
@@ -255,6 +271,10 @@ Cómo conseguirlos: a veces del cerebro dorado, y siempre al derrotar al jefe de
       <button class="mobile-tab" data-mobile="stats">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         Stats
+      </button>
+      <button class="mobile-tab" data-mobile="ranking">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v4a5 5 0 0 1-10 0V4z"/><path d="M17 5h3a2 2 0 0 1-2 4"/><path d="M7 5H4a2 2 0 0 0 2 4"/></svg>
+        Ranking
       </button>
     </nav>
 

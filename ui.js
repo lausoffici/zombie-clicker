@@ -801,11 +801,97 @@
     }
   }
 
+  let rankingLoading = false;
+
+  function setRankingStatus(text) {
+    const status = $("ranking-status");
+    if (status) status.textContent = text || "";
+  }
+
+  function renderRankingRows(rows) {
+    const list = $("ranking-list");
+    if (!list) return;
+    list.textContent = "";
+
+    const head = document.createElement("div");
+    head.className = "ranking-row ranking-head";
+    head.setAttribute("role", "row");
+    ["#", "Apodo", "Almas", "Cerebros", "BPS"].forEach(function (label) {
+      const cell = document.createElement("span");
+      cell.textContent = label;
+      head.appendChild(cell);
+    });
+    list.appendChild(head);
+
+    const me = (cachedDisplayName || "").trim();
+    rows.forEach(function (row) {
+      const el = document.createElement("div");
+      el.className = "ranking-row";
+      el.setAttribute("role", "row");
+      const name = row.displayName || "";
+      if (me && name && name === me) el.classList.add("ranking-row-me");
+
+      const cells = [
+        String(row.rank || ""),
+        name,
+        formatNumber(row.prestigeSouls || 0),
+        formatNumber(row.totalBrainsEarned || 0),
+        formatNumber(row.bestBps || 0)
+      ];
+      cells.forEach(function (text) {
+        const cell = document.createElement("span");
+        cell.textContent = text;
+        el.appendChild(cell);
+      });
+      list.appendChild(el);
+    });
+  }
+
+  function loadRanking() {
+    if (rankingLoading) return;
+    const list = $("ranking-list");
+    const refresh = $("btn-ranking-refresh");
+
+    if (typeof Cloud === "undefined" || typeof Cloud.fetchLeaderboard !== "function") {
+      setRankingStatus("Nube no disponible.");
+      if (list) list.textContent = "";
+      return;
+    }
+
+    rankingLoading = true;
+    if (refresh) refresh.disabled = true;
+    setRankingStatus("Cargando…");
+
+    Cloud.fetchLeaderboard(50).then(function (res) {
+      rankingLoading = false;
+      if (refresh) refresh.disabled = false;
+      if (!res || !res.ok) {
+        setRankingStatus((res && res.error) || "No se pudo cargar el ranking");
+        if (list) list.textContent = "";
+        return;
+      }
+      const rows = res.rows || [];
+      if (rows.length === 0) {
+        setRankingStatus("Todavía no hay jugadores en el ranking.");
+        if (list) list.textContent = "";
+        return;
+      }
+      setRankingStatus("Top " + rows.length);
+      renderRankingRows(rows);
+    }).catch(function () {
+      rankingLoading = false;
+      if (refresh) refresh.disabled = false;
+      setRankingStatus("No se pudo cargar el ranking");
+      if (list) list.textContent = "";
+    });
+  }
+
   function setupSideTabs() {
     const tabs = [
       { btn: "side-tab-achievements", panel: "side-panel-achievements" },
       { btn: "side-tab-prestige", panel: "side-panel-prestige" },
-      { btn: "side-tab-stats", panel: "side-panel-stats" }
+      { btn: "side-tab-stats", panel: "side-panel-stats" },
+      { btn: "side-tab-ranking", panel: "side-panel-ranking" }
     ];
     tabs.forEach(function (t) {
       const btn = $(t.btn);
@@ -820,6 +906,7 @@
         });
         btn.classList.add("active");
         panel.classList.add("active");
+        if (t.btn === "side-tab-ranking") loadRanking();
       });
     });
   }
@@ -1295,6 +1382,11 @@
 
     const btnOpenSoulsShop = $("btn-open-souls-shop");
     if (btnOpenSoulsShop) btnOpenSoulsShop.addEventListener("click", openSoulsShop);
+
+    const btnRankingRefresh = $("btn-ranking-refresh");
+    if (btnRankingRefresh) {
+      btnRankingRefresh.addEventListener("click", function () { loadRanking(); });
+    }
 
     const btnExport = $("btn-export");
     const btnImport = $("btn-import");

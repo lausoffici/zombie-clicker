@@ -118,3 +118,39 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row
   execute procedure public.handle_new_user();
+
+create or replace function public.get_leaderboard(p_limit integer default 50)
+returns table (
+  rank bigint,
+  display_name text,
+  prestige_souls integer,
+  total_brains_earned double precision,
+  best_bps double precision
+)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select
+    row_number() over (
+      order by s.prestige_souls desc,
+               s.total_brains_earned desc,
+               s.best_bps desc
+    ) as rank,
+    p.display_name,
+    s.prestige_souls,
+    s.total_brains_earned,
+    s.best_bps
+  from public.saves s
+  inner join public.profiles p on p.id = s.user_id
+  where coalesce(s.total_brains_earned, 0) > 0
+     or coalesce(s.prestige_souls, 0) > 0
+     or coalesce(s.best_bps, 0) > 0
+  order by s.prestige_souls desc,
+           s.total_brains_earned desc,
+           s.best_bps desc
+  limit greatest(1, least(coalesce(p_limit, 50), 100));
+$$;
+
+grant execute on function public.get_leaderboard(integer) to anon, authenticated;
