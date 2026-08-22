@@ -6,6 +6,7 @@
   const SOUL_BONUS = 0.05;
   const GOLDEN_BONE_CHANCE = 0.10;
   const OFFLINE_CAP_SECONDS = 8 * 3600;
+  const CLICK_BPS_SHARE = 0.02;
 
   const GENERATORS = [
     { id: "superviviente", name: "Superviviente asustado", icon: "🏃", desc: "Un humano que apenas puede moverse", baseCost: 15, bps: 0.1, growth: 1.15 },
@@ -34,10 +35,10 @@
   };
 
   const UPGRADES = [
-    { id: "dedos-podridos", name: "Dedos podridos", icon: "✋", desc: "Multiplica el click sobre tu BPS", baseCost: 100, costGrowth: 2.5, maxLevel: 5, type: "click", perLevel: 1.5 },
-    { id: "mandibula-filosa", name: "Mandíbula filosa", icon: "🦷", desc: "Multiplica el click sobre tu BPS", baseCost: 1000, costGrowth: 2.5, maxLevel: 5, type: "click", perLevel: 1.5 },
-    { id: "garras-infectadas", name: "Garras infectadas", icon: "🐾", desc: "Multiplica el click sobre tu BPS", baseCost: 10000, costGrowth: 2.5, maxLevel: 5, type: "click", perLevel: 1.6 },
-    { id: "puño-demolicion", name: "Puño demolición", icon: "👊", desc: "Multiplica el click sobre tu BPS", baseCost: 100000, costGrowth: 2.5, maxLevel: 5, type: "click", perLevel: 1.7 },
+    { id: "dedos-podridos", name: "Dedos podridos", icon: "✋", desc: "Mejora el click (incluye 2% del BPS)", baseCost: 100, costGrowth: 2.5, maxLevel: 5, type: "click", perLevel: 1.5 },
+    { id: "mandibula-filosa", name: "Mandíbula filosa", icon: "🦷", desc: "Mejora el click (incluye 2% del BPS)", baseCost: 1000, costGrowth: 2.5, maxLevel: 5, type: "click", perLevel: 1.5 },
+    { id: "garras-infectadas", name: "Garras infectadas", icon: "🐾", desc: "Mejora el click (incluye 2% del BPS)", baseCost: 10000, costGrowth: 2.5, maxLevel: 5, type: "click", perLevel: 1.6 },
+    { id: "puño-demolicion", name: "Puño demolición", icon: "👊", desc: "Mejora el click (incluye 2% del BPS)", baseCost: 100000, costGrowth: 2.5, maxLevel: 5, type: "click", perLevel: 1.7 },
     { id: "superviviente-veloz", name: "Superviviente veloz", icon: "⚡", desc: "Potencia supervivientes", baseCost: 500, costGrowth: 2.5, maxLevel: 5, type: "generator", generatorId: "superviviente", perLevel: 1.5 },
     { id: "mordedura-profunda", name: "Mordedura profunda", icon: "🦴", desc: "Potencia mordedores", baseCost: 5000, costGrowth: 2.5, maxLevel: 5, type: "generator", generatorId: "mordedor", perLevel: 1.5 },
     { id: "corredor-mutado", name: "Corredor mutado", icon: "🧪", desc: "Potencia corredores", baseCost: 50000, costGrowth: 2.5, maxLevel: 5, type: "generator", generatorId: "corredor", perLevel: 1.5 },
@@ -47,10 +48,10 @@
     { id: "horde-voraz", name: "Horda voraz", icon: "👥", desc: "Potencia hordas", baseCost: 20000000, costGrowth: 2.5, maxLevel: 5, type: "generator", generatorId: "horde", perLevel: 1.5 },
     { id: "necropolis-oscura", name: "Necrópolis oscura", icon: "🏚️", desc: "Potencia necrópolis", baseCost: 200000000, costGrowth: 2.5, maxLevel: 5, type: "generator", generatorId: "necropolis", perLevel: 1.5 },
     { id: "virus-letal", name: "Virus letal", icon: "🧬", desc: "Potencia Virus Alfa", baseCost: 2000000000, costGrowth: 2.5, maxLevel: 5, type: "generator", generatorId: "virus-alfa", perLevel: 1.5 },
-    { id: "reflejos-muertos", name: "Reflejos muertos", icon: "💀", desc: "Multiplica el click sobre tu BPS", baseCost: 500000, costGrowth: 2.5, maxLevel: 5, type: "click", perLevel: 1.5 },
+    { id: "reflejos-muertos", name: "Reflejos muertos", icon: "💀", desc: "Mejora el click (incluye 2% del BPS)", baseCost: 500000, costGrowth: 2.5, maxLevel: 5, type: "click", perLevel: 1.5 },
     { id: "golpe-critico", name: "Golpe crítico", icon: "💥", desc: "Chance de crítico ×10", baseCost: 25000, costGrowth: 2.5, maxLevel: 5, type: "crit", perLevel: 0.05 },
     { id: "cerebros-baratos", name: "Cerebros baratos", icon: "📉", desc: "Generadores más baratos", baseCost: 75000, costGrowth: 2.5, maxLevel: 5, type: "cheaper", perLevel: 0.05 },
-    { id: "click-apocalipsis", name: "Click del fin", icon: "☄️", desc: "Multiplica el click sobre tu BPS (tarde)", baseCost: 1e12, costGrowth: 2.5, maxLevel: 5, type: "click", perLevel: 2 },
+    { id: "click-apocalipsis", name: "Click del fin", icon: "☄️", desc: "Mejora el click tarde (incluye 2% del BPS)", baseCost: 1e12, costGrowth: 2.5, maxLevel: 5, type: "click", perLevel: 2 },
     { id: "hambre-colectiva", name: "Hambre colectiva", icon: "🍽️", desc: "Multiplicador global (tarde)", baseCost: 1e12, costGrowth: 2.5, maxLevel: 5, type: "global", perLevel: 1.5 },
     { id: "silencio-de-dioses", name: "Silencio de dioses", icon: "✨", desc: "Multiplicador global (tarde)", baseCost: 1e15, costGrowth: 2.5, maxLevel: 5, type: "global", perLevel: 1.5 }
   ];
@@ -122,7 +123,7 @@
 
   const PRESTIGE_UPGRADES = [
     { id: "bpsBoost", name: "BPS Boost", desc: "+10% BPS", cost: 1, effect: "bpsBoost", value: 0.10 },
-    { id: "clickBoost", name: "Click Boost", desc: "+20% al click (sobre BPS)", cost: 1, effect: "clickBoost", value: 0.20 },
+    { id: "clickBoost", name: "Click Boost", desc: "+20% click", cost: 1, effect: "clickBoost", value: 0.20 },
     { id: "soulStart", name: "Soul Start", desc: "+100 cerebros iniciales", cost: 2, effect: "soulStart", value: 100 },
     { id: "offlineBoost", name: "Offline Boost", desc: "+50% offline cap", cost: 2, effect: "offlineBoost", value: 0.50 },
     { id: "cheaperGenerators", name: "Cheaper Generators", desc: "-10% costo", cost: 3, effect: "cheaperGenerators", value: 0.10 },
@@ -329,8 +330,7 @@
 
   function getClickValue(state) {
     const bps = getBrainsPerSecond(state);
-    const base = Math.max(1, bps);
-    return base * getClickMultiplier(state);
+    return getClickMultiplier(state) * (1 + bps * CLICK_BPS_SHARE);
   }
 
   function getGeneratorBps(state, genId) {
@@ -846,6 +846,7 @@
     getBrainsPerSecond: getBrainsPerSecond,
     getClickValue: getClickValue,
     getClickMultiplier: getClickMultiplier,
+    CLICK_BPS_SHARE: CLICK_BPS_SHARE,
     getGeneratorCost: getGeneratorCost,
     getUpgradeLevel: getUpgradeLevel,
     getUpgradeCost: getUpgradeCost,

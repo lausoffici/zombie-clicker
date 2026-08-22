@@ -284,23 +284,24 @@ function approxEqual(a, b, eps) {
   assert.ok(after > base, 'los upgrades de click deben aumentar el valor');
 })();
 
-// 14b. click multiplica el BPS
+// 14b. click suma una fracción del BPS, no el 100%
 (function testClickScalesWithBps() {
   const s = Game.createState();
   s.generators.mordedor = 1; // 1 BPS base
   const bps = Game.getBrainsPerSecond(s);
+  const share = Game.CLICK_BPS_SHARE;
   assert.ok(bps > 0, 'bps > 0');
-  assert.ok(approxEqual(Game.getClickValue(s), Math.max(1, bps)), 'click base = max(1, bps)');
+  assert.ok(share > 0 && share < 0.1, 'el click no debe copiar todo el BPS');
+  assert.ok(approxEqual(Game.getClickValue(s), 1 + bps * share), 'click base = 1 + 2% BPS');
   const up = Game.UPGRADES.find((u) => u.type === 'click');
   s.upgrades[up.id] = 1;
   assert.ok(
-    approxEqual(Game.getClickValue(s), Math.max(1, bps) * up.perLevel),
-    'click = bps * multiplicadores de click'
+    approxEqual(Game.getClickValue(s), (1 + bps * share) * up.perLevel),
+    'las mejoras multiplican (1 + fracción de BPS)'
   );
-  assert.ok(
-    approxEqual(Game.getClickMultiplier(s), up.perLevel),
-    'getClickMultiplier solo cuenta upgrades de click'
-  );
+  s.generators.mordedor = 100;
+  const highBps = Game.getBrainsPerSecond(s);
+  assert.ok(Game.getClickValue(s) < highBps, 'un click no debe valer un segundo entero de BPS');
 })();
 
 // 15. estado inicial valido

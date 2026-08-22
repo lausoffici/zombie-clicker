@@ -481,7 +481,7 @@
 
   function formatUpgradeEffect(upg, level) {
     if (level <= 0) {
-      if (upg.type === "click") return "×" + upg.perLevel.toFixed(2).replace(/\.?0+$/, "") + " BPS-click / niv.";
+      if (upg.type === "click") return "×" + upg.perLevel.toFixed(2).replace(/\.?0+$/, "") + " click / niv.";
       if (upg.type === "generator") return "×" + upg.perLevel.toFixed(2).replace(/\.?0+$/, "") + " gen / niv.";
       if (upg.type === "global") return "+" + Math.round((upg.perLevel - 1) * 100) + "% global / niv.";
       if (upg.type === "crit") return Math.round(upg.perLevel * 100) + "% crít. / niv.";
@@ -490,7 +490,7 @@
     }
     if (upg.type === "click" || upg.type === "generator") {
       const mult = Math.pow(upg.perLevel, level);
-      const label = upg.type === "click" ? "BPS-click" : "gen";
+      const label = upg.type === "click" ? "click" : "gen";
       return "×" + (Math.round(mult * 100) / 100) + " " + label;
     }
     if (upg.type === "global") {
