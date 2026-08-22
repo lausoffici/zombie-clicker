@@ -266,6 +266,34 @@
     });
   }
 
+  function fetchLeaderboard(limit) {
+    if (!client) {
+      return Promise.resolve({ ok: false, rows: [], error: "Nube no configurada" });
+    }
+    let lim = Number(limit);
+    if (!isFinite(lim) || lim < 1 || lim > 100) lim = 50;
+    lim = Math.floor(lim);
+    return client.rpc("get_leaderboard", { p_limit: lim }).then(function (res) {
+      if (res.error) {
+        return { ok: false, rows: [], error: translateAuthError(res.error) || "No se pudo cargar el ranking" };
+      }
+      const raw = Array.isArray(res.data) ? res.data : [];
+      const rows = raw.map(function (row, i) {
+        row = row || {};
+        return {
+          rank: row.rank || (i + 1),
+          displayName: row.display_name || row.displayName || "",
+          prestigeSouls: row.prestige_souls || row.prestigeSouls || 0,
+          totalBrainsEarned: row.total_brains_earned || row.totalBrainsEarned || 0,
+          bestBps: row.best_bps || row.bestBps || 0
+        };
+      });
+      return { ok: true, rows: rows };
+    }).catch(function (err) {
+      return { ok: false, rows: [], error: translateAuthError(err) || "No se pudo cargar el ranking" };
+    });
+  }
+
   function getLastSyncAt() {
     return lastSyncAt;
   }
@@ -283,6 +311,7 @@
     getProfile: getProfile,
     pullSave: pullSave,
     pushSave: pushSave,
+    fetchLeaderboard: fetchLeaderboard,
     getLastSyncAt: getLastSyncAt
   };
 

@@ -68,6 +68,13 @@ En la tienda, pestaña **Almas**, podés gastar **astillas** en mejoras permanen
 - Cerrar sesión no borra el progreso local ni el de la nube.
 - Setup de la nube (una vez): ver `docs/superpowers/specs/2026-08-21-accounts-supabase.md`.
 
+### Ranking
+- Requiere servir el juego **por HTTP** y tener `config.js` (nube configurada). Sin `config.js` la pestaña muestra "Nube no configurada" y no rompe nada.
+- La pestaña **Ranking** muestra el **top 50**: primero por **almas**, luego por **cerebros**, luego por **BPS**.
+- Solo aparecen jugadores **con cuenta** que hayan **sincronizado** su progreso a la nube.
+- Las stats las reporta el cliente (no hay anti-cheat).
+- Un invitado puede ver el ranking; si estás logueado y estás en el top 50, tu fila queda resaltada.
+
 ### Eventos
 - **Cerebro dorado:** cada 1–3 minutos. Cerebros instantáneos o, a veces, un hueso.
 - **Jefe de la horda:** cada 3–6 minutos. Clickalo para bajarle la vida; al matarlo da cerebros y un hueso. Si se va, no hay premio.
